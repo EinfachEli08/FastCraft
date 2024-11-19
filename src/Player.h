@@ -2,7 +2,6 @@
 #define PLAYER_HPP
 
 #include "level/Level.h"
-#include "phys/AABB.h"
 #include <vector>
 #include <cstdlib>      // For random numbers
 #include <GLFW/glfw3.h> // For keyboard input

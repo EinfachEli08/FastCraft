@@ -1,4 +1,4 @@
-#include "AABB.h"
+#include "phys/AABB.h"
 
 AABB::AABB(float var1, float var2, float var3, float var4, float var5, float var6)
     : x0(var1), y0(var2), z0(var3), x1(var4), y1(var5), z1(var6), epsilon(0.0F) {}

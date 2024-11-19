@@ -24,7 +24,7 @@
 #define __glad_h_
 
 #ifdef __gl_h_
-#error OpenGL header already included, remove this include, glad already provides it
+
 #endif
 #define __gl_h_
 
@@ -323,7 +323,6 @@ typedef void (APIENTRY *GLVULKANPROCNV)(void);
 #define GL_LIST_BIT 0x00020000
 #define GL_TEXTURE_BIT 0x00040000
 #define GL_SCISSOR_BIT 0x00080000
-#define GL_ALL_ATTRIB_BITS 0xFFFFFFFF
 #define GL_QUAD_STRIP 0x0008
 #define GL_POLYGON 0x0009
 #define GL_ACCUM 0x0100
@@ -411,7 +410,6 @@ typedef void (APIENTRY *GLVULKANPROCNV)(void);
 #define GL_ALPHA_TEST 0x0BC0
 #define GL_ALPHA_TEST_FUNC 0x0BC1
 #define GL_ALPHA_TEST_REF 0x0BC2
-#define GL_LOGIC_OP 0x0BF1
 #define GL_AUX_BUFFERS 0x0C00
 #define GL_INDEX_CLEAR_VALUE 0x0C20
 #define GL_INDEX_WRITEMASK 0x0C21
@@ -495,7 +493,6 @@ typedef void (APIENTRY *GLVULKANPROCNV)(void);
 #define GL_MAP1_GRID_SEGMENTS 0x0DD1
 #define GL_MAP2_GRID_DOMAIN 0x0DD2
 #define GL_MAP2_GRID_SEGMENTS 0x0DD3
-#define GL_TEXTURE_COMPONENTS 0x1003
 #define GL_TEXTURE_BORDER 0x1005
 #define GL_AMBIENT 0x1200
 #define GL_DIFFUSE 0x1201
@@ -589,7 +586,6 @@ typedef void (APIENTRY *GLVULKANPROCNV)(void);
 #define GL_RGBA16 0x805B
 #define GL_CLIENT_PIXEL_STORE_BIT 0x00000001
 #define GL_CLIENT_VERTEX_ARRAY_BIT 0x00000002
-#define GL_CLIENT_ALL_ATTRIB_BITS 0xFFFFFFFF
 #define GL_VERTEX_ARRAY_POINTER 0x808E
 #define GL_NORMAL_ARRAY_POINTER 0x808F
 #define GL_COLOR_ARRAY_POINTER 0x8090

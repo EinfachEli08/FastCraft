@@ -6,7 +6,6 @@
 #include "Chunk.h"
 #include "Tesselator.h"
 #include "Player.h"
-#include "AABB.h"
 #include <GLFW/glfw3.h> // For OpenGL handling
 
 class LevelRenderer : public LevelListener

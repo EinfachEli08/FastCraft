@@ -1,6 +1,8 @@
 #include "Level.h"
 #include "LevelListener.h"
 
+#include <algorithm>
+
 Level::Level()
     : width(16), height(16), depth(16)
 {

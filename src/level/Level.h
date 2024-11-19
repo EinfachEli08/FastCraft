@@ -14,7 +14,7 @@ public:
     int width;
     int height;
     int depth;
-    std::vector<std::byte> blocks;
+    std::vector<unsigned int> blocks;
     std::vector<int> lightDepths;
     std::vector<LevelListener *> levelListeners;
 
