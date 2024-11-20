@@ -1,9 +1,14 @@
 #include "Chunk.h"
 
-GLuint Chunk::texture = Textures::loadTexture("assets/terrain.png", 9728);
+GLuint Chunk::texture;
 Tesselator Chunk::t;
 int Chunk::rebuiltThisFrame = 0;
 int Chunk::updates = 0;
+
+void Chunk::init(GLuint tex)
+{
+    texture = tex;
+}
 
 Chunk::Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1): level(level), x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1), dirty(true)
 {

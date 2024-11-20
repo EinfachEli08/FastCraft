@@ -2,48 +2,36 @@ TARGET := FastCraft
 
 LIB := lib
 SRC := $(wildcard src/**/*.cpp src/**/*.c src/*.cpp src/*.c)
-SRC += src/glad.c  # Include glad.c explicitly in the source list
 
 # Convert the source files into object files, placing them directly in the build/ directory
-OBJ := $(patsubst src/%, build/%, $(SRC:.cpp=.o) $(SRC:.c=.o))
+OBJ := $(patsubst src/%,build/%, $(SRC:.cpp=.o))
+OBJ := $(patsubst src/%,build/%, $(OBJ:.c=.o))
 
-CXX := g++
+CXX := x86_64-w64-mingw32-g++
 
-LIBS := -lglfw3dll
+LIBS := -lglfw3dll -lopengl32
 
-ARGS := -g --std=c++17 -Isrc -Iinclude -L$(LIB) $(LIBS)
+ARGS := -g -std=c++17 -I/mingw64/include -Isrc -Iinclude -L$(LIB)
 
-
-
-# Ensure all necessary directories exist
 $(shell mkdir -p build)
-$(shell mkdir -p $(sort $(dir $(OBJ))))  # Create directories for all object files
 
 # Main target: link all object files into the final executable
 all: $(OBJ)
 	@echo Final linking
-	@$(CXX) $(ARGS) $(OBJ) -o bin/$(TARGET)
+	$(CXX) $(ARGS) $(OBJ) $(LIBS) -o bin/$(TARGET)
 
 # Clean the build directory
 clean:
 	rm -rf bin/$(TARGET) build
 
-# Rule for compiling .cpp files into .o files in the build/ directory
 build/%.o: src/%.cpp
 	@echo Compiling $<
-	@mkdir -p $(dir $@)  # Ensure the directory for this .o file exists
+	@mkdir -p $(dir $@)
 	@$(CXX) $(ARGS) -c $< -o $@
 
-# Rule for compiling .c files into .o files in the build/ directory
 build/%.o: src/%.c
 	@echo Compiling $<
-	@mkdir -p $(dir $@)  # Ensure the directory for this .o file exists
-	@$(CXX) $(ARGS) -c $< -o $@
-
-# Explicit rule for compiling glad.c
-build/glad.o: src/glad.c
-	@echo Compiling glad.c
-	@mkdir -p $(dir $@)  # Ensure the directory for this .o file exists
+	@mkdir -p $(dir $@)
 	@$(CXX) $(ARGS) -c $< -o $@
 
 %.o:

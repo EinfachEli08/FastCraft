@@ -1,3 +1,4 @@
+#define STB_IMAGE_IMPLEMENTATION
 #include "Textures.h"
 
 std::unordered_map<std::string, GLuint> Textures::idMap;
@@ -11,7 +12,7 @@ GLuint Textures::loadTexture(const std::string &path, GLint filter)
     }
 
     int width, height, numChannels;
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &numChannels, 4); 
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &numChannels, 4);
 
     if (!data)
     {

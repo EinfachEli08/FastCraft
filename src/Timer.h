@@ -11,7 +11,7 @@ private:
     float ticksPerSecond;
     long lastTime;
     int ticks;
-    float a;
+   
     float timeScale;
     float fps;
     float passedTime;
@@ -24,6 +24,7 @@ public:
     float getPassedTime() const;
     float getTimeScale() const;
     void setTimeScale(float scale);
+    float a;
 };
 
 #endif

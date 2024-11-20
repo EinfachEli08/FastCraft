@@ -4,8 +4,6 @@
 #include "Level.h"
 #include "Tesselator.h"
 #include "Textures.h"
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include "Tile.h"
 
 class Chunk
@@ -21,6 +19,8 @@ public:
     static Tesselator t;
     static int rebuiltThisFrame;
     static int updates;
+
+    static void init(GLuint tex);
 
     Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1);
     void rebuild(int var1);

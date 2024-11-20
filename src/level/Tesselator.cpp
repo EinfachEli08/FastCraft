@@ -1,7 +1,7 @@
 #include "Tesselator.h"
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include <iostream>
+#include <GLFW/glfw3.h>
 
 Tesselator::Tesselator() : vertices(0), u(0.0f), v(0.0f), r(1.0f), g(1.0f), b(1.0f), hasColor(false), hasTexture(false)
 {
