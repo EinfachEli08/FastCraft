@@ -10,11 +10,25 @@ void Chunk::init(GLuint tex)
     texture = tex;
 }
 
-Chunk::Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1): level(level), x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1), dirty(true)
+Chunk::Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1) : level(level), x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1), dirty(true)
 {
-    this->aabb = AABB(static_cast<float>(x0), static_cast<float>(y0), static_cast<float>(z0),
-                      static_cast<float>(x1), static_cast<float>(y1), static_cast<float>(z1));
+    if (!level)
+    {
+        std::cerr << "Error: level pointer is null" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    this->aabb = AABB(static_cast<float>(x0), static_cast<float>(y0),
+                      static_cast<float>(z0), static_cast<float>(x1),
+                      static_cast<float>(y1), static_cast<float>(z1));
+
     this->lists = glGenLists(2);
+    if (this->lists == 0)
+    {
+        GLenum error = glGetError();
+        std::cerr << "Error: glGenLists failed with error code " << error << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 }
 
 void Chunk::rebuild(int var1)
@@ -43,11 +57,11 @@ void Chunk::rebuild(int var1)
                         ++tileCount;
                         if (!isNotGrass)
                         {
-                            Tile::rock.render(t,  var1, x, y, z);
+                            Tile::rock.render(t, var1, x, y, z);
                         }
                         else
                         {
-                            Tile::grass.render(t,  var1, x, y, z);
+                            Tile::grass.render(t, var1, x, y, z);
                         }
                     }
                 }

@@ -9,6 +9,9 @@
 class Player
 {
 private:
+
+public:
+    AABB bb;
     Level *level;
     float xo, yo, zo;
     float x, y, z;
@@ -16,8 +19,6 @@ private:
     float yRot, xRot;
     bool onGround;
 
-public:
-    AABB bb;
     Player(Level *level);
     void resetPos();
     void setPos(float x, float y, float z);

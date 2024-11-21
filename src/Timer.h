@@ -10,13 +10,14 @@ private:
 
     float ticksPerSecond;
     long lastTime;
-    int ticks;
+   
    
     float timeScale;
     float fps;
     float passedTime;
 
 public:
+    int ticks;
     Timer(float ticksPerSecond);
     void advanceTime();
     int getTicks() const;

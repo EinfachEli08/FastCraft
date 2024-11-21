@@ -1,6 +1,5 @@
 #include "LevelRenderer.h"
 #include <GLFW/glfw3.h> // For OpenGL handling
-
 LevelRenderer::LevelRenderer(Level *level) : level(level)
 {
     level->addListener(this);
@@ -19,19 +18,18 @@ LevelRenderer::LevelRenderer(Level *level) : level(level)
         {
             for (int var4 = 0; var4 < zChunks; ++var4)
             {
-                int var5 = var2 * CHUNK_SIZE;
-                int var6 = var3 * CHUNK_SIZE;
-                int var7 = var4 * CHUNK_SIZE;
-                int var8 = (var2 + 1) * CHUNK_SIZE;
-                int var9 = (var3 + 1) * CHUNK_SIZE;
-                int var10 = (var4 + 1) * CHUNK_SIZE;
+                int x0 = var2 * CHUNK_SIZE;
+                int y0 = var3 * CHUNK_SIZE;
+                int z0 = var4 * CHUNK_SIZE;
+                int x1 = (var2 + 1) * CHUNK_SIZE;
+                int y1 = (var3 + 1) * CHUNK_SIZE;
+                int z1 = (var4 + 1) * CHUNK_SIZE;
 
-                // Clamp the chunk bounds to the level size
-                var8 = std::min(var8, level->width);
-                var9 = std::min(var9, level->depth);
-                var10 = std::min(var10, level->height);
-
-                chunks[(var2 + var3 * xChunks) * zChunks + var4] = new Chunk(level, var5, var6, var7, var8, var9, var10);
+                x1 = std::min(x1, level->width);
+                y1 = std::min(y1, level->depth);
+                z1 = std::min(z1, level->height);
+                std::cout << "yös" << std::endl;
+                chunks[(var2 + var3 * xChunks) * zChunks + var4] = new Chunk(level, x0, y0, z0, x1, y1, z1);
             }
         }
     }
@@ -53,6 +51,7 @@ void LevelRenderer::render(Player *player, int contextID)
     // Iterate over all chunks and render them
     for (auto &chunk : chunks)
     {
+       
         chunk->render(contextID);
     }
 }
