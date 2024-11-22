@@ -12,24 +12,34 @@ LevelRenderer::LevelRenderer(Level *level) : level(level)
     // Initialize chunks
     chunks.resize(xChunks * yChunks * zChunks);
 
-    for (int var2 = 0; var2 < xChunks; ++var2)
+    for (int x = 0; x < xChunks; ++x)
     {
-        for (int var3 = 0; var3 < yChunks; ++var3)
+        for (int y = 0; y < yChunks; ++y)
         {
-            for (int var4 = 0; var4 < zChunks; ++var4)
+            for (int z = 0; z < zChunks; ++z)
             {
-                int x0 = var2 * CHUNK_SIZE;
-                int y0 = var3 * CHUNK_SIZE;
-                int z0 = var4 * CHUNK_SIZE;
-                int x1 = (var2 + 1) * CHUNK_SIZE;
-                int y1 = (var3 + 1) * CHUNK_SIZE;
-                int z1 = (var4 + 1) * CHUNK_SIZE;
+                int x0 = x * CHUNK_SIZE;
+                int y0 = y * CHUNK_SIZE;
+                int z0 = z * CHUNK_SIZE;
+                int x1 = (x + 1) * CHUNK_SIZE;
+                int y1 = (y + 1) * CHUNK_SIZE;
+                int z1 = (z + 1) * CHUNK_SIZE;
 
-                x1 = std::min(x1, level->width);
-                y1 = std::min(y1, level->depth);
-                z1 = std::min(z1, level->height);
-                std::cout << "yös" << std::endl;
-                chunks[(var2 + var3 * xChunks) * zChunks + var4] = new Chunk(level, x0, y0, z0, x1, y1, z1);
+                if(x1 > level->width){
+                    x1 = level->width;
+                }
+
+                if (y1 > level->depth)
+                {
+                    y1 = level->depth;
+                }
+
+                if (z1 > level->height)
+                {
+                    z1 = level->height;
+                }
+
+                chunks[(x + y * xChunks) * zChunks + z] = new Chunk(level, x0, y0, z0, x1, y1, z1);
             }
         }
     }

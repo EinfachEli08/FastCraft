@@ -1,6 +1,6 @@
 #include "Chunk.h"
 
-GLuint Chunk::texture;
+GLuint Chunk::texture ;
 Tesselator Chunk::t;
 int Chunk::rebuiltThisFrame = 0;
 int Chunk::updates = 0;
@@ -31,14 +31,14 @@ Chunk::Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1) : lev
     }
 }
 
-void Chunk::rebuild(int var1)
+void Chunk::rebuild(int index)
 {
     if (rebuiltThisFrame != 2)
     {
         this->dirty = false;
         ++updates;
         ++rebuiltThisFrame;
-        glNewList(this->lists + var1, GL_COMPILE);
+        glNewList(this->lists + index, GL_COMPILE);
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, texture);
         t.init();
@@ -57,11 +57,11 @@ void Chunk::rebuild(int var1)
                         ++tileCount;
                         if (!isNotGrass)
                         {
-                            Tile::rock.render(t, var1, x, y, z);
+                            Tile::rock.render(t, index, x, y, z);
                         }
                         else
                         {
-                            Tile::grass.render(t, var1, x, y, z);
+                            Tile::grass.render(t, index, x, y, z);
                         }
                     }
                 }

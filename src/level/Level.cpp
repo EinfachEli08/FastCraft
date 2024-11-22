@@ -4,7 +4,7 @@
 #include <algorithm>
 
 Level::Level()
-    : width(16), height(16), depth(16)
+    : width(64), height(64), depth(64)
 {
 
     // Initialize blocks and lightDepths
