@@ -126,6 +126,8 @@ int initGfx(GLFWwindow **window)
 
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    glfwSwapInterval(0);
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -160,7 +162,7 @@ static void init()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
-    level = new Level();
+    level = new Level(256,256,16);
     player = new Player(level);
     levelRenderer = new LevelRenderer(level);
     mouse = new Mouse();
@@ -183,9 +185,10 @@ int main()
 
     init();
 
-    while (!glfwWindowShouldClose(window))
+    while (!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS && !glfwWindowShouldClose(window))
     {
-        timer.advanceTime();
+       
+            timer.advanceTime();
         
 
         for (int i = 0; i < timer.ticks; ++i)
@@ -195,14 +198,7 @@ int main()
 
         render(timer.a, window);
 
-       
-        glfwGetCursorPos(window, &xpos, &ypos);
-        mouse->update(xpos,-ypos);
-
-        //std::cout << " Mouse : (x : " << mouse->getX() << ", y : " << mouse->getY() << ", dx : " << mouse->getDX() << ", dy : " << mouse->getDY() << ")" << std::endl;
-
         ++ fps;
-
         long long current_time = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
         if (current_time >= millis + 1000)
         {
@@ -210,6 +206,9 @@ int main()
             millis += 1000;
             fps = 0;
         }
+
+        glfwGetCursorPos(window, &xpos, &ypos);
+        mouse->update(xpos, -ypos);
 
         glfwPollEvents();
     }

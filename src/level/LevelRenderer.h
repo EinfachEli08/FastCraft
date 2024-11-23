@@ -6,6 +6,8 @@
 #include "Chunk.h"
 #include "Tesselator.h"
 #include "Player.h"
+#include "HitResult.h"
+#include "Frustum.h"
 #include <GLFW/glfw3.h> // For OpenGL handling
 
 class LevelRenderer : public LevelListener
@@ -23,17 +25,19 @@ public:
     LevelRenderer(Level *level);
     ~LevelRenderer();
 
-    // Renders the level for the given player and context
+    
     void render(Player *player, int contextID);
 
-    // Handles tile picking logic
+    void renderHit(HitResult hit);
+
     void pick(Player *player);
 
-    // Marks a chunk as dirty, triggering a rebuild
     void setDirty(int x0, int y0, int z0, int x1, int y1, int z1);
 
-    // LevelListener method implementations
     void tileChanged(int x, int y, int z) override;
+
+    void lightColumnChanged(int var1, int var2, int var3, int var4);
+
     void allChanged() override;
 };
 

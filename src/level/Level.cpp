@@ -2,10 +2,28 @@
 #include "LevelListener.h"
 
 #include <algorithm>
+#include <cmath>
 
-Level::Level()
-    : width(64), height(64), depth(64)
+Level::Level(int widthIn, int heightIn, int depthIn) 
 {
+
+    if (widthIn <= 0 || heightIn <= 0 || depthIn <= 0)
+    {
+        throw std::invalid_argument("Dimensions must be positive.");
+    }
+
+    long long totalBlocks = widthIn * heightIn * depthIn;
+    long long totalLightDepths = widthIn * depthIn;
+
+    if (totalBlocks > std::numeric_limits<size_t>::max() ||
+        totalLightDepths > std::numeric_limits<size_t>::max())
+    {
+        throw std::overflow_error("Requested size exceeds platform limits.");
+    }
+
+    width = widthIn;
+    height = heightIn;
+    depth = depthIn;
 
     // Initialize blocks and lightDepths
     blocks.resize(width * height * depth);
@@ -22,6 +40,7 @@ Level::Level()
             }
         }
     }
+    
 }
 
 void Level::addListener(LevelListener *listener)

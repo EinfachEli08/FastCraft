@@ -3,6 +3,7 @@
 
 #include "../phys/AABB.h"
 #include "LevelListener.h"
+
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -18,7 +19,7 @@ public:
     std::vector<int> lightDepths;
     std::vector<LevelListener *> levelListeners;
 
-    Level();
+    Level(int widthIn, int heightIn, int depthIn);
     void addListener(LevelListener *listener);
     void removeListener(LevelListener *listener);
     bool isTile(int x, int y, int z) const;

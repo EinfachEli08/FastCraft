@@ -56,52 +56,43 @@ void Player::tick()
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS ||
         glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS)
     {
-        var2 -= 5.0f;
+        --var2;
     }
 
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS ||
         glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS)
     {
-        var2 += 5.0f;
+        ++var2;
     }
 
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS ||
         glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS)
     {
-        var1 -= 5.0f;
+        --var1;
     }
 
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS ||
         glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS)
     {
-        var1 += 5.0f;
+        ++var1;
     }
 
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT_ALT) == GLFW_PRESS && onGround)
     {
         yd = 0.12f;
     }
 
-    // Sprinting (Left Shift)
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    {
-        down = true;
-    }
-
-    moveRelative(var1, var2, 0.02f);
-
-    if (down)
-    {
-        yd -= 0.005f;
-    }
-
+    moveRelative(var1, var2, onGround ? 0.02f: 0.005F);
+    yd = yd - 0.005f;
     move(xd, yd, zd);
     xd *= 0.91f;
     yd *= 0.98f;
     zd *= 0.91f;
-    xd *= 0.8f;
-    zd *= 0.8f;
+    if(onGround){
+        xd *= 0.8f;
+        zd *= 0.8f;
+    }
 }
 
 void Player::move(float var1, float var2, float var3)

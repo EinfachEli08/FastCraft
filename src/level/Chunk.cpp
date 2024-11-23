@@ -57,11 +57,11 @@ void Chunk::rebuild(int index)
                         ++tileCount;
                         if (!isNotGrass)
                         {
-                            Tile::rock.render(t, index, x, y, z);
+                            Tile::rock.render(t,this->level, index, x, y, z);
                         }
                         else
                         {
-                            Tile::grass.render(t, index, x, y, z);
+                            Tile::grass.render(t, this->level, index, x, y, z);
                         }
                     }
                 }

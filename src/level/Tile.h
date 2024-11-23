@@ -2,6 +2,7 @@
 #define TILE_HPP
 
 #include "Tesselator.h"
+#include "Level.h"
 
 class Tile
 {
@@ -11,8 +12,8 @@ public:
     static Tile grass;
 
     Tile(int tex);
-    void render(Tesselator &tesselator, int x, int y, int z, int size);
-    void renderFace(Tesselator &tesselator, int x, int y, int z);
+    void render(Tesselator &tesselator,Level* level, int x, int y, int z, int size);
+    void renderFace(Tesselator &tesselator, int x, int y, int z, int face);
 
 private:
     int tex;

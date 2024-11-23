@@ -1,5 +1,9 @@
 #include "LevelRenderer.h"
+
 #include <GLFW/glfw3.h> // For OpenGL handling
+#include <cmath>
+#include <chrono>
+
 LevelRenderer::LevelRenderer(Level *level) : level(level)
 {
     level->addListener(this);
@@ -25,7 +29,8 @@ LevelRenderer::LevelRenderer(Level *level) : level(level)
                 int y1 = (y + 1) * CHUNK_SIZE;
                 int z1 = (z + 1) * CHUNK_SIZE;
 
-                if(x1 > level->width){
+                if (x1 > level->width)
+                {
                     x1 = level->width;
                 }
 
@@ -56,15 +61,18 @@ LevelRenderer::~LevelRenderer()
 // Render method
 void LevelRenderer::render(Player *player, int contextID)
 {
-    Chunk::rebuiltThisFrame = 0;
+    Chunk::rebuiltThisFrame = 0;             // Reset the rebuilt chunks count
+    Frustum frustum = Frustum::getInstance();
 
-    // Iterate over all chunks and render them
-    for (auto &chunk : chunks)
+    for (int i = 0; i < chunks.size(); ++i)
     {
-       
-        chunk->render(contextID);
+        if (frustum.cubeInFrustum(chunks[i]->aabb.x0, chunks[i]->aabb.y0, chunks[i]->aabb.z0, chunks[i]->aabb.x1, chunks[i]->aabb.y1, chunks[i]->aabb.z1))
+        {
+            chunks[i]->render(contextID); // Render the chunk if inside the frustum
+        }
     }
 }
+
 
 // Picking method, used to pick tiles around the player
 void LevelRenderer::pick(Player *player)
@@ -93,13 +101,16 @@ void LevelRenderer::pick(Player *player)
                 if (level->isSolidTile(x, y, z))
                 {
                     glPushName(0);
-                    t.init();
 
-                    // Render the faces of tiles (for example, rocks and grass)
-                    Tile::rock.renderFace(t, x, y, z);
-                    Tile::grass.renderFace(t, x, y, z);
+                    for (int face = 0; face < 6; face++)
+                    {
+                        glPushName(face);
+                        t.init();
+                        Tile::rock.renderFace(t, x, y, z, face);
+                        t.flush();
+                        glPopName();
+                    }
 
-                    t.flush();
                     glPopName();
                 }
                 glPopName();
@@ -108,6 +119,17 @@ void LevelRenderer::pick(Player *player)
         }
         glPopName();
     }
+}
+
+void LevelRenderer::renderHit(HitResult hit)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
+    t.init();
+    Tile::rock.renderFace(t, hit.x, hit.y, hit.z, hit.f);
+    t.flush();
+    glDisable(GL_BLEND);
 }
 
 // Mark chunks as dirty based on the coordinates
@@ -144,6 +166,11 @@ void LevelRenderer::setDirty(int x0, int y0, int z0, int x1, int y1, int z1)
 void LevelRenderer::tileChanged(int x, int y, int z)
 {
     setDirty(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+}
+
+void LevelRenderer::lightColumnChanged(int var1, int var2, int var3, int var4)
+{
+    setDirty(var1 - 1, var3 - 1, var2 - 1, var1 + 1, var4 + 1, var2 + 1);
 }
 
 // LevelListener interface method: Called when all tiles have changed
