@@ -14,7 +14,7 @@
 #endif
 
 int screenWidth = 960;
-int screenHeight = 540;
+int screenHeight = 600;
 
 double mouseX = 0.0;
 double mouseY = 0.0;
@@ -32,6 +32,32 @@ HitResult *hitResult;
 
 int var1 = 920330;
 float fogColor[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
+
+bool isFullscreen = false;
+
+int windowedWidth = 960, windowedHeight = 540;
+
+int windowedPosX = 0, windowedPosY = 0;
+
+void toggleFullscreen(GLFWwindow *window)
+{
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    if (isFullscreen)
+    {
+        glfwSetWindowMonitor(window, nullptr, windowedPosX, windowedPosY, windowedWidth, windowedHeight, 0);
+    }
+    else
+    {
+        glfwGetWindowPos(window, &windowedPosX, &windowedPosY);
+        glfwGetWindowSize(window, &windowedWidth, &windowedHeight);
+
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+
+    isFullscreen = !isFullscreen;
+}
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -110,20 +136,17 @@ void setupPickCamera(float timer, int widthIn, int heightIn)
 
 void pick(float deltaTime)
 {
-    // Ensure selectBuffer is adequately sized
     std::vector<GLuint> selectBuffer(512);
     glSelectBuffer(selectBuffer.size(), selectBuffer.data());
     glRenderMode(GL_SELECT);
 
     setupPickCamera(deltaTime, screenWidth / 2, screenHeight / 2);
 
-    // Perform the picking operation using the levelRenderer
     if (levelRenderer)
     {
-        levelRenderer->pick(player); // Ensure levelRenderer is initialized properly
+        levelRenderer->pick(player); 
     }
 
-    // Process hits from OpenGL's selection buffer
     GLint hits = glRenderMode(GL_RENDER);
     size_t bufferPos = 0;
 
@@ -135,11 +158,10 @@ void pick(float deltaTime)
     {
         GLuint names = selectBuffer[bufferPos++];
         GLuint minDepth = selectBuffer[bufferPos++];
-        bufferPos++; // Skip maxDepth
-
+        bufferPos++; 
         if (minDepth >= closestDepth && i != 0)
         {
-            bufferPos += names; // Skip over the names for this hit
+            bufferPos += names; 
         }
         else
         {
@@ -156,7 +178,6 @@ void pick(float deltaTime)
         }
     }
 
-    // Update the hit result based on the closest hit
     if (hitCount > 0)
     {
         hitResult = new HitResult(pos[0], pos[1], pos[2], pos[3], pos[4]);
@@ -167,19 +188,17 @@ void pick(float deltaTime)
     }
 }
 
-// Set up the camera
+
 void setupCamera(float timer)
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // gluPerspective(70.0F, 800 / 600, 0.05F, 1000.0F)
     perspective(70.0f, (screenWidth + 0.0F) / (screenHeight + 0.0F), 0.05f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     moveCameraToPlayer(timer);
 }
 
-// Render function
 void render(float deltaTime, GLFWwindow *window)
 {
     player->turn(mouse->getDX(), mouse->getDY());
@@ -239,7 +258,6 @@ void render(float deltaTime, GLFWwindow *window)
     glFogf(GL_FOG_DENSITY, 0.2f);
     glFogfv(GL_FOG_COLOR, fogColor);
 
-    // Render level
     glDisable(GL_FOG);
     levelRenderer->render(player, 0);
     glEnable(GL_FOG);
@@ -255,7 +273,6 @@ void render(float deltaTime, GLFWwindow *window)
     glfwSwapBuffers(window);
 }
 
-// Initialize GLFW and OpenGL
 int init(GLFWwindow **window)
 {
     if (!glfwInit())
@@ -301,7 +318,7 @@ int init(GLFWwindow **window)
 
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -333,9 +350,7 @@ int init(GLFWwindow **window)
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
 
-    // TODO: Player crash when depth is smaller than width and height. noftalls dima fragen
-    level = new Level(64, 64, 64);
-    // TODO: Crash without reason fix when depth is smaller
+    level = new Level(256, 256, 64);
     player = new Player(level);
     levelRenderer = new LevelRenderer(level);
     mouse = new Mouse();
@@ -352,7 +367,7 @@ void destroy(){
     level->save();
     glfwTerminate();
 }
-// Main function
+
 int main()
 {
     double xpos, ypos;
@@ -365,6 +380,16 @@ int main()
 
     while (!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS && !glfwWindowShouldClose(window))
     {
+
+        if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)
+        {
+            toggleFullscreen(window);
+        
+            while (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)
+            {
+                glfwPollEvents();
+            }
+        }
 
         timer.advanceTime();
 
@@ -390,7 +415,6 @@ int main()
         glfwPollEvents();
     }
 
-    // Clean up and terminate
     destroy();
 
     return 0;

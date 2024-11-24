@@ -14,7 +14,7 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
     this->depth = depth;
 
     this->blocks.resize(width * height * depth);
-    this->lightDepths.resize(width * depth);
+    this->lightDepths.resize(width * height * depth);
 
     for (int x = 0; x < width; ++x)
     {
@@ -113,7 +113,9 @@ void Level::calcLightDepths(int x, int y, int width, int height)
         for (int var6 = y; var6 < y + height; ++var6)
         {
 
-            int var7 = this->lightDepths[var5 + var6 * this->width];
+            int calc = var5 + var6 * this->width;
+
+            int var7 = this->lightDepths[calc];
             int var8;
             for (var8 = this->depth - 1; var8 > 0 && !this->isLightBlocker(var5, var8, var6); --var8)
             {
