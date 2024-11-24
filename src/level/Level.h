@@ -8,18 +8,17 @@
 #include <fstream>
 #include <iostream>
 
-
 class Level
 {
 public:
     int width;
     int height;
     int depth;
-    std::vector<unsigned int> blocks;
-    std::vector<int> lightDepths;
-    std::vector<LevelListener *> levelListeners;
 
-    Level(int widthIn, int heightIn, int depthIn);
+    Level(int width, int height, int depth);
+    void load();
+    void save();
+    void calcLightDepths(int var1, int var2, int var3, int var4);
     void addListener(LevelListener *listener);
     void removeListener(LevelListener *listener);
     bool isTile(int x, int y, int z) const;
@@ -28,6 +27,11 @@ public:
     std::vector<AABB> getCubes(const AABB &aabb) const;
     float getBrightness(int x, int y, int z) const;
     void setTile(int x, int y, int z, int tileId);
+
+private:
+    std::vector<unsigned int> blocks;
+    std::vector<int> lightDepths;
+    std::vector<LevelListener *> levelListeners;
 };
 
 #endif // LEVEL_HPP

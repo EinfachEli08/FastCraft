@@ -13,10 +13,11 @@ void Frustum::normalizePlane(std::array<std::array<float, 4>, 6> &frustum, int s
                                 frustum[side][1] * frustum[side][1] +
                                 frustum[side][2] * frustum[side][2]);
 
-    for (int i = 0; i < 4; ++i)
-    {
-        frustum[side][i] /= magnitude;
-    }
+    
+    frustum[side][0] /= magnitude;
+    frustum[side][1] /= magnitude;
+    frustum[side][2] /= magnitude;
+    frustum[side][3] /= magnitude;
 }
 
 void Frustum::calculateFrustum()

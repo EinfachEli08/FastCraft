@@ -5,6 +5,7 @@
 
 Player::Player(Level *level) : level(level), xo(0), yo(0), zo(0), x(0), y(0), z(0), xd(0), yd(0), zd(0), yRot(0), xRot(0), onGround(false)                          
 {
+    this->level	= level;
     resetPos();
 }
 
@@ -95,41 +96,41 @@ void Player::tick()
     }
 }
 
-void Player::move(float var1, float var2, float var3)
+void Player::move(float xPos, float yPos, float zPos)
 {
-    float var4 = var1;
-    float var5 = var2;
-    float var6 = var3;
-    std::vector<AABB> collidingCubes = level->getCubes(bb.expand(var1, var2, var3));
+    float var4 = xPos;
+    float var5 = yPos;
+    float var6 = zPos;
+    std::vector<AABB> collidingCubes = level->getCubes(bb.expand(xPos, yPos, zPos));
 
     // Handle Y collisions
     for (auto &cube : collidingCubes)
     {
-        var2 = cube.clipYCollide(bb, var2);
+        yPos = cube.clipYCollide(bb, yPos);
     }
-    bb.move(0.0f, var2, 0.0f);
+    bb.move(0.0f, yPos, 0.0f);
 
     // Handle X collisions
     for (auto &cube : collidingCubes)
     {
-        var1 = cube.clipXCollide(bb, var1);
+        xPos = cube.clipXCollide(bb, xPos);
     }
-    bb.move(var1, 0.0f, 0.0f);
+    bb.move(xPos, 0.0f, 0.0f);
 
     // Handle Z collisions
     for (auto &cube : collidingCubes)
     {
-        var3 = cube.clipZCollide(bb, var3);
+        zPos = cube.clipZCollide(bb, zPos);
     }
-    bb.move(0.0f, 0.0f, var3);
+    bb.move(0.0f, 0.0f, zPos);
 
-    onGround = var5 != var2 && var5 < 0.0f;
+    onGround = var5 != yPos && var5 < 0.0f;
 
-    if (var4 != var1)
+    if (var4 != xPos)
         xd = 0.0f;
-    if (var5 != var2)
+    if (var5 != yPos)
         yd = 0.0f;
-    if (var6 != var3)
+    if (var6 != zPos)
         zd = 0.0f;
 
     // Update player position based on AABB

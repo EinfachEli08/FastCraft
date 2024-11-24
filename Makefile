@@ -9,9 +9,9 @@ OBJ := $(patsubst src/%,build/%, $(OBJ:.c=.o))
 
 CXX := x86_64-w64-mingw32-g++
 
-LIBS := -lglfw3dll -lopengl32
+LIBS := -lglfw3dll -lopengl32 -lz
 
-ARGS := -g -std=c++17 -I/mingw64/include -Isrc -Iinclude -L$(LIB)
+ARGS := -g -std=c++17 -I/mingw64/include -Isrc -Iinclude -L$(LIB) -Os
 
 $(shell mkdir -p build)
 

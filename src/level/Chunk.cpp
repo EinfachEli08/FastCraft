@@ -42,9 +42,7 @@ void Chunk::rebuild(int index)
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, texture);
         t.init();
-
-        int tileCount = 0;
-
+        
         for (int x = this->x0; x < this->x1; ++x)
         {
             for (int y = this->y0; y < this->y1; ++y)
@@ -54,7 +52,7 @@ void Chunk::rebuild(int index)
                     if (this->level->isTile(x, y, z))
                     {
                         bool isNotGrass = y != this->level->depth * 2 / 3;
-                        ++tileCount;
+                        
                         if (!isNotGrass)
                         {
                             Tile::rock.render(t,this->level, index, x, y, z);

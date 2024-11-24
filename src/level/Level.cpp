@@ -1,33 +1,20 @@
 #include "Level.h"
-#include "LevelListener.h"
 
 #include <algorithm>
 #include <cmath>
+#include <zlib.h>
+#include <functional>
+#include <fstream>
 
-Level::Level(int widthIn, int heightIn, int depthIn) 
+Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths()
 {
 
-    if (widthIn <= 0 || heightIn <= 0 || depthIn <= 0)
-    {
-        throw std::invalid_argument("Dimensions must be positive.");
-    }
+    this->width = width;
+    this->height = height;
+    this->depth = depth;
 
-    long long totalBlocks = widthIn * heightIn * depthIn;
-    long long totalLightDepths = widthIn * depthIn;
-
-    if (totalBlocks > std::numeric_limits<size_t>::max() ||
-        totalLightDepths > std::numeric_limits<size_t>::max())
-    {
-        throw std::overflow_error("Requested size exceeds platform limits.");
-    }
-
-    width = widthIn;
-    height = heightIn;
-    depth = depthIn;
-
-    // Initialize blocks and lightDepths
-    blocks.resize(width * height * depth);
-    lightDepths.resize(width * depth);
+    this->blocks.resize(width * height * depth);
+    this->lightDepths.resize(width * depth);
 
     for (int x = 0; x < width; ++x)
     {
@@ -35,12 +22,110 @@ Level::Level(int widthIn, int heightIn, int depthIn)
         {
             for (int y = 0; y < height; ++y)
             {
-                int index = (z * height + y) * width + x;
-                blocks[index] = (z <= depth * 2 / 3) ? 1 : 0; // Set rock/grass
+                int index = (z * this->height + y) * this->width + x;
+                this->blocks[index] = (z <= depth * 2 / 3) ? 1 : 0; // Set rock/grass
             }
         }
     }
-    
+    calcLightDepths(0, 0, width, height);
+    load();
+}
+
+void Level::load()
+{
+    try
+    {
+        // Open the file for reading in binary mode
+        std::ifstream file("level.dat", std::ios::binary);
+        if (!file)
+        {
+            throw std::runtime_error("Unable to open file for reading.");
+        }
+
+        // Decompress with zlib
+        std::vector<char> compressedData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        file.close();
+
+        uLongf decompressedSize = this->blocks.size(); // Set this to your expected block size
+        if (uncompress(reinterpret_cast<Bytef *>(this->blocks.data()), &decompressedSize,reinterpret_cast<const Bytef *>(compressedData.data()), compressedData.size()) != Z_OK)
+        {
+            throw std::runtime_error("Failed to decompress data.");
+        }
+
+        // Notify listeners
+        calcLightDepths(0, 0, width, height);
+        
+        for (int var11 = 0; var11 < this->levelListeners.size(); ++var11)
+        {
+            this->levelListeners.at(var11)->allChanged();
+        }
+        std::cout << "level loaded" << std::endl;
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Error loading level: " << ex.what() << std::endl;
+    }
+}
+
+void Level::save()
+{
+    try
+    {
+        // Compress data with zlib
+        uLongf compressedSize = compressBound(this->blocks.size());
+        std::vector<char> compressedData(compressedSize);
+
+        if (compress(reinterpret_cast<Bytef *>(compressedData.data()), &compressedSize,
+                     reinterpret_cast<const Bytef *>(this->blocks.data()), blocks.size()) != Z_OK)
+        {
+            throw std::runtime_error("Failed to compress data.");
+        }
+        compressedData.resize(compressedSize); // Adjust size to actual compressed data
+
+        // Open the file for writing in binary mode
+        std::ofstream file("level.dat", std::ios::binary);
+        if (!file)
+        {
+            throw std::runtime_error("Unable to open file for writing.");
+        }
+
+        file.write(compressedData.data(), compressedData.size());
+        file.close();
+        std::cout << "level saved" << std::endl;
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Error saving level: " << ex.what() << std::endl;
+    }
+}
+
+void Level::calcLightDepths(int x, int y, int width, int height)
+{
+    for (int var5 = x; var5 < x + width; ++var5)
+    {
+        for (int var6 = y; var6 < y + height; ++var6)
+        {
+
+            int var7 = this->lightDepths[var5 + var6 * this->width];
+            int var8;
+            for (var8 = this->depth - 1; var8 > 0 && !this->isLightBlocker(var5, var8, var6); --var8)
+            {
+            }
+
+            this->lightDepths[var5 + var6 * this->width] = var8;
+
+            if (var7 != var8)
+            {
+                int var9 = var7 < var8 ? var7 : var8;
+                int var10 = var7 > var8 ? var7 : var8;
+
+                for (int var11 = 0; var11 < this->levelListeners.size(); ++var11)
+                {
+                    this->levelListeners.at(var11)->lightColumnChanged(var5, var6, var9, var10);
+                }
+            }
+        }
+    }
 }
 
 void Level::addListener(LevelListener *listener)
@@ -55,8 +140,7 @@ void Level::removeListener(LevelListener *listener)
 
 bool Level::isTile(int x, int y, int z) const
 {
-    return (x >= 0 && y >= 0 && z >= 0 && x < width && y < height && z < depth) &&
-           blocks[(y * depth + z) * width + x] == 1;
+    return (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) && this->blocks[(y * this->height + z) * this->width + x] == 1;
 }
 
 bool Level::isSolidTile(int x, int y, int z) const
@@ -72,19 +156,19 @@ bool Level::isLightBlocker(int x, int y, int z) const
 std::vector<AABB> Level::getCubes(const AABB &aabb) const
 {
     std::vector<AABB> cubes;
-    int minX = static_cast<int>(aabb.x0);
-    int maxX = static_cast<int>(aabb.x1 + 1.0f);
-    int minY = static_cast<int>(aabb.y0);
-    int maxY = static_cast<int>(aabb.y1 + 1.0f);
-    int minZ = static_cast<int>(aabb.z0);
-    int maxZ = static_cast<int>(aabb.z1 + 1.0f);
+    int minX = aabb.x0;
+    int maxX = aabb.x1 + 1.0f;
+    int minY = aabb.y0;
+    int maxY = aabb.y1 + 1.0f;
+    int minZ = aabb.z0;
+    int maxZ = aabb.z1 + 1.0f;
 
     minX = std::max(minX, 0);
     minY = std::max(minY, 0);
     minZ = std::max(minZ, 0);
-    maxX = std::min(maxX, width);
-    maxY = std::min(maxY, height);
-    maxZ = std::min(maxZ, depth);
+    maxX = std::min(maxX, this->width);
+    maxY = std::min(maxY, this->depth);
+    maxZ = std::min(maxZ, this->height);
 
     for (int x = minX; x < maxX; ++x)
     {
@@ -94,8 +178,7 @@ std::vector<AABB> Level::getCubes(const AABB &aabb) const
             {
                 if (isSolidTile(x, y, z))
                 {
-                    cubes.emplace_back(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z),
-                                       static_cast<float>(x + 1), static_cast<float>(y + 1), static_cast<float>(z + 1));
+                    cubes.emplace_back(x, y, z, (x + 1), (y + 1), (z + 1));
                 }
             }
         }
@@ -109,23 +192,24 @@ float Level::getBrightness(int x, int y, int z) const
     const float darkBrightness = 0.8f;
     const float brightBrightness = 1.0f;
 
-    if (x >= 0 && y >= 0 && z >= 0 && x < width && y < height && z < depth)
+    if (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height)
     {
-        return (y < lightDepths[x + z * width]) ? darkBrightness : brightBrightness;
+        return (y < this->lightDepths[x + z * this->width]) ? darkBrightness : brightBrightness;
     }
     return brightBrightness;
 }
 
 void Level::setTile(int x, int y, int z, int tileId)
 {
-    if (x >= 0 && y >= 0 && z >= 0 && x < width && y < height && z < depth)
+    if (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height)
     {
-        blocks[(y * depth + z) * width + x] = static_cast<unsigned char>(tileId);
 
-        // Notify listeners
-        for (auto *listener : levelListeners)
+        this->blocks[(y * this->height + z) * this->width + x] = tileId;
+        calcLightDepths(x, z, 1, 1);
+
+        for (int i = 0; i < this->levelListeners.size(); ++i)
         {
-            listener->tileChanged(x, y, z);
+            this->levelListeners.at(i)->tileChanged(x, y, z);
         }
     }
 }

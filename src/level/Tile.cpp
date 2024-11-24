@@ -17,12 +17,13 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
     float var13 = 0.6F;
 
     // These are the 3D coordinates
-    float x1 = x;
+    float x1 = x + 0.0F;
     float x2 = x + 1.0f;
-    float y1 = y;
+    float y1 = y + 0.0F;
     float y2 = y + 1.0f;
-    float z1 = z;
+    float z1 = z + 0.0F;
     float z2 = z + 1.0f;
+
     float brightness;
     if (!level->isSolidTile(x, y - 1, z))
     {
@@ -61,7 +62,7 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
     if (!level->isSolidTile(x, y, z - 1))
     {
         brightness = level->getBrightness(x, y, z - 1) * var12;
-        if (brightness == var11 ^ size == 1)
+        if (brightness == var12 ^ size == 1)
         {
             tesselator.color(brightness, brightness, brightness);
             tesselator.tex(texX2, texY);
@@ -78,7 +79,7 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
     if (!level->isSolidTile(x, y, z + 1))
     {
         brightness = level->getBrightness(x, y, z + 1) * var12;
-        if (brightness == var11 ^ size == 1)
+        if (brightness == var12 ^ size == 1)
         {
             tesselator.color(brightness, brightness, brightness);
             tesselator.tex(texX, texY);
@@ -95,7 +96,7 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
     if (!level->isSolidTile(x - 1, y, z))
     {
         brightness = level->getBrightness(x - 1, y, z) * var13;
-        if (brightness == var11 ^ size == 1)
+        if (brightness == var13 ^ size == 1)
         {
             tesselator.color(brightness, brightness, brightness);
             tesselator.tex(texX2, texY);
@@ -112,9 +113,9 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
     if (!level->isSolidTile(x + 1, y, z))
     {
         brightness = level->getBrightness(x + 1, y, z) * var13;
-        if (brightness == var11 ^ size == 1)
+        if (brightness == var13 ^ size == 1)
         {
-            tesselator.color(100, 100, 100);
+            tesselator.color(brightness, brightness, brightness);
             tesselator.tex(texX, texY2);
             tesselator.vertex(x2, y1, z2);
             tesselator.tex(texX2, texY2);
@@ -126,6 +127,8 @@ void Tile::render(Tesselator &tesselator, Level *level, int size, int x, int y, 
         }
     }
 }
+
+
 void Tile::renderFace(Tesselator &tesselator, int x, int y, int z, int face)
 {
     float x1 = x;

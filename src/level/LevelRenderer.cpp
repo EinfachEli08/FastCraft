@@ -58,7 +58,6 @@ LevelRenderer::~LevelRenderer()
     }
 }
 
-// Render method
 void LevelRenderer::render(Player *player, int contextID)
 {
     Chunk::rebuiltThisFrame = 0;             // Reset the rebuilt chunks count
@@ -73,8 +72,6 @@ void LevelRenderer::render(Player *player, int contextID)
     }
 }
 
-
-// Picking method, used to pick tiles around the player
 void LevelRenderer::pick(Player *player)
 {
     float selectionRadius = 3.0f;
@@ -132,7 +129,6 @@ void LevelRenderer::renderHit(HitResult hit)
     glDisable(GL_BLEND);
 }
 
-// Mark chunks as dirty based on the coordinates
 void LevelRenderer::setDirty(int x0, int y0, int z0, int x1, int y1, int z1)
 {
     x0 /= CHUNK_SIZE;
@@ -162,7 +158,6 @@ void LevelRenderer::setDirty(int x0, int y0, int z0, int x1, int y1, int z1)
     }
 }
 
-// LevelListener interface method: Called when a tile has changed
 void LevelRenderer::tileChanged(int x, int y, int z)
 {
     setDirty(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
@@ -173,7 +168,6 @@ void LevelRenderer::lightColumnChanged(int var1, int var2, int var3, int var4)
     setDirty(var1 - 1, var3 - 1, var2 - 1, var1 + 1, var4 + 1, var2 + 1);
 }
 
-// LevelListener interface method: Called when all tiles have changed
 void LevelRenderer::allChanged()
 {
     setDirty(0, 0, 0, level->width, level->depth, level->height);
