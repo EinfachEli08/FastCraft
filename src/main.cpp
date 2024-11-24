@@ -8,6 +8,7 @@
 #include "level/LevelRenderer.h"
 #include "Player.h"
 #include "utils/Mouse.h"
+#include "utils/Controller.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -27,6 +28,8 @@ Level *level;
 Player *player;
 LevelRenderer *levelRenderer;
 Mouse *mouse;
+Controller *controller;
+int stickSpeed = 9;
 
 HitResult *hitResult;
 
@@ -201,49 +204,96 @@ void setupCamera(float timer)
 
 void render(float deltaTime, GLFWwindow *window)
 {
-    player->turn(mouse->getDX(), mouse->getDY());
-    pick(deltaTime);
+    if(!controller->isConnected()){
+        player->turn(mouse->getDX(), mouse->getDY(),0);
+        pick(deltaTime);
 
-    if (mouse->getEventButton() == 1 && mouse->getEventButtonState() && hitResult != nullptr)
-    {
-        level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
-    }
-    if (mouse->getEventButton() == 0 && mouse->getEventButtonState() && hitResult != nullptr)
-    {
-        int x = hitResult->x;
-        int y = hitResult->y;
-        int z = hitResult->z;
-        if (hitResult->f == 0)
+        if (mouse->getEventButton() == 1 && mouse->getEventButtonState() && hitResult != nullptr)
         {
-            --y;
+            level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
-
-        if (hitResult->f == 1)
+        if (mouse->getEventButton() == 0 && mouse->getEventButtonState() && hitResult != nullptr)
         {
-            ++y;
-        }
+            int x = hitResult->x;
+            int y = hitResult->y;
+            int z = hitResult->z;
+            if (hitResult->f == 0)
+            {
+                --y;
+            }
 
-        if (hitResult->f == 2)
+            if (hitResult->f == 1)
+            {
+                ++y;
+            }
+
+            if (hitResult->f == 2)
+            {
+                --z;
+            }
+
+            if (hitResult->f == 3)
+            {
+                ++z;
+            }
+
+            if (hitResult->f == 4)
+            {
+                --x;
+            }
+
+            if (hitResult->f == 5)
+            {
+                ++x;
+            }
+
+            level->setTile(x, y, z, 1);
+        }
+    }else{
+        player->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3),0.25);
+        pick(deltaTime);
+
+        if (controller->getAxisPosition(4)>0 && hitResult != nullptr)
         {
-            --z;
+            level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
-
-        if (hitResult->f == 3)
+        if (controller->getAxisPosition(5) > 0 && hitResult != nullptr)
         {
-            ++z;
-        }
+            int x = hitResult->x;
+            int y = hitResult->y;
+            int z = hitResult->z;
+            if (hitResult->f == 0)
+            {
+                --y;
+            }
 
-        if (hitResult->f == 4)
-        {
-            --x;
-        }
+            if (hitResult->f == 1)
+            {
+                ++y;
+            }
 
-        if (hitResult->f == 5)
-        {
-            ++x;
-        }
+            if (hitResult->f == 2)
+            {
+                --z;
+            }
 
-        level->setTile(x, y, z, 1);
+            if (hitResult->f == 3)
+            {
+                ++z;
+            }
+
+            if (hitResult->f == 4)
+            {
+                --x;
+            }
+
+            if (hitResult->f == 5)
+            {
+                ++x;
+            }
+
+            level->setTile(x, y, z, 1);
+        }
     }
 
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ENTER) == GLFW_PRESS){
@@ -354,13 +404,14 @@ int init(GLFWwindow **window)
     player = new Player(level);
     levelRenderer = new LevelRenderer(level);
     mouse = new Mouse();
+    controller = new Controller(GLFW_JOYSTICK_1);
 
     return 0;
 }
 
 void tick()
 {
-    player->tick();
+    player->tick(controller,0.125);
 }
 
 void destroy(){
@@ -378,17 +429,12 @@ int main()
         return -1;
     }
 
-    while (!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS && !glfwWindowShouldClose(window))
+    while ((!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS) && !glfwWindowShouldClose(window))
     {
-
-        if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)
+        
+        if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS || controller->isButtonPressed(6))
         {
             toggleFullscreen(window);
-        
-            while (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)
-            {
-                glfwPollEvents();
-            }
         }
 
         timer.advanceTime();
@@ -411,7 +457,7 @@ int main()
 
         glfwGetCursorPos(window, &xpos, &ypos);
         mouse->update(xpos, -ypos);
-
+        controller->update();
         glfwPollEvents();
     }
 

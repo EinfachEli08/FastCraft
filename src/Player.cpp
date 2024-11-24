@@ -1,11 +1,10 @@
 #include "Player.h"
-#include "level/Level.h"
 #include <GLFW/glfw3.h> // For keyboard input
 #include <cmath>        // For sin, cos, sqrt
 
-Player::Player(Level *level) : level(level), xo(0), yo(0), zo(0), x(0), y(0), z(0), xd(0), yd(0), zd(0), yRot(0), xRot(0), onGround(false)                          
+Player::Player(Level *level) : level(level), xo(0), yo(0), zo(0), x(0), y(0), z(0), xd(0), yd(0), zd(0), yRot(0), xRot(0), onGround(false)
 {
-    this->level	= level;
+    this->level = level;
     resetPos();
 }
 
@@ -28,17 +27,67 @@ void Player::setPos(float var1, float var2, float var3)
     bb = AABB(var1 - var4, var2 - var5, var3 - var4, var1 + var4, var2 + var5, var3 + var4);
 }
 
-void Player::turn(float var1, float var2)
+void Player::turn(float var1, float var2, float deadzone)
 {
-    yRot += var1 * 0.15f;
-    xRot -= var2 * 0.15f;
-    if (xRot < -90.0f)
-        xRot = -90.0f;
-    if (xRot > 90.0f)
-        xRot = 90.0f;
+    if(deadzone != 0){
+        // Apply deadzone filtering to joystick inputs
+        if (fabs(var1) < deadzone)
+        {
+            var1 = 0.0f; // Ignore horizontal movement if within deadzone
+        }
+        else
+        {
+            // Scale input to the deadzone range
+            if (var1 > 0.0f)
+            {
+                var1 -= deadzone;
+            }
+            else
+            {
+                var1 += deadzone;
+            }
+            var1 /= (1.0f - deadzone); // Normalize input to range [-1, 1]
+        }
+
+        if (fabs(var2) < deadzone)
+        {
+            var2 = 0.0f; // Ignore vertical movement if within deadzone
+        }
+        else
+        {
+            // Scale input to the deadzone range
+            if (var2 > 0.0f)
+            {
+                var2 -= deadzone;
+            }
+            else
+            {
+                var2 += deadzone;
+            }
+            var2 /= (1.0f - deadzone); // Normalize input to range [-1, 1]
+        }
+
+        // Now apply rotation after deadzone filtering
+        yRot += var1 * 0.15f;
+        xRot -= var2 * 0.15f;
+
+        // Clamping the vertical rotation to prevent excessive tilting
+        if (xRot < -90.0f)
+            xRot = -90.0f;
+        if (xRot > 90.0f)
+            xRot = 90.0f;
+    }else{
+        yRot += var1 * 0.15f;
+        xRot -= var2 * 0.15f;
+        if (xRot < -90.0f)
+            xRot = -90.0f;
+        if (xRot > 90.0f)
+            xRot = 90.0f;
+    }
+    
 }
 
-void Player::tick()
+void Player::tick(Controller *controller, float deadzone)
 {
     xo = x;
     yo = y;
@@ -47,50 +96,87 @@ void Player::tick()
     float var2 = 0.0f;
     bool down = false;
 
-    // Reset position if R key is pressed
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
+    if (controller->isConnected())
     {
-        resetPos();
+        // Reset position if R key is pressed
+        if (controller->isButtonPressed(12))
+        {
+            resetPos();
+        }
+
+        // Movement handling (WASD or arrow keys)
+        if (controller->getAxisPosition(1) < deadzone)
+        {
+            --var2;
+        }
+
+        if (controller->getAxisPosition(1) > -deadzone)
+        {
+            ++var2;
+        }
+
+        if (controller->getAxisPosition(0) < deadzone)
+        {
+            --var1;
+        }
+
+        if (controller->getAxisPosition(0) > -deadzone)
+        {
+            ++var1;
+        }
+
+        if (controller->isButtonPressed(0) && onGround)
+        {
+            yd = 0.12f;
+        }
+    }
+    else
+    {
+        // Reset position if R key is pressed
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
+        {
+            resetPos();
+        }
+
+        // Movement handling (WASD or arrow keys)
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS)
+        {
+            --var2;
+        }
+
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS)
+        {
+            ++var2;
+        }
+
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS)
+        {
+            --var1;
+        }
+
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS)
+        {
+            ++var1;
+        }
+
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && onGround)
+        {
+            yd = 0.12f;
+        }
     }
 
-    // Movement handling (WASD or arrow keys)
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS)
-    {
-        --var2;
-    }
-
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS)
-    {
-        ++var2;
-    }
-
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS)
-    {
-        --var1;
-    }
-
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS)
-    {
-        ++var1;
-    }
-
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS ||
-        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT_ALT) == GLFW_PRESS && onGround)
-    {
-        yd = 0.12f;
-    }
-
-    moveRelative(var1, var2, onGround ? 0.02f: 0.005F);
+    moveRelative(var1, var2, onGround ? 0.02f : 0.005F);
     yd = yd - 0.005f;
     move(xd, yd, zd);
     xd *= 0.91f;
     yd *= 0.98f;
     zd *= 0.91f;
-    if(onGround){
+    if (onGround)
+    {
         xd *= 0.8f;
         zd *= 0.8f;
     }
