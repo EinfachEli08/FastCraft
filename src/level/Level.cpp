@@ -35,31 +35,38 @@ void Level::load()
 {
     try
     {
-        // Open the file for reading in binary mode
+        // Read the file
         std::ifstream file("level.dat", std::ios::binary);
         if (!file)
         {
             throw std::runtime_error("Unable to open file for reading.");
         }
 
-        // Decompress with zlib
         std::vector<char> compressedData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         file.close();
 
-        uLongf decompressedSize = this->blocks.size(); // Set this to your expected block size
-        if (uncompress(reinterpret_cast<Bytef *>(this->blocks.data()), &decompressedSize,reinterpret_cast<const Bytef *>(compressedData.data()), compressedData.size()) != Z_OK)
+        // Decompress
+        uLongf decompressedSize = this->blocks.size() * sizeof(int);
+        if (uncompress(reinterpret_cast<Bytef *>(this->blocks.data()), &decompressedSize,
+                       reinterpret_cast<const Bytef *>(compressedData.data()), compressedData.size()) != Z_OK)
         {
-            throw std::runtime_error("Failed to decompress data.");
+            throw std::runtime_error("Failed to decompress block data.");
         }
 
-        // Notify listeners
-        calcLightDepths(0, 0, width, height);
-        
-        for (int var11 = 0; var11 < this->levelListeners.size(); ++var11)
+        if (decompressedSize != this->blocks.size() * sizeof(int))
         {
-            this->levelListeners.at(var11)->allChanged();
+            throw std::runtime_error("Decompressed data size mismatch.");
         }
-        std::cout << "level loaded" << std::endl;
+
+        // Recalculate lighting for the entire level
+        calcLightDepths(0, 0, this->width, this->depth);
+
+        for (auto &listener : this->levelListeners)
+        {
+            listener->allChanged();
+        }
+
+        std::cout << "Level loaded successfully." << std::endl;
     }
     catch (const std::exception &ex)
     {
@@ -71,18 +78,18 @@ void Level::save()
 {
     try
     {
-        // Compress data with zlib
-        uLongf compressedSize = compressBound(this->blocks.size());
+        // Compress the entire block data
+        uLongf compressedSize = compressBound(this->blocks.size() * sizeof(int));
         std::vector<char> compressedData(compressedSize);
 
         if (compress(reinterpret_cast<Bytef *>(compressedData.data()), &compressedSize,
-                     reinterpret_cast<const Bytef *>(this->blocks.data()), blocks.size()) != Z_OK)
+                     reinterpret_cast<const Bytef *>(this->blocks.data()), this->blocks.size() * sizeof(int)) != Z_OK)
         {
-            throw std::runtime_error("Failed to compress data.");
+            throw std::runtime_error("Failed to compress block data.");
         }
         compressedData.resize(compressedSize); // Adjust size to actual compressed data
 
-        // Open the file for writing in binary mode
+        // Save to file
         std::ofstream file("level.dat", std::ios::binary);
         if (!file)
         {
@@ -91,7 +98,7 @@ void Level::save()
 
         file.write(compressedData.data(), compressedData.size());
         file.close();
-        std::cout << "level saved" << std::endl;
+        std::cout << "Level saved successfully." << std::endl;
     }
     catch (const std::exception &ex)
     {
