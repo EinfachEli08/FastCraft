@@ -5,9 +5,18 @@
 static Mouse *instance = nullptr;
 
 // Constructor
-Mouse::Mouse() : currentX(0.0), currentY(0.0), prevX(0.0), prevY(0.0), deltaX(0.0), deltaY(0.0), eventButton(-1), eventButtonState(GLFW_RELEASE)
+Mouse::Mouse() : currentX(0.0), currentY(0.0), prevX(0.0), prevY(0.0), deltaX(0.0), deltaY(0.0),
+                 eventButton(-1), eventButtonState(GLFW_RELEASE)
 {
     instance = this;
+
+    // Initialize all button states
+    for (int i = 0; i <= GLFW_MOUSE_BUTTON_LAST; ++i)
+    {
+        buttonStates[i] = GLFW_RELEASE; // Initial state
+        buttonClick[i] = false;         // Not clicked
+        buttonRelease[i] = false;       // Not released
+    }
 }
 
 // Update method for position and button states
@@ -31,17 +40,25 @@ void Mouse::update(double xpos, double ypos)
         for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; ++button)
         {
             int state = glfwGetMouseButton(currentContext, button);
+
+            // Handle click (triggered once)
             if (state == GLFW_PRESS && buttonStates[button] == GLFW_RELEASE)
             {
-                // Button was just pressed
-                eventButton = button;
-                eventButtonState = GLFW_PRESS;
+                buttonClick[button] = true; // Mark as clicked
             }
-            else if (state == GLFW_RELEASE && buttonStates[button] == GLFW_PRESS)
+            else
             {
-                // Button was just released
-                eventButton = button;
-                eventButtonState = GLFW_RELEASE;
+                buttonClick[button] = false; // Reset click state
+            }
+
+            // Handle release (triggered once)
+            if (state == GLFW_RELEASE && buttonStates[button] == GLFW_PRESS)
+            {
+                buttonRelease[button] = true; // Mark as released
+            }
+            else
+            {
+                buttonRelease[button] = false; // Reset release state
             }
 
             // Update internal button state
@@ -74,15 +91,28 @@ double Mouse::getDY() const
     return deltaY;
 }
 
-// Check if a specific button is pressed
-bool Mouse::isButtonPressed(int button) const
+// Check if a specific button is currently held down
+bool Mouse::isButtonHeld(int button) const
 {
-    GLFWwindow *currentContext = glfwGetCurrentContext();
-    if (!currentContext)
-    {
-        return false; // Ensure there's a valid context
-    }
-    return glfwGetMouseButton(currentContext, button) == GLFW_PRESS;
+    if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
+        return false;
+    return buttonStates[button] == GLFW_PRESS;
+}
+
+// Check if a specific button was clicked
+bool Mouse::isButtonClicked(int button) const
+{
+    if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
+        return false;
+    return buttonClick[button];
+}
+
+// Check if a specific button was released
+bool Mouse::isButtonReleased(int button) const
+{
+    if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
+        return false;
+    return buttonRelease[button];
 }
 
 // Get the last event button

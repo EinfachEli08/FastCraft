@@ -75,7 +75,9 @@
         "string_view": "cpp",
         "span": "cpp",
         "cinttypes": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "glad.h": "c",
+        "windows.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

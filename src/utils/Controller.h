@@ -1,6 +1,6 @@
-#pragma once
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
-#include <GLFW/glfw3.h>
 #include <vector>
 #include <string>
 #include <optional>
@@ -10,36 +10,50 @@ class Controller
 public:
     Controller(int controllerID);
 
-    // Update the controller state
+    // Update the controller's state
     void update();
 
-    // Check if the controller is connected
+    // Check connection status
     bool isConnected() const;
 
-    // Get the state of a button (pressed or not)
+    // Button methods
     bool isButtonPressed(int button) const;
+    std::optional<int> getPressedButton() const;
 
-    // Get the position of an axis (e.g., joystick)
+    // Axis methods
     float getAxisPosition(int axis) const;
-
-    // Get the delta (change) of an axis position
     float getDX(int axis) const;
     float getDY(int axis) const;
 
-    // Get the controller name
+    // Axis as button methods
+    bool isAxisButtonPressed(int axis) const;
+    bool isAxisButtonReleased(int axis) const;
+    bool isAxisButtonHeld(int axis) const;
+
+    // Controller information
     std::string getControllerName() const;
 
-    // Get the currently pressed button, if any
-    std::optional<int> getPressedButton() const;
+    // Deadzone configuration
+    void setAxisDeadzone(float deadzone);
 
 private:
-    int m_controllerID;
-    bool m_isConnected;
-    std::vector<unsigned char> m_buttons;
-    std::vector<float> m_axes;
-    std::vector<float> m_prevAxes; // Store previous axis states
-    std::string m_name;
+    void checkConnection();                 // Check if the controller is connected
+    void updateState();                     // Update button and axis states
+    float applyDeadzone(float value) const; // Apply deadzone to an axis value
 
-    void checkConnection();
-    void updateState();
+    int m_controllerID; // Controller ID
+    bool m_isConnected; // Connection status
+    std::string m_name; // Controller name
+
+    std::vector<unsigned char> m_buttons; // Button states
+    std::vector<float> m_axes;            // Current axis states
+    std::vector<float> m_prevAxes;        // Previous axis states
+
+    std::vector<bool> m_axisButtonPressed;  // Axis button pressed state
+    std::vector<bool> m_axisButtonReleased; // Axis button released state
+
+    const float m_axisButtonThreshold = 0.5f; // Threshold for axis button activation
+    float m_deadzone = 0.1f;                  // Default deadzone value for axes
 };
+
+#endif // CONTROLLER_H

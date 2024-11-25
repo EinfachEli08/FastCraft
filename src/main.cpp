@@ -208,11 +208,11 @@ void render(float deltaTime, GLFWwindow *window)
         player->turn(mouse->getDX(), mouse->getDY(),0);
         pick(deltaTime);
 
-        if (mouse->getEventButton() == 1 && mouse->getEventButtonState() && hitResult != nullptr)
+        if (mouse->isButtonClicked(1) && hitResult != nullptr)
         {
             level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
-        if (mouse->getEventButton() == 0 && mouse->getEventButtonState() && hitResult != nullptr)
+        if (mouse->isButtonClicked(0) && hitResult != nullptr)
         {
             int x = hitResult->x;
             int y = hitResult->y;
@@ -253,11 +253,11 @@ void render(float deltaTime, GLFWwindow *window)
         player->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3),0.25);
         pick(deltaTime);
 
-        if (controller->getAxisPosition(4)>0 && hitResult != nullptr)
+        if (controller->isAxisButtonPressed(4)  && hitResult != nullptr)
         {
             level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
-        if (controller->getAxisPosition(5) > 0 && hitResult != nullptr)
+        if (controller->isAxisButtonPressed(5)  && hitResult != nullptr)
         {
             int x = hitResult->x;
             int y = hitResult->y;
@@ -373,19 +373,6 @@ int init(GLFWwindow **window)
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    GLuint texture;
-    try
-    {
-        texture = Textures::loadTexture("assets/terrain.png", GL_NEAREST);
-        Chunk::init(texture);
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
         glfwTerminate();
         return -1;
     }

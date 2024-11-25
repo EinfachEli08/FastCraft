@@ -42,11 +42,6 @@ void Player::turn(float var1, float var2, float deadzone)
             {
                 var1 -= deadzone;
             }
-            else
-            {
-                var1 += deadzone;
-            }
-            var1 /= (1.0f - deadzone); // Normalize input to range [-1, 1]
         }
 
         if (fabs(var2) < deadzone)

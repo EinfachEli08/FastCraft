@@ -38,6 +38,18 @@ void Chunk::rebuild(int index)
         this->dirty = false;
         ++updates;
         ++rebuiltThisFrame;
+
+        GLuint texture;
+        try
+        {
+            texture = Textures::loadTexture("assets/terrain.png", 9728);
+            Chunk::init(texture);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
+
         glNewList(this->lists + index, GL_COMPILE);
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, texture);

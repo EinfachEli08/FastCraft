@@ -27,7 +27,7 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
             }
         }
     }
-    calcLightDepths(0, 0, width, height);
+    this->calcLightDepths(0, 0, width, height);
     load();
 }
 
@@ -200,12 +200,13 @@ float Level::getBrightness(int x, int y, int z) const
 {
     const float darkBrightness = 0.8f;
     const float brightBrightness = 1.0f;
-
-    if (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height)
-    {
-        return (y < this->lightDepths[x + z * this->width]) ? darkBrightness : brightBrightness;
-    }
-    return brightBrightness;
+    /*
+        if ( && x < this->width && y < this->depth && z < this->height)
+        {
+            return (y < this->lightDepths[x + z * this->width]) ? darkBrightness : brightBrightness;
+        }
+        */
+    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? (y < this->lightDepths[x + z * this->width] ? darkBrightness : brightBrightness) : brightBrightness;
 }
 
 void Level::setTile(int x, int y, int z, int tileId)
