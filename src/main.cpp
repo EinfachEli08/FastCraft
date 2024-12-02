@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 #include <iostream>
 #include <chrono>
 #include <cmath>
@@ -9,10 +10,8 @@
 #include "Player.h"
 #include "utils/Mouse.h"
 #include "utils/Controller.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include "character/Cube.h"
+#include "character/Zombie.h"
 
 int screenWidth = 960;
 int screenHeight = 600;
@@ -30,7 +29,7 @@ LevelRenderer *levelRenderer;
 Mouse *mouse;
 Controller *controller;
 int stickSpeed = 9;
-
+std::vector<Zombie> zombies;
 HitResult *hitResult;
 
 int var1 = 920330;
@@ -147,7 +146,7 @@ void pick(float deltaTime)
 
     if (levelRenderer)
     {
-        levelRenderer->pick(player); 
+        levelRenderer->pick(player);
     }
 
     GLint hits = glRenderMode(GL_RENDER);
@@ -161,10 +160,10 @@ void pick(float deltaTime)
     {
         GLuint names = selectBuffer[bufferPos++];
         GLuint minDepth = selectBuffer[bufferPos++];
-        bufferPos++; 
+        bufferPos++;
         if (minDepth >= closestDepth && i != 0)
         {
-            bufferPos += names; 
+            bufferPos += names;
         }
         else
         {
@@ -191,7 +190,6 @@ void pick(float deltaTime)
     }
 }
 
-
 void setupCamera(float timer)
 {
     glMatrixMode(GL_PROJECTION);
@@ -204,8 +202,9 @@ void setupCamera(float timer)
 
 void render(float deltaTime, GLFWwindow *window)
 {
-    if(!controller->isConnected()){
-        player->turn(mouse->getDX(), mouse->getDY(),0);
+    if (!controller->isConnected())
+    {
+        player->turn(mouse->getDX(), mouse->getDY());
         pick(deltaTime);
 
         if (mouse->isButtonClicked(1) && hitResult != nullptr)
@@ -249,15 +248,17 @@ void render(float deltaTime, GLFWwindow *window)
 
             level->setTile(x, y, z, 1);
         }
-    }else{
-        player->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3),0.25);
+    }
+    else
+    {
+        player->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3));
         pick(deltaTime);
 
-        if (controller->isAxisButtonPressed(4)  && hitResult != nullptr)
+        if (controller->isAxisButtonPressed(4) && hitResult != nullptr)
         {
             level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
-        if (controller->isAxisButtonPressed(5)  && hitResult != nullptr)
+        if (controller->isAxisButtonPressed(5) && hitResult != nullptr)
         {
             int x = hitResult->x;
             int y = hitResult->y;
@@ -296,7 +297,8 @@ void render(float deltaTime, GLFWwindow *window)
         }
     }
 
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ENTER) == GLFW_PRESS){
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ENTER) == GLFW_PRESS)
+    {
         level->save();
     }
 
@@ -310,6 +312,12 @@ void render(float deltaTime, GLFWwindow *window)
 
     glDisable(GL_FOG);
     levelRenderer->render(player, 0);
+
+    for (size_t var1 = 0; var1 < zombies.size(); ++var1)
+    {
+        zombies[var1].render(deltaTime); // Call tick() on each Zombie
+    }
+
     glEnable(GL_FOG);
     levelRenderer->render(player, 1);
     glDisable(GL_TEXTURE_2D);
@@ -319,6 +327,7 @@ void render(float deltaTime, GLFWwindow *window)
         levelRenderer->renderHit(*hitResult);
     }
 
+    new Cube(0,0);
     glDisable(GL_FOG);
     glfwSwapBuffers(window);
 }
@@ -393,15 +402,26 @@ int init(GLFWwindow **window)
     mouse = new Mouse();
     controller = new Controller(GLFW_JOYSTICK_1);
 
+    for (int var5 = 0; var5 < 100; ++var5)
+    {
+        zombies.emplace_back(level, 128.0F, 0.0F, 128.0F);
+    }
+
     return 0;
 }
 
 void tick()
 {
-    player->tick(controller,0.125);
+    for (size_t var1 = 0; var1 < zombies.size(); ++var1)
+    {
+        zombies[var1].tick(); // Call tick() on each Zombie
+    }
+                                                 
+    player->tick(controller, 0.125);
 }
 
-void destroy(){
+void destroy()
+{
     level->save();
     glfwTerminate();
 }
@@ -418,7 +438,7 @@ int main()
 
     while ((!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS) && !glfwWindowShouldClose(window))
     {
-        
+
         if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS || controller->isButtonPressed(6))
         {
             toggleFullscreen(window);

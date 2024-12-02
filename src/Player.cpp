@@ -2,236 +2,75 @@
 #include <GLFW/glfw3.h> // For keyboard input
 #include <cmath>        // For sin, cos, sqrt
 
-Player::Player(Level *level) : level(level), xo(0), yo(0), zo(0), x(0), y(0), z(0), xd(0), yd(0), zd(0), yRot(0), xRot(0), onGround(false)
+// Constructor
+Player::Player(Level *level) : Entity(level)
 {
-    this->level = level;
-    resetPos();
+    this->heightOffset = 1.62F;
 }
 
-void Player::resetPos()
-{
-    // Randomly spawn the player
-    float var1 = static_cast<float>(std::rand()) / RAND_MAX * static_cast<float>(level->width);
-    float var2 = static_cast<float>(level->depth + 10);
-    float var3 = static_cast<float>(std::rand()) / RAND_MAX * static_cast<float>(level->height);
-    setPos(var1, var2, var3);
-}
 
-void Player::setPos(float var1, float var2, float var3)
-{
-    x = var1;
-    y = var2;
-    z = var3;
-    float var4 = 0.3f;
-    float var5 = 0.9f;
-    bb = AABB(var1 - var4, var2 - var5, var3 - var4, var1 + var4, var2 + var5, var3 + var4);
-}
-
-void Player::turn(float var1, float var2, float deadzone)
-{
-    if(deadzone != 0){
-        // Apply deadzone filtering to joystick inputs
-        if (fabs(var1) < deadzone)
-        {
-            var1 = 0.0f; // Ignore horizontal movement if within deadzone
-        }
-        else
-        {
-            // Scale input to the deadzone range
-            if (var1 > 0.0f)
-            {
-                var1 -= deadzone;
-            }
-        }
-
-        if (fabs(var2) < deadzone)
-        {
-            var2 = 0.0f; // Ignore vertical movement if within deadzone
-        }
-        else
-        {
-            // Scale input to the deadzone range
-            if (var2 > 0.0f)
-            {
-                var2 -= deadzone;
-            }
-            else
-            {
-                var2 += deadzone;
-            }
-            var2 /= (1.0f - deadzone); // Normalize input to range [-1, 1]
-        }
-
-        // Now apply rotation after deadzone filtering
-        yRot += var1 * 0.15f;
-        xRot -= var2 * 0.15f;
-
-        // Clamping the vertical rotation to prevent excessive tilting
-        if (xRot < -90.0f)
-            xRot = -90.0f;
-        if (xRot > 90.0f)
-            xRot = 90.0f;
-    }else{
-        yRot += var1 * 0.15f;
-        xRot -= var2 * 0.15f;
-        if (xRot < -90.0f)
-            xRot = -90.0f;
-        if (xRot > 90.0f)
-            xRot = 90.0f;
-    }
-    
-}
-
+// Handle input and physics
 void Player::tick(Controller *controller, float deadzone)
 {
-    xo = x;
-    yo = y;
-    zo = z;
+    this->xo = this->x;
+    this->yo = this->y;
+    this->zo = this->z;
     float var1 = 0.0f;
     float var2 = 0.0f;
-    bool down = false;
 
     if (controller->isConnected())
     {
-        // Reset position if R key is pressed
+        // Controller input
         if (controller->isButtonPressed(12))
-        {
-            resetPos();
-        }
-
-        // Movement handling (WASD or arrow keys)
-        if (controller->getAxisPosition(1) < deadzone)
-        {
+            this->resetPos();
+        if (controller->getAxisPosition(1) < -deadzone)
             --var2;
-        }
-
-        if (controller->getAxisPosition(1) > -deadzone)
-        {
+        if (controller->getAxisPosition(1) > deadzone)
             ++var2;
-        }
-
-        if (controller->getAxisPosition(0) < deadzone)
-        {
+        if (controller->getAxisPosition(0) < -deadzone)
             --var1;
-        }
-
-        if (controller->getAxisPosition(0) > -deadzone)
-        {
+        if (controller->getAxisPosition(0) > deadzone)
             ++var1;
-        }
-
         if (controller->isButtonPressed(0) && onGround)
-        {
             yd = 0.12f;
-        }
     }
     else
     {
-        // Reset position if R key is pressed
+        // Keyboard input
         if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
-        {
-            resetPos();
-        }
+            this->resetPos();
 
-        // Movement handling (WASD or arrow keys)
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS)
-        {
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS)
             --var2;
-        }
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS)
-        {
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS)
             ++var2;
-        }
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS)
-        {
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS)
             --var1;
-        }
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS)
-        {
+        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS ||
+            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS)
             ++var1;
-        }
 
         if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && onGround)
-        {
-            yd = 0.12f;
-        }
+            this->yd = 0.12f;
     }
 
-    moveRelative(var1, var2, onGround ? 0.02f : 0.005F);
-    yd = yd - 0.005f;
-    move(xd, yd, zd);
-    xd *= 0.91f;
-    yd *= 0.98f;
-    zd *= 0.91f;
-    if (onGround)
+    // Movement and physics updates
+    this->moveRelative(var1, var2, this->onGround ? 0.02f : 0.005f);
+    this->yd -= 0.005f;
+    this->move(this->xd, this->yd, this->zd);
+    this->xd *= 0.91f;
+    this->yd *= 0.98f;
+    this->zd *= 0.91f;
+
+    if (this->onGround)
     {
-        xd *= 0.8f;
-        zd *= 0.8f;
-    }
-}
-
-void Player::move(float xPos, float yPos, float zPos)
-{
-    float var4 = xPos;
-    float var5 = yPos;
-    float var6 = zPos;
-    std::vector<AABB> collidingCubes = level->getCubes(bb.expand(xPos, yPos, zPos));
-
-    // Handle Y collisions
-    for (auto &cube : collidingCubes)
-    {
-        yPos = cube.clipYCollide(bb, yPos);
-    }
-    bb.move(0.0f, yPos, 0.0f);
-
-    // Handle X collisions
-    for (auto &cube : collidingCubes)
-    {
-        xPos = cube.clipXCollide(bb, xPos);
-    }
-    bb.move(xPos, 0.0f, 0.0f);
-
-    // Handle Z collisions
-    for (auto &cube : collidingCubes)
-    {
-        zPos = cube.clipZCollide(bb, zPos);
-    }
-    bb.move(0.0f, 0.0f, zPos);
-
-    onGround = var5 != yPos && var5 < 0.0f;
-
-    if (var4 != xPos)
-        xd = 0.0f;
-    if (var5 != yPos)
-        yd = 0.0f;
-    if (var6 != zPos)
-        zd = 0.0f;
-
-    // Update player position based on AABB
-    x = (bb.x0 + bb.x1) / 2.0f;
-    y = bb.y0 + 1.62f;
-    z = (bb.z0 + bb.z1) / 2.0f;
-}
-
-void Player::moveRelative(float var1, float var2, float var3)
-{
-
-    float var4 = var1 * var1 + var2 * var2;
-    if (var4 >= 0.01f)
-    {
-        var4 = var3 / std::sqrt(var4);
-        var1 *= var4;
-        var2 *= var4;
-        float var5 = std::sin(yRot * 3.14159265359 / 180.0f);
-        float var6 = std::cos(yRot * 3.14159265359 / 180.0f);
-        xd += var1 * var6 - var2 * var5;
-        zd += var2 * var6 + var1 * var5;
+        this->xd *= 0.8f;
+        this->zd *= 0.8f;
     }
 }
