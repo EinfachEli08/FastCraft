@@ -1,6 +1,4 @@
-#ifndef TESSELATOR_HPP
-#define TESSELATOR_HPP
-
+#pragma once
 #include <vector>
 
 class Tesselator
@@ -31,5 +29,3 @@ private:
     bool hasColor;
     bool hasTexture;
 };
-
-#endif // TESSELATOR_HPP

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <array>
 
+
 class Frustum
 {
 public:
@@ -24,6 +25,7 @@ public:
     bool sphereInFrustum(float x, float y, float z, float radius) const;
     bool cubeFullyInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const;
     bool cubeInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const;
+    bool isVisible(float x0, float y0, float z0, float x1, float y1, float z1) const;
 
 private:
     Frustum() = default;

@@ -223,3 +223,8 @@ void Level::setTile(int x, int y, int z, int tileId)
         }
     }
 }
+
+bool Level::isLit(int x, int y, int z)
+{
+    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? y >= this->lightDepths[x + z * this->width] : true;
+}

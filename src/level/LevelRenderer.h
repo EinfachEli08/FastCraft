@@ -2,11 +2,11 @@
 #define LEVELRENDERER_HPP
 
 #include <vector>
-#include "Chunk.h"
-#include "Tesselator.h"
+#include "level/Chunk.h"
+#include "level/Tesselator.h"
+#include "level/Frustum.h"
 #include "Player.h"
 #include "HitResult.h"
-#include "Frustum.h"
 #include <GLFW/glfw3.h> // For OpenGL handling
 
 class Level;

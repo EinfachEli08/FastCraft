@@ -1,8 +1,8 @@
 #ifndef TILE_HPP
 #define TILE_HPP
 
-#include "Tesselator.h"
-#include "Level.h"
+#include "level/Tesselator.h"
+#include "level/Level.h"
 
 class Tile
 {

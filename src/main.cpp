@@ -20,7 +20,7 @@ double mouseX = 0.0;
 double mouseY = 0.0;
 
 long long millis = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
-Timer timer(60.0F);
+Timer timer(20.0F);
 int fps = 0;
 
 Level *level;
@@ -32,8 +32,10 @@ int stickSpeed = 9;
 std::vector<Zombie> zombies;
 HitResult *hitResult;
 
-int var1 = 920330;
-float fogColor[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
+int var1 = 16710650;
+float fogColor1[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
+int var2 = 920330;
+float fogColor0[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
 
 bool isFullscreen = false;
 
@@ -189,6 +191,17 @@ void pick(float deltaTime)
         hitResult = nullptr;
     }
 }
+/*
+void setupOrthoCamera()
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0D, screenWidth, screenHeight, 0.0D, 100.0D, 300.0D);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(0.0F, 0.0F, -200.0F);
+}
+*/
 
 void setupCamera(float timer)
 {
@@ -308,12 +321,12 @@ void render(float deltaTime, GLFWwindow *window)
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_EXP);
     glFogf(GL_FOG_DENSITY, 0.2f);
-    glFogfv(GL_FOG_COLOR, fogColor);
+    glFogfv(GL_FOG_COLOR, fogColor0);
 
     glDisable(GL_FOG);
     levelRenderer->render(player, 0);
 
-    for (size_t var1 = 0; var1 < zombies.size(); ++var1)
+    for (int var1 = 0; var1 < zombies.size(); ++var1)
     {
         zombies[var1].render(deltaTime); // Call tick() on each Zombie
     }
@@ -327,7 +340,7 @@ void render(float deltaTime, GLFWwindow *window)
         levelRenderer->renderHit(*hitResult);
     }
 
-    new Cube(0,0);
+    new Cube(0, 0);
     glDisable(GL_FOG);
     glfwSwapBuffers(window);
 }
@@ -402,9 +415,10 @@ int init(GLFWwindow **window)
     mouse = new Mouse();
     controller = new Controller(GLFW_JOYSTICK_1);
 
-    for (int var5 = 0; var5 < 100; ++var5)
+    for (int i = 0; i < 10; ++i)
     {
         zombies.emplace_back(level, 128.0F, 0.0F, 128.0F);
+        zombies[i].resetPos();
     }
 
     return 0;
@@ -416,7 +430,7 @@ void tick()
     {
         zombies[var1].tick(); // Call tick() on each Zombie
     }
-                                                 
+
     player->tick(controller, 0.125);
 }
 

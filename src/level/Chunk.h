@@ -1,10 +1,9 @@
-#ifndef CHUNK_HPP
-#define CHUNK_HPP
+#pragma once
 
-#include "Level.h"
-#include "Tesselator.h"
+#include "level/Level.h"
+#include "level/Tesselator.h"
 #include "Textures.h"
-#include "Tile.h"
+#include "level/Tile.h"
 
 class Chunk
 {
@@ -30,5 +29,3 @@ public:
 private:
     void generateChunkList();
 };
-
-#endif // CHUNK_HPP

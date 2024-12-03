@@ -32,7 +32,7 @@ void Player::tick(Controller *controller, float deadzone)
         if (controller->getAxisPosition(0) > deadzone)
             ++var1;
         if (controller->isButtonPressed(0) && onGround)
-            yd = 0.12f;
+            yd = 0.5f;
     }
     else
     {
@@ -57,12 +57,12 @@ void Player::tick(Controller *controller, float deadzone)
             ++var1;
 
         if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && onGround)
-            this->yd = 0.12f;
+            this->yd = 0.5f;
     }
 
     // Movement and physics updates
-    this->moveRelative(var1, var2, this->onGround ? 0.02f : 0.005f);
-    this->yd -= 0.005f;
+    this->moveRelative(var1, var2, this->onGround ? 0.1f : 0.02f);
+    this->yd = this->yd - 0.08D;
     this->move(this->xd, this->yd, this->zd);
     this->xd *= 0.91f;
     this->yd *= 0.98f;
@@ -70,7 +70,7 @@ void Player::tick(Controller *controller, float deadzone)
 
     if (this->onGround)
     {
-        this->xd *= 0.8f;
-        this->zd *= 0.8f;
+        this->xd *= 0.7f;
+        this->zd *= 0.7f;
     }
 }

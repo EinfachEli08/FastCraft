@@ -1,7 +1,7 @@
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 
-#include "../phys/AABB.h"
+#include "phys/AABB.h"
 #include "LevelListener.h"
 
 #include <vector>
@@ -27,6 +27,7 @@ public:
     std::vector<AABB> getCubes(const AABB &aabb) const;
     float getBrightness(int x, int y, int z) const;
     void setTile(int x, int y, int z, int tileId);
+    bool isLit(int x, int y, int z);
 
 private:
     std::vector<unsigned int> blocks;

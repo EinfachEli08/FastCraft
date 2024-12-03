@@ -1,5 +1,4 @@
-#ifndef LEVELLISTENER_HPP
-#define LEVELLISTENER_HPP
+#pragma once
 
 class LevelListener
 {
@@ -15,4 +14,3 @@ public:
     virtual void allChanged() = 0;
 };
 
-#endif // LEVELLISTENER_HPP

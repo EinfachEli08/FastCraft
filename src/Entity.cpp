@@ -2,14 +2,16 @@
 #include <cmath>
 #include <algorithm>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+
 
 // Constructor
 Entity::Entity(Level *level) : level(level), onGround(false), heightOffset(0.0f)
 {
     this->resetPos();
+}
+
+void Entity::remove(){
+    this->removed = true;
 }
 
 // Reset position of the entity
@@ -27,10 +29,16 @@ void Entity::setPos(float x, float y, float z)
     this->x = x;
     this->y = y;
     this->z = z;
-    float var4 = 0.3f;
-    float var5 = 0.9f;
+    float var4 = this->bbWidth/ 2.0F;
+    float var5 = this->bbHeight / 2.0F;
     this->bb = AABB(x - var4, y - var5, z - var4, x + var4, y + var5, z + var4);
 }
+
+void Entity::setSize(float bbWidth, float bbHeight){
+this->bbWidth = bbWidth;
+this->bbHeight = bbHeight;
+}
+
 
 // Rotate the entity
 void Entity::turn(float yRot, float xRot)
@@ -103,10 +111,18 @@ void Entity::moveRelative(float x, float z, float speed)
         x *= len;
         z *= len;
 
-        float sinYaw = std::sin(yRot * M_PI / 180.0f);
-        float cosYaw = std::cos(yRot * M_PI / 180.0f);
+        float sinYaw = std::sin(yRot * Math::PI / 180.0f);
+        float cosYaw = std::cos(yRot * Math::PI / 180.0f);
 
         this->xd += x * cosYaw - z * sinYaw;
         this->zd += z * cosYaw + x * sinYaw;
     }
+}
+
+bool Entity::isLit()
+{
+    int x = this->x;
+    int y = this->y;
+    int z = this->z;
+    return this->level->isLit(x, y, z);
 }

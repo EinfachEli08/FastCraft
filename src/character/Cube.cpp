@@ -47,8 +47,12 @@ void Cube::setPos(float x, float y, float z)
 }
 
 // Render the cube
-void Cube::render() const
-{
+void Cube::render(){
+    if (!this->compiled)
+    {
+        compile();
+    }
+
     const float DEG_TO_RAD = 57.29578f;
 
     glPushMatrix();
@@ -56,13 +60,21 @@ void Cube::render() const
     glRotatef(this->zRot * DEG_TO_RAD, 0.0f, 0.0f, 1.0f);
     glRotatef(this->yRot * DEG_TO_RAD, 0.0f, 1.0f, 0.0f);
     glRotatef(this->xRot * DEG_TO_RAD, 1.0f, 0.0f, 0.0f);
-
-    glBegin(GL_QUADS);
-    for (const auto &polygon : polygons)
-    {
-        polygon.render();
-    }
-    glEnd();
-
+    glCallList(this->list);
     glPopMatrix();
+}
+void Cube::compile()
+{
+    this->list = glGenLists(1);
+    glNewList(this->list, GL_COMPILE);
+    glBegin(GL_QUADS);
+
+    for(int i = 0; i < this->polygons.size(); i++)
+    {
+        this->polygons[i].render();
+    }
+
+    glEnd();
+    glEndList();
+    this->compiled = true;
 }

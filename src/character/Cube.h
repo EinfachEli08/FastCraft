@@ -10,10 +10,13 @@ private:
     std::vector<Polygon> polygons;
     int xTexOffs;
     int yTexOffs;
+    int list = 0;
+    bool compiled = false;
+    void compile();
 
 public:
-    float x, y, z;         
-    float xRot, yRot, zRot; 
+    float x, y, z;
+    float xRot, yRot, zRot;
 
     Cube(int xTexOffs, int yTexOffs);
 
@@ -23,5 +26,5 @@ public:
 
     void setPos(float x, float y, float z);
 
-    void render() const;
+    void render();
 };
