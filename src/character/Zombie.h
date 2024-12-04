@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Entity.h"
-#include "Cube.h"
+#include "character/Cube.h"
 #include "utils/Math.h"
+#include "character/ZombieModel.h"
 #include <cmath>
 #include <cstdlib>
 
 class Zombie : public Entity
 {
+private:
+    static ZombieModel zombieModel;
+
 public:
     Cube head;
     Cube body;
