@@ -1,37 +1,42 @@
 #include "Tesselator.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <GLFW/glfw3.h>
 
-Tesselator::Tesselator() : vertices(0), u(0.0f), v(0.0f), r(1.0f), g(1.0f), b(1.0f), hasColor(false), hasTexture(false)
-{
-    vertexBuffer.reserve(MAX_VERTICES * 3);
-    texCoordBuffer.reserve(MAX_VERTICES * 2);
-    colorBuffer.reserve(MAX_VERTICES * 3);
-}
+Tesselator::Tesselator()
+    : buffer(MAX_FLOATS, 0.0f), vertices(0), u(0.0f), v(0.0f),
+      r(1.0f), g(1.0f), b(1.0f), hasColor(false), hasTexture(false),
+      len(3), p(0) {}
 
 Tesselator::~Tesselator()
 {
-    clear();
+    this->clear();
 }
 
 void Tesselator::init()
 {
-    clear();
-    hasColor = false;
-    hasTexture = false;
+    this->clear();
+    this->hasColor = false;
+    this->hasTexture = false;
 }
 
 void Tesselator::tex(float u, float v)
 {
-    hasTexture = true;
+    if (!this->hasTexture)
+    {
+        this->len += 2;
+    }
+    this->hasTexture = true;
     this->u = u;
     this->v = v;
 }
 
 void Tesselator::color(float r, float g, float b)
 {
-    hasColor = true;
+    if (!this->hasColor)
+    {
+        this->len += 3;
+    }
+    this->hasColor = true;
     this->r = r;
     this->g = g;
     this->b = b;
@@ -39,73 +44,82 @@ void Tesselator::color(float r, float g, float b)
 
 void Tesselator::vertex(float x, float y, float z)
 {
-    vertexBuffer.push_back(x);
-    vertexBuffer.push_back(y);
-    vertexBuffer.push_back(z);
-
-    if (hasTexture)
+    if (this->hasTexture)
     {
-        texCoordBuffer.push_back(u);
-        texCoordBuffer.push_back(v);
+        this->buffer[this->p++] = this->u;
+        this->buffer[this->p++] = this->v;
     }
 
-    if (hasColor)
+    if (this->hasColor)
     {
-        colorBuffer.push_back(r);
-        colorBuffer.push_back(g);
-        colorBuffer.push_back(b);
+        this->buffer[this->p++] = this->r;
+        this->buffer[this->p++] = this->g;
+        this->buffer[this->p++] = this->b;
     }
 
-    ++vertices;
+    this->buffer[this->p++] = x;
+    this->buffer[this->p++] = y;
+    this->buffer[this->p++] = z;
 
-    if (vertices >= MAX_VERTICES)
+    ++this->vertices;
+
+    if (this->p >= MAX_FLOATS - this->len)
     {
-        flush();
+        this->flush();
     }
+}
+
+void Tesselator::vertexUV(float x, float y, float z, float u, float v)
+{
+    this->tex(u, v);
+    this->vertex(x, y, z);
 }
 
 void Tesselator::flush()
 {
-    if (vertices == 0)
+    if (this->vertices == 0)
         return;
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-
-    if (hasTexture)
+    if (this->hasTexture && this->hasColor)
     {
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(2, GL_FLOAT, 0, texCoordBuffer.data());
+        glInterleavedArrays(GL_T2F_C3F_V3F, 0, this->buffer.data());
+    }
+    else if (this->hasTexture)
+    {
+        glInterleavedArrays(GL_T2F_V3F, 0, this->buffer.data());
+    }
+    else if (this->hasColor)
+    {
+        glInterleavedArrays(GL_C3F_V3F, 0, this->buffer.data());
+    }
+    else
+    {
+        glInterleavedArrays(GL_V3F, 0, this->buffer.data());
     }
 
-    if (hasColor)
-    {
-        glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer(3, GL_FLOAT, 0, colorBuffer.data());
-    }
-
-    glDrawArrays(GL_QUADS, 0, vertices);
+    glDrawArrays(GL_QUADS, 0, this->vertices);
 
     glDisableClientState(GL_VERTEX_ARRAY);
 
-    if (hasTexture)
+    if (this->hasTexture)
     {
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
-    if (hasColor)
+    if (this->hasColor)
     {
         glDisableClientState(GL_COLOR_ARRAY);
     }
 
-    clear();
+    this->clear();
 }
 
 void Tesselator::clear()
 {
-    vertices = 0;
-    vertexBuffer.clear();
-    texCoordBuffer.clear();
-    colorBuffer.clear();
+    this->vertices = 0;
+    this->p = 0;
+    this->buffer.clear();
+    this->buffer.resize(MAX_FLOATS, 0.0f); // Reset the buffer
 }
