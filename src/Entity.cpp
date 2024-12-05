@@ -7,6 +7,11 @@
 // Constructor
 Entity::Entity(Level *level) : level(level), onGround(false), heightOffset(0.0f)
 {
+    this->xo = this->yo = this->zo = 0.0f;
+    this->x = this->y = this->z = 0.0f;
+    this->xd = this->yd = this->zd = 0.0f;
+    this->yRot = 0.0f;
+    this->xRot = 0.0f;
     this->resetPos();
 }
 
@@ -41,15 +46,22 @@ this->bbHeight = bbHeight;
 
 
 // Rotate the entity
-void Entity::turn(float yRot, float xRot)
+void Entity::turn(float yRotDelta, float xRotDelta)
 {
-    this->yRot += yRot * 0.15f;
-    this->xRot -= xRot * 0.15f;
+    this->yRot += yRotDelta * 0.15f;
+    this->xRot -= xRotDelta * 0.15f;
 
+    // Begrenze xRot auf vertikale Grenzen
     if (this->xRot < -90.0f)
         this->xRot = -90.0f;
     if (this->xRot > 90.0f)
         this->xRot = 90.0f;
+
+    // Zyklische Begrenzung für yRot (0 bis 360 Grad)
+    while (this->yRot < 0.0f)
+        this->yRot += 360.0f;
+    while (this->yRot >= 360.0f)
+        this->yRot -= 360.0f;
 }
 
 // Update tick state
@@ -111,8 +123,11 @@ void Entity::moveRelative(float x, float z, float speed)
         x *= len;
         z *= len;
 
-        float sinYaw = std::sin(yRot * Math::PI / 180.0f);
-        float cosYaw = std::cos(yRot * Math::PI / 180.0f);
+        // Zyklische yRot verwenden (zwischen 0 und 360 Grad)
+        float yRotRad = (this->yRot * Math::PI / 180.0f);
+
+        float sinYaw = std::sin(yRotRad);
+        float cosYaw = std::cos(yRotRad);
 
         this->xd += x * cosYaw - z * sinYaw;
         this->zd += z * cosYaw + x * sinYaw;
