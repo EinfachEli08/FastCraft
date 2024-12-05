@@ -191,7 +191,7 @@ void pick(float deltaTime)
         hitResult = nullptr;
     }
 }
-/*
+
 void setupOrthoCamera()
 {
     glMatrixMode(GL_PROJECTION);
@@ -201,7 +201,50 @@ void setupOrthoCamera()
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
 }
-*/
+
+void drawGui()
+{
+    glClear(GL_DEPTH_BUFFER_BIT);
+    setupOrthoCamera();
+    glPushMatrix();
+    glTranslatef((screenWidth - 48), 48.0F, 0.0F);
+    Tesselator tess;
+    glScalef(48.0F, 48.0F, 48.0F);
+    glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
+    glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+    glTranslatef(1.5F, -0.5F, -0.5F);
+
+    GLuint texture;
+    try
+    {
+        texture = Textures::loadTexture("assets/terrain.png", 9728);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glEnable(GL_TEXTURE_2D);
+    tess.init();
+    Tile::grass.render(tess, level, 0, -2, 0, 0);
+    tess.flush();
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+    int wCenter = screenWidth / 2;
+    int hCenter = screenHeight / 2;
+
+    tess.init();
+    tess.vertex((wCenter + 1), (hCenter - 8), 0.0F);
+    tess.vertex((wCenter - 0), (hCenter - 8), 0.0F);
+    tess.vertex((wCenter - 0), (hCenter + 9), 0.0F);
+    tess.vertex((wCenter + 1), (hCenter + 9), 0.0F);
+    tess.vertex((wCenter + 9), (hCenter - 0), 0.0F);
+    tess.vertex((wCenter + 8), (hCenter - 0), 0.0F);
+    tess.vertex((wCenter + 8), (hCenter + 1), 0.0F);
+    tess.vertex((wCenter + 9), (hCenter + 1), 0.0F);
+    tess.flush();
+}
 
 void setupCamera(float timer)
 {
@@ -220,7 +263,7 @@ void render(float deltaTime, GLFWwindow *window)
         player->turn(mouse->getDX(), mouse->getDY());
         pick(deltaTime);
 
-        if (mouse->isButtonClicked(1) && hitResult != nullptr)
+        if (mous e->isButtonClicked(1) && hitResult != nullptr)
         {
             level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
@@ -334,14 +377,13 @@ void render(float deltaTime, GLFWwindow *window)
     glEnable(GL_FOG);
     levelRenderer->render(player, 1);
     glDisable(GL_TEXTURE_2D);
-
+   
     if (hitResult != nullptr)
     {
         levelRenderer->renderHit(*hitResult);
     }
-
-    new Cube(0, 0);
     glDisable(GL_FOG);
+    drawGui();
     glfwSwapBuffers(window);
 }
 
