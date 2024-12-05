@@ -9,6 +9,7 @@
 #include "level/LevelRenderer.h"
 #include "Player.h"
 #include "utils/Mouse.h"
+#include "utils/Keyboard.h"
 #include "utils/Controller.h"
 #include "character/Cube.h"
 #include "character/Zombie.h"
@@ -27,6 +28,7 @@ Level *level;
 Player *player;
 LevelRenderer *levelRenderer;
 Mouse *mouse;
+Keyboard *keyboard;
 Controller *controller;
 int stickSpeed = 9;
 std::vector<Zombie> zombies;
@@ -263,7 +265,7 @@ void render(float deltaTime, GLFWwindow *window)
         player->turn(mouse->getDX(), mouse->getDY());
         pick(deltaTime);
 
-        if (mous e->isButtonClicked(1) && hitResult != nullptr)
+        if (mouse->isButtonClicked(1) && hitResult != nullptr)
         {
             level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
         }
@@ -351,11 +353,6 @@ void render(float deltaTime, GLFWwindow *window)
 
             level->setTile(x, y, z, 1);
         }
-    }
-
-    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ENTER) == GLFW_PRESS)
-    {
-        level->save();
     }
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -455,6 +452,7 @@ int init(GLFWwindow **window)
     player = new Player(level);
     levelRenderer = new LevelRenderer(level);
     mouse = new Mouse();
+    keyboard = new Keyboard();
     controller = new Controller(GLFW_JOYSTICK_1);
 
     for (int i = 0; i < 10; ++i)
@@ -468,6 +466,16 @@ int init(GLFWwindow **window)
 
 void tick()
 {
+
+    if (keyboard->isKeyPressed(GLFW_KEY_ENTER))
+    {
+        level->save();
+    }
+    if (keyboard->isKeyPressed(GLFW_KEY_G))
+    {
+        zombies.emplace_back(level, player->x, player->y, player->z);
+    }
+
     for (size_t var1 = 0; var1 < zombies.size(); ++var1)
     {
         zombies[var1].tick(); // Call tick() on each Zombie
@@ -492,10 +500,13 @@ int main()
         return -1;
     }
 
-    while ((!glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_ESCAPE) == GLFW_PRESS) && !glfwWindowShouldClose(window))
+    while (!keyboard->isKeyPressed(GLFW_KEY_ESCAPE) && !glfwWindowShouldClose(window))
     {
+        mouse->update(xpos, -ypos);
+        keyboard->update();
+        controller->update();
 
-        if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS || controller->isButtonPressed(6))
+        if (keyboard->isKeyPressed(GLFW_KEY_F11) || controller->isButtonPressed(6))
         {
             toggleFullscreen(window);
         }
@@ -519,8 +530,7 @@ int main()
         }
 
         glfwGetCursorPos(window, &xpos, &ypos);
-        mouse->update(xpos, -ypos);
-        controller->update();
+       
         glfwPollEvents();
     }
 
