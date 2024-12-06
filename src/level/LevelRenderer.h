@@ -4,9 +4,9 @@
 #include <vector>
 #include "level/Chunk.h"
 #include "level/Tesselator.h"
-#include "level/Frustum.h"
 #include "Player.h"
 #include "HitResult.h"
+#include "level/DirtyChunkSorter.h"
 #include <GLFW/glfw3.h> // For OpenGL handling
 
 class Level;
@@ -15,18 +15,20 @@ class LevelRenderer : public LevelListener
 {
 public:
     static constexpr int CHUNK_SIZE = 16;
+    static constexpr int MAX_REBUILDS_PER_FRAME = 8;
 
 private:
     Level *level;
     std::vector<Chunk *> chunks;
     int xChunks, yChunks, zChunks;
-    Tesselator t;
+    std::vector<Chunk *> getAllDirtyChunks();
 
 public:
     LevelRenderer(Level *level);
     ~LevelRenderer();
 
-    
+    void updateDirtyChunks(Player *player);
+
     void render(Player *player, int contextID);
 
     void renderHit(HitResult hit);

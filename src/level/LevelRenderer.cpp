@@ -1,8 +1,8 @@
 #include "LevelRenderer.h"
 
-#include <GLFW/glfw3.h> // For OpenGL handling
 #include <cmath>
 #include <chrono>
+#include <algorithm>
 
 LevelRenderer::LevelRenderer(Level *level) : level(level)
 {
@@ -58,6 +58,22 @@ LevelRenderer::~LevelRenderer()
     }
 }
 
+std::vector<Chunk *> LevelRenderer::getAllDirtyChunks()
+{
+    std::vector<Chunk *> dirtyChunks;
+
+    // Collect all chunks marked as dirty
+    for (Chunk *chunk : chunks)
+    {
+        if (chunk->isDirty())
+        {
+            dirtyChunks.push_back(chunk);
+        }
+    }
+
+    return dirtyChunks;
+}
+
 void LevelRenderer::render(Player *player, int contextID)
 {
     Chunk::rebuiltThisFrame = 0;             // Reset the rebuilt chunks count
@@ -72,8 +88,26 @@ void LevelRenderer::render(Player *player, int contextID)
     }
 }
 
+void LevelRenderer::updateDirtyChunks(Player *player)
+{
+    std::vector<Chunk *> dirtyChunks = this->getAllDirtyChunks();
+    if (!dirtyChunks.empty())
+    {
+        // Sort the dirtyChunks using DirtyChunkSorter
+        DirtyChunkSorter sorter(player, &Frustum::getInstance());
+        std::sort(dirtyChunks.begin(), dirtyChunks.end(), sorter);
+
+        // Rebuild up to 8 chunks
+        for (size_t i = 0; i < std::min<size_t>(8, dirtyChunks.size()); ++i)
+        {
+            dirtyChunks[i]->rebuild();
+        }
+    }
+}
+
 void LevelRenderer::pick(Player *player)
 {
+    Tesselator& tess = Tesselator::getInstance();
     float selectionRadius = 3.0f;
     AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
 
@@ -95,19 +129,23 @@ void LevelRenderer::pick(Player *player)
             for (int z = z0; z < z1; ++z)
             {
                 glPushName(z);
-                if (level->isSolidTile(x, y, z))
+                if (this->level->isSolidTile(x, y, z))
                 {
                     glPushName(0);
+                    Tile* tile = Tile::tiles[this->level->getTile(x, y, z)];
 
-                    for (int face = 0; face < 6; face++)
-                    {
-                        glPushName(face);
-                        t.init();
-                        Tile::rock.renderFace(t, x, y, z, face);
-                        t.flush();
+                    if(tile != nullptr){
+                        glPushName(0);
+                        for (int face = 0; face < 6; face++)
+                        {
+                            glPushName(face);
+                            tess.init();
+                            tile->renderFace(tess, x, y, z, face);
+                            tess.flush();
+                            glPopName();
+                        }
                         glPopName();
                     }
-
                     glPopName();
                 }
                 glPopName();
@@ -120,12 +158,13 @@ void LevelRenderer::pick(Player *player)
 
 void LevelRenderer::renderHit(HitResult hit)
 {
+    Tesselator& tess = Tesselator::getInstance();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
-    t.init();
-    Tile::rock.renderFace(t, hit.x, hit.y, hit.z, hit.f);
-    t.flush();
+    tess.init();
+    Tile::rock->renderFace(tess, hit.x, hit.y, hit.z, hit.f);
+    tess.flush();
     glDisable(GL_BLEND);
 }
 

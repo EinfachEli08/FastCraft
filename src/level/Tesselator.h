@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 
-
 class Tesselator
 {
 public:
@@ -15,16 +14,20 @@ public:
     void vertexUV(float x, float y, float z, float u, float v);
     void flush();
 
+    static Tesselator &getInstance();
+
 private:
     void clear();
 
-    static const int MAX_MEMORY_USE = 4194304; // Matches Java's 4MB buffer
-    static const int MAX_FLOATS = 524288;      // Number of floats (4MB / 4 bytes per float)
+    static Tesselator instance;
+
+    static const int MAX_MEMORY_USE = 4194304; 
+    static const int MAX_FLOATS = 524288;     
 
     std::vector<float> buffer;
     int vertices;
-    float u, v;    // Texture coordinates
-    float r, g, b; // Color
+    float u, v;    
+    float r, g, b;
     bool hasColor;
     bool hasTexture;
     int len;

@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+Tesselator Tesselator::instance;
+
 Tesselator::Tesselator()
     : buffer(MAX_FLOATS, 0.0f), vertices(0), u(0.0f), v(0.0f),
       r(1.0f), g(1.0f), b(1.0f), hasColor(false), hasTexture(false),
@@ -10,6 +12,11 @@ Tesselator::Tesselator()
 Tesselator::~Tesselator()
 {
     this->clear();
+}
+
+Tesselator &Tesselator::getInstance()
+{
+    return instance;
 }
 
 void Tesselator::init()

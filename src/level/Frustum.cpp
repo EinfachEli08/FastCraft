@@ -7,6 +7,7 @@ Frustum &Frustum::getInstance()
     return instance;
 }
 
+
 void Frustum::normalizePlane(std::array<std::array<float, 4>, 6> &frustum, int side)
 {
     float magnitude = std::sqrt(frustum[side][0] * frustum[side][0] +

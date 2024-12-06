@@ -1,6 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Textures.h"
 
+#include <glad/glad.h>
+
 std::unordered_map<std::string, GLuint> Textures::idMap;
 GLuint Textures::lastId = 0;
 

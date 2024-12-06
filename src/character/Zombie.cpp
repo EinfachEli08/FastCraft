@@ -1,7 +1,9 @@
+
 #include "Zombie.h"
-#include <glad/glad.h> // Or glad if you're using it
+
 #include <Textures.h>
 #include <chrono>
+#include <glad/glad.h>
 
 ZombieModel Zombie::zombieModel;
 

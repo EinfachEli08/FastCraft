@@ -1,5 +1,4 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "utils/OpenGLHeaders.h"
 #include <vector>
 #include <iostream>
 #include <chrono>
@@ -8,6 +7,7 @@
 #include "Timer.h"
 #include "level/LevelRenderer.h"
 #include "Player.h"
+#include "particle/ParticleEngine.h"
 #include "utils/Mouse.h"
 #include "utils/Keyboard.h"
 #include "utils/Controller.h"
@@ -26,6 +26,8 @@ int fps = 0;
 
 Level *level;
 Player *player;
+int paintTexture = 1;
+ParticleEngine *particleEngine;
 LevelRenderer *levelRenderer;
 Mouse *mouse;
 Keyboard *keyboard;
@@ -229,7 +231,6 @@ void drawGui()
     glBindTexture(GL_TEXTURE_2D, texture);
     glEnable(GL_TEXTURE_2D);
     tess.init();
-    Tile::grass.render(tess, level, 0, -2, 0, 0);
     tess.flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
@@ -454,6 +455,7 @@ int init(GLFWwindow **window)
     mouse = new Mouse();
     keyboard = new Keyboard();
     controller = new Controller(GLFW_JOYSTICK_1);
+    particleEngine = new ParticleEngine(level);
 
     for (int i = 0; i < 10; ++i)
     {
@@ -471,9 +473,22 @@ void tick()
     {
         level->save();
     }
-    if (keyboard->isKeyPressed(GLFW_KEY_G))
+
+    if (keyboard->isKeyPressed(GLFW_KEY_1))
     {
-        zombies.emplace_back(level, player->x, player->y, player->z);
+        paintTexture = 1;
+    }
+    if (keyboard->isKeyPressed(GLFW_KEY_2))
+    {
+        paintTexture = 3;
+    }
+    if (keyboard->isKeyPressed(GLFW_KEY_3))
+    {
+        paintTexture = 4;
+    }
+    if (keyboard->isKeyPressed(GLFW_KEY_4))
+    {
+        paintTexture = 5;
     }
 
     for (size_t var1 = 0; var1 < zombies.size(); ++var1)

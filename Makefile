@@ -1,7 +1,10 @@
 TARGET := FastCraft
 
-LIB := lib
-SRC := $(wildcard src/**/*.cpp src/**/*.c src/*.cpp src/*.c)
+LIB := lib# Define a recursive wildcard function
+rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)$(filter $(subst *,%,$2),$d))
+
+# Recursively find all .c and .cpp files in src
+SRC := $(call rwildcard,src/,*.c) $(call rwildcard,src/,*.cpp)
 
 # Convert the source files into object files, placing them directly in the build/ directory
 OBJ := $(patsubst src/%,build/%, $(SRC:.cpp=.o))

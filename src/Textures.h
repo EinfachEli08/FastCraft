@@ -3,8 +3,11 @@
 #include <unordered_map>
 #include <stb/stb_image.h>
 #include <iostream>
-#include <glad/glad.h>
+
 #include <stdexcept>
+
+typedef unsigned int GLuint;
+typedef signed int GLint;
 
 class Textures
 {

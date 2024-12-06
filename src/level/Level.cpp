@@ -5,6 +5,7 @@
 #include <zlib.h>
 #include <functional>
 #include <fstream>
+#include "Level/tile/Tile.h"
 
 Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths()
 {
@@ -147,22 +148,24 @@ void Level::removeListener(LevelListener *listener)
     levelListeners.erase(std::remove(levelListeners.begin(), levelListeners.end(), listener), levelListeners.end());
 }
 
-bool Level::isTile(int x, int y, int z) const
+bool Level::isTile(int x, int y, int z) 
 {
     return (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) && this->blocks[(y * this->height + z) * this->width + x] == 1;
 }
 
-bool Level::isSolidTile(int x, int y, int z) const
+bool Level::isSolidTile(int x, int y, int z) 
 {
     return isTile(x, y, z);
 }
 
-bool Level::isLightBlocker(int x, int y, int z) const
+bool Level::isLightBlocker(int x, int y, int z) 
 {
-    return isSolidTile(x, y, z);
+    Tile *tile = Tile::tiles[getTile(x, y, z)];
+
+    return tile == nullptr ? false : tile->blocksLight();
 }
 
-std::vector<AABB> Level::getCubes(const AABB &aabb) const
+std::vector<AABB> Level::getCubes(const AABB &aabb) 
 {
     std::vector<AABB> cubes;
     int minX = aabb.x0;
@@ -196,7 +199,7 @@ std::vector<AABB> Level::getCubes(const AABB &aabb) const
     return cubes;
 }
 
-float Level::getBrightness(int x, int y, int z) const
+float Level::getBrightness(int x, int y, int z) 
 {
     const float darkBrightness = 0.8f;
     const float brightBrightness = 1.0f;
@@ -227,4 +230,9 @@ void Level::setTile(int x, int y, int z, int tileId)
 bool Level::isLit(int x, int y, int z)
 {
     return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? y >= this->lightDepths[x + z * this->width] : true;
+}
+
+int Level::getTile(int x, int y, int z)
+{
+    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? this->blocks[(y * this->height + z) * this->width + x] : 0;
 }
