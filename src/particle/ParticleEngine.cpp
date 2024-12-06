@@ -24,7 +24,7 @@ void ParticleEngine::tick()
 void ParticleEngine::render(Player *player, float deltaTime, int renderMode)
 {
     glEnable(GL_TEXTURE_2D);
-    int textureID = Textures::loadTexture("/terrain.png", 9728);
+    int textureID = Textures::loadTexture("assets/terrain.png", 9728);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     float var5 = -(float)std::cos(player->yRot * Math::PI / 180.0f);

@@ -76,7 +76,18 @@ std::vector<Chunk *> LevelRenderer::getAllDirtyChunks()
 
 void LevelRenderer::render(Player *player, int contextID)
 {
-    Chunk::rebuiltThisFrame = 0;             // Reset the rebuilt chunks count
+    glEnable(GL_TEXTURE_2D);
+    GLuint texture;
+    try
+    {
+        texture = Textures::loadTexture("assets/terrain.png", 9728);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+    glBindTexture(GL_TEXTURE_2D,texture);
+
     Frustum frustum = Frustum::getInstance();
 
     for (int i = 0; i < chunks.size(); ++i)
@@ -86,6 +97,7 @@ void LevelRenderer::render(Player *player, int contextID)
             chunks[i]->render(contextID); // Render the chunk if inside the frustum
         }
     }
+    glDisable(GL_TEXTURE_2D);
 }
 
 void LevelRenderer::updateDirtyChunks(Player *player)
@@ -93,11 +105,10 @@ void LevelRenderer::updateDirtyChunks(Player *player)
     std::vector<Chunk *> dirtyChunks = this->getAllDirtyChunks();
     if (!dirtyChunks.empty())
     {
-        // Sort the dirtyChunks using DirtyChunkSorter
+      
         DirtyChunkSorter sorter(player, &Frustum::getInstance());
         std::sort(dirtyChunks.begin(), dirtyChunks.end(), sorter);
 
-        // Rebuild up to 8 chunks
         for (size_t i = 0; i < std::min<size_t>(8, dirtyChunks.size()); ++i)
         {
             dirtyChunks[i]->rebuild();
@@ -163,7 +174,7 @@ void LevelRenderer::renderHit(HitResult hit)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
     tess.init();
-    Tile::rock->renderFace(tess, hit.x, hit.y, hit.z, hit.f);
+    Tile::rock->renderFaceNoTexture(tess, hit.x, hit.y, hit.z, hit.f);
     tess.flush();
     glDisable(GL_BLEND);
 }

@@ -5,7 +5,6 @@
 #include "level/tile/GrassTile.h"
 #include "particle/Particle.h"
 
-
 // Static tile instances
 std::vector<Tile *> Tile::tiles(256, nullptr);
 Tile *Tile::empty = nullptr;
@@ -25,41 +24,46 @@ Tile::Tile(int id, int tex) : Tile(id)
     this->tex = tex;
 }
 
-void Tile::render(Tesselator &tesselator, Level *level, int x, int y, int z, int size)
+void Tile::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
 {
     float brightness = 1.0f;
     float sideBrightness = 0.8f;
     float topBrightness = 0.6f;
 
-    if (shouldRenderFace(level, x, y - 1, z, size))
+    if (this->shouldRenderFace(level, y, z - 1, size, x))
     {
-        tesselator.color(brightness, brightness, brightness);
-        renderFace(tesselator, x, y, z, 0);
+        tess.color(brightness, brightness, brightness);
+        this->renderFace(tess, y, z, size, 0);
     }
-    if (shouldRenderFace(level, x, y + 1, z, size))
+
+    if (this->shouldRenderFace(level, y, z + 1, size, x))
     {
-        tesselator.color(brightness, brightness, brightness);
-        renderFace(tesselator, x, y, z, 1);
+        tess.color(brightness, brightness, brightness);
+        this->renderFace(tess, y, z, size, 1);
     }
-    if (shouldRenderFace(level, x, y, z - 1, size))
+
+    if (this->shouldRenderFace(level, y, z, size - 1, x))
     {
-        tesselator.color(sideBrightness, sideBrightness, sideBrightness);
-        renderFace(tesselator, x, y, z, 2);
+        tess.color(sideBrightness, sideBrightness, sideBrightness);
+        this->renderFace(tess, y, z, size, 2);
     }
-    if (shouldRenderFace(level, x, y, z + 1, size))
+
+    if (this->shouldRenderFace(level, y, z, size + 1, x))
     {
-        tesselator.color(sideBrightness, sideBrightness, sideBrightness);
-        renderFace(tesselator, x, y, z, 3);
+        tess.color(sideBrightness, sideBrightness, sideBrightness);
+        this->renderFace(tess, y, z, size, 3);
     }
-    if (shouldRenderFace(level, x - 1, y, z, size))
+
+    if (this->shouldRenderFace(level, y - 1, z, size, x))
     {
-        tesselator.color(topBrightness, topBrightness, topBrightness);
-        renderFace(tesselator, x, y, z, 4);
+        tess.color(topBrightness, topBrightness, topBrightness);
+        this->renderFace(tess, y, z, size, 4);
     }
-    if (shouldRenderFace(level, x + 1, y, z, size))
+
+    if (this->shouldRenderFace(level, y + 1, z, size, x))
     {
-        tesselator.color(topBrightness, topBrightness, topBrightness);
-        renderFace(tesselator, x, y, z, 5);
+        tess.color(topBrightness, topBrightness, topBrightness);
+        this->renderFace(tess, y, z, size, 5);
     }
 }
 

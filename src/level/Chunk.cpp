@@ -49,18 +49,17 @@ Chunk::Chunk(Level *level, int x0, int y0, int z0, int x1, int y1, int z1) : lev
 
 void Chunk::rebuild(int index)
 {
-    if (rebuiltThisFrame != 2)
-    {
+    
         this->dirty = false;
         ++updates;
-        //++rebuiltThisFrame;
+       
 
         auto start = std::chrono::high_resolution_clock::now();
         auto var2 = std::chrono::duration_cast<std::chrono::nanoseconds>(start.time_since_epoch()).count();
 
         glNewList(this->lists + index, GL_COMPILE);
         t.init();
-        
+        int var4 = 0;
         for (int x = this->x0; x < this->x1; ++x)
         {
             for (int y = this->y0; y < this->y1; ++y)
@@ -70,28 +69,20 @@ void Chunk::rebuild(int index)
                     int tile = this->level->getTile(x,y,z);
                     if(tile > 0){
                         Tile::tiles[tile]->render(t, this->level, index,x,y,z);
+                        var4++;
                     }
-                    /*
-                    if (this->level->get(x, y, z))
-                    {
-                        bool isNotGrass = y != this->level->depth * 2 / 3;
-
-                        if (!isNotGrass)
-                        {
-                            Tile::rock.render(t,this->level, index, x, y, z);
-                        }
-                        else
-                        {
-                            Tile::grass.render(t, this->level, index, x, y, z);
-                        }
-                    }*/
                 }
             }
         }
 
         t.flush();
-        glDisable(GL_TEXTURE_2D);
         glEndList();
+        auto start1 = std::chrono::high_resolution_clock::now();
+        auto var9 = std::chrono::duration_cast<std::chrono::nanoseconds>(start1.time_since_epoch()).count();
+        if (var4 > 0)
+        {
+            this->totalTime += var9-var2;
+           ++this->totalUpdates; 
     }
 }
 

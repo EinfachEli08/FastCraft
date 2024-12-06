@@ -36,16 +36,48 @@ int stickSpeed = 9;
 std::vector<Zombie> zombies;
 HitResult *hitResult;
 
-int var1 = 16710650;
-float fogColor1[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
-int var2 = 920330;
-float fogColor0[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
-
 bool isFullscreen = false;
 
 int windowedWidth = 960, windowedHeight = 540;
 
 int windowedPosX = 0, windowedPosY = 0;
+
+int var1 = 16710650;
+float fogColor1[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
+int var2 = 920330;
+float fogColor0[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
+float lb[16];
+
+void getBuffer(float var1, float var2, float var3, float var4)
+{
+    lb[0] = var1;
+    lb[1] = var2;
+    lb[2] = var3;
+    lb[3] = var4;
+}
+
+void setupFog(int mode)
+{
+    if (mode == 0)
+    {
+        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_DENSITY, 0.001F);
+        glFogfv(GL_FOG_COLOR, fogColor0);
+        glDisable(GL_LIGHTING);
+    }
+    else if (mode == 1)
+    {
+        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_DENSITY, 0.06F);
+        glFogfv(GL_FOG_COLOR, fogColor1);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_COLOR_MATERIAL);
+
+        float ambientLight = 0.6F;
+        getBuffer(ambientLight, ambientLight, ambientLight, 1.0F);
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lb);
+    }
+}
 
 void toggleFullscreen(GLFWwindow *window)
 {
@@ -150,10 +182,7 @@ void pick(float deltaTime)
 
     setupPickCamera(deltaTime, screenWidth / 2, screenHeight / 2);
 
-    if (levelRenderer)
-    {
-        levelRenderer->pick(player);
-    }
+    levelRenderer->pick(player);
 
     GLint hits = glRenderMode(GL_RENDER);
     size_t bufferPos = 0;
@@ -231,6 +260,7 @@ void drawGui()
     glBindTexture(GL_TEXTURE_2D, texture);
     glEnable(GL_TEXTURE_2D);
     tess.init();
+    Tile::tiles[paintTexture]->render(tess, level, 0, -2, 0, 0);
     tess.flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
@@ -359,28 +389,39 @@ void render(float deltaTime, GLFWwindow *window)
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     setupCamera(deltaTime);
     glEnable(GL_CULL_FACE);
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_EXP);
-    glFogf(GL_FOG_DENSITY, 0.2f);
-    glFogfv(GL_FOG_COLOR, fogColor0);
+    Frustum frustum = Frustum::getInstance();
+    levelRenderer->updateDirtyChunks(player);
 
-    glDisable(GL_FOG);
+    setupFog(0);
+    glEnable(GL_FOG);
     levelRenderer->render(player, 0);
 
+ 
     for (int var1 = 0; var1 < zombies.size(); ++var1)
+    {
+        //if (zombie->isLit() && frustum.isVisible(zombie->bb.x0, zombie->bb.y0, zombie->bb.z0, zombie->bb.x1, zombie->bb.y1, zombie->bb.z1))
+            zombies[var1].render(deltaTime); // Call tick() on each Zombie
+    }
+
+    particleEngine->render(player, deltaTime, 0);
+    setupFog(1);
+    levelRenderer->render(player, 1);
+
+    /* for (int var1 = 0; var1 < zombies.size(); ++var1)
     {
         zombies[var1].render(deltaTime); // Call tick() on each Zombie
     }
+*/
 
-    glEnable(GL_FOG);
-    levelRenderer->render(player, 1);
+    particleEngine->render(player, deltaTime, 1);
+    glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
-   
+    glDisable(GL_FOG);
     if (hitResult != nullptr)
     {
         levelRenderer->renderHit(*hitResult);
     }
-    glDisable(GL_FOG);
+
     drawGui();
     glfwSwapBuffers(window);
 }
@@ -545,7 +586,7 @@ int main()
         }
 
         glfwGetCursorPos(window, &xpos, &ypos);
-       
+
         glfwPollEvents();
     }
 

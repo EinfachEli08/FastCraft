@@ -10,6 +10,10 @@
 
 class Chunk
 {
+private:
+    long totalTime;
+    int totalUpdates;
+
 public:
     AABB aabb;
     Level *level;
