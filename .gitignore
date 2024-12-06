@@ -1,3 +1,5 @@
 bin/assets/*
+bin/level.dat
 .vscode
 build
+
