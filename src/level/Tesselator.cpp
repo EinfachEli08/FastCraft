@@ -1,11 +1,12 @@
 #include "Tesselator.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cstring>
 
 Tesselator Tesselator::instance;
 
 Tesselator::Tesselator()
-    : buffer(MAX_FLOATS, 0.0f), vertices(0), u(0.0f), v(0.0f),
+    : buffer(MAX_FLOATS, 0.0f), array(MAX_FLOATS,0.0f), vertices(0), u(0.0f), v(0.0f),
       r(1.0f), g(1.0f), b(1.0f), hasColor(false), hasTexture(false),
       len(3), p(0) {}
 
@@ -22,20 +23,28 @@ Tesselator &Tesselator::getInstance()
 void Tesselator::flush()
 {
     this->buffer.clear();
-
-    if (this->vertices == 0)
-        return;
-
-    glEnableClientState(GL_VERTEX_ARRAY);
+    if (buffer.size() < p)
+    {
+        buffer.resize(p);
+    }
+    std::memcpy(buffer.data(), array.data(), p * sizeof(float));
+    buffer.clear();
 
     if (this->hasTexture && this->hasColor)
     {
         glInterleavedArrays(GL_T2F_C3F_V3F, 0, this->buffer.data());
     }
-
     else if (this->hasTexture)
     {
         glInterleavedArrays(GL_T2F_V3F, 0, this->buffer.data());
+    }
+    else if (this->hasColor)
+    {
+        glInterleavedArrays(GL_C3F_V3F, 0, this->buffer.data());
+    }
+    else
+    {
+        glInterleavedArrays(GL_V3F, 0, this->buffer.data());
     }
 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -111,20 +120,20 @@ void Tesselator::vertex(float x, float y, float z)
 {
     if (this->hasTexture)
     {
-        this->buffer[this->p++] = this->u;
-        this->buffer[this->p++] = this->v;
+        this->array[this->p++] = this->u;
+        this->array[this->p++] = this->v;
     }
 
     if (this->hasColor)
     {
-        this->buffer[this->p++] = this->r;
-        this->buffer[this->p++] = this->g;
-        this->buffer[this->p++] = this->b;
+        this->array[this->p++] = this->r;
+        this->array[this->p++] = this->g;
+        this->array[this->p++] = this->b;
     }
 
-    this->buffer[this->p++] = x;
-    this->buffer[this->p++] = y;
-    this->buffer[this->p++] = z;
+    this->array[this->p++] = x;
+    this->array[this->p++] = y;
+    this->array[this->p++] = z;
 
     ++this->vertices;
 

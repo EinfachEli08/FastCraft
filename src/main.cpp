@@ -298,13 +298,12 @@ void render(float deltaTime, GLFWwindow *window)
 
         if (mouse->isButtonClicked(1) && hitResult != nullptr)
         {
-            Tile* tile = Tile::tiles[level->getTile(hitResult->x, hitResult->y, hitResult->z)];
+            Tile *tile = Tile::tiles[level->getTile(hitResult->x, hitResult->y, hitResult->z)];
             bool var4 = level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
             if (tile != nullptr && var4)
             {
                 tile->destroy(level, hitResult->x, hitResult->y, hitResult->z, *particleEngine);
             }
-
         }
         if (mouse->isButtonClicked(0) && hitResult != nullptr)
         {
@@ -407,11 +406,10 @@ void render(float deltaTime, GLFWwindow *window)
     glEnable(GL_FOG);
     levelRenderer->render(player, 0);
 
- 
     for (int var1 = 0; var1 < zombies.size(); ++var1)
     {
-        //if (zombie->isLit() && frustum.isVisible(zombie->bb.x0, zombie->bb.y0, zombie->bb.z0, zombie->bb.x1, zombie->bb.y1, zombie->bb.z1))
-            zombies[var1].render(deltaTime); // Call tick() on each Zombie
+        // if (zombie->isLit() && frustum.isVisible(zombie->bb.x0, zombie->bb.y0, zombie->bb.z0, zombie->bb.x1, zombie->bb.y1, zombie->bb.z1))
+        zombies[var1].render(deltaTime); // Call tick() on each Zombie
     }
 
     particleEngine->render(player, deltaTime, 0);
@@ -541,6 +539,11 @@ void tick()
     if (keyboard->isKeyPressed(GLFW_KEY_4))
     {
         paintTexture = 5;
+    }
+
+    if (keyboard->isKeyPressed(GLFW_KEY_G))
+    {
+        zombies.emplace_back(level, player->x, player->y, player->z);
     }
 
     for (size_t var1 = 0; var1 < zombies.size(); ++var1)

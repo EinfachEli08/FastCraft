@@ -3,3 +3,4 @@ bin/level.dat
 .vscode
 build
 
+build/*

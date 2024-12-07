@@ -25,7 +25,8 @@ private:
     static const int MAX_FLOATS = 524288;     
 
     std::vector<float> buffer;
-    
+    std::vector<float> array;
+
     int vertices;
     float u, v;    
     float r, g, b;
