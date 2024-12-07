@@ -5,56 +5,56 @@
 Particle::Particle(Level *level, float x, float y, float z, float xd, float yd, float zd, int tex)
     : Entity(level), tex(tex)
 {
-    setSize(0.2f, 0.2f);
-    heightOffset = bbHeight / 2.0f;
-    setPos(x, y, z);
-    this->xd = xd + (rand() / float(RAND_MAX) * 2.0f - 1.0f) * 0.4f;
-    this->yd = yd + (rand() / float(RAND_MAX) * 2.0f - 1.0f) * 0.4f;
-    this->zd = zd + (rand() / float(RAND_MAX) * 2.0f - 1.0f) * 0.4f;
+    this->setSize(0.2f, 0.2f);
+    this->heightOffset = this->bbHeight / 2.0f;
+    this->setPos(x, y, z);
+    this->xd = xd + (Math::random() * 2.0f - 1.0f) * 0.4f;
+    this->yd = yd + (Math::random() * 2.0f - 1.0f) * 0.4f;
+    this->zd = zd + (Math::random() * 2.0f - 1.0f) * 0.4f;
 
-    float var9 = (rand() / float(RAND_MAX) + rand() / float(RAND_MAX) + 1.0f) * 0.15f;
-    float var10 = std::sqrt(xd * xd + yd * yd + zd * zd);
-    this->xd = xd / var10 * var9 * 0.7f;
-    this->yd = yd / var10 * var9;
-    this->zd = zd / var10 * var9 * 0.7f;
+    float var9 = (Math::random() + Math::random() + 1.0f) * 0.15f;
+    float var10 = std::sqrt(this->xd * this->xd + this->yd * this->yd + this->zd * this->zd);
+    this->xd = this->xd / var10 * var9 * 0.7f;
+    this->yd = this->yd / var10 * var9;
+    this->zd = this->zd / var10 * var9 * 0.7f;
 
-    uo = rand() / float(RAND_MAX) * 3.0f;
-    vo = rand() / float(RAND_MAX) * 3.0f;
+    uo = Math::random() * 3.0f;
+    vo = Math::random() * 3.0f;
 }
 
 void Particle::tick()
 {
-    xo = x;
-    yo = y;
-    zo = z;
-    if (rand() / float(RAND_MAX) < 0.1f)
+    this->xo = this->x;
+    this->yo = this->y;
+    this->zo = this->z;
+    if (Math::random() < 0.1D)
     {
-        remove();
+        this->remove();
     }
 
-    yd -= 0.06f;
-    move(xd, yd, zd);
-    xd *= 0.98f;
-    yd *= 0.98f;
-    zd *= 0.98f;
+    this->yd = this->yd - 0.06D;
+    this->move(this->xd, this->yd, this->zd);
+    this->xd *= 0.98f;
+    this->yd *= 0.98f;
+    this->zd *= 0.98f;
 
-    if (onGround)
+    if (this->onGround)
     {
-        xd *= 0.7f;
-        zd *= 0.7f;
+        this->xd *= 0.7f;
+        this->zd *= 0.7f;
     }
 }
 
 void Particle::render(Tesselator &tesselator, float deltaTime, float var2, float var3, float var4)
 {
-    float var6 = ((tex % 16) + uo / 4.0f) / 16.0f;
+    float var6 = ((this->tex % 16) + this->uo / 4.0f) / 16.0f;
     float var7 = var6 + 0.999f / 64.0f;
-    float var8 = ((tex / 16) + vo / 4.0f) / 16.0f;
+    float var8 = ((this->tex / 16) + this->vo / 4.0f) / 16.0f;
     float var9 = var8 + 0.999f / 64.0f;
     float var10 = 0.1f;
-    float var11 = xo + (x - xo) * deltaTime;
-    float var12 = yo + (y - yo) * deltaTime;
-    float var13 = zo + (z - zo) * deltaTime;
+    float var11 = this->xo + (this->x - this->xo) * deltaTime;
+    float var12 = this->yo + (this->y - this->yo) * deltaTime;
+    float var13 = this->zo + (this->z - this->zo) * deltaTime;
 
     tesselator.vertexUV(var11 - var2 * var10, var12 - var3 * var10, var13 - var4 * var10, var6, var9);
     tesselator.vertexUV(var11 - var2 * var10, var12 + var3 * var10, var13 - var4 * var10, var6, var8);

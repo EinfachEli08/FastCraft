@@ -32,6 +32,7 @@ public:
     virtual bool isSolid();
     virtual void tick(Level *level, int x, int y, int z, std::default_random_engine &random);
     virtual void destroy(Level *level, int x, int y, int z, ParticleEngine &particleEngine);
+    AABB* getAABB(int x, int y, int z);
 
 protected:
     virtual int getTexture(int face);

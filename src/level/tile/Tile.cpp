@@ -67,6 +67,16 @@ void Tile::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
     }
 }
 
+bool Tile::shouldRenderFace(Level *level, int x, int y, int z, int size)
+{
+    return !level->isSolidTile(x, y, z) && level->isLit(x, y, z) ^ (size == 1);
+}
+
+int Tile::getTexture(int face)
+{
+    return tex;
+}
+
 void Tile::renderFace(Tesselator &tesselator, int x, int y, int z, int face)
 {
 
@@ -191,6 +201,10 @@ void Tile::renderFaceNoTexture(Tesselator &tesselator, int x, int y, int z, int 
     }
 }
 
+AABB* Tile::getAABB(int x, int y, int z){
+    return new AABB(x,y,z,x+1,y+1,z+1);
+}
+
 bool Tile::blocksLight()
 {
     return true;
@@ -219,14 +233,4 @@ void Tile::destroy(Level *level, int x, int y, int z, ParticleEngine &particleEn
             }
         }
     }
-}
-
-int Tile::getTexture(int face)
-{
-    return tex;
-}
-
-bool Tile::shouldRenderFace(Level *level, int x, int y, int z, int size)
-{
-    return !level->isSolidTile(x, y, z) && level->isLit(x, y, z) ^ (size == 1);
 }

@@ -5,9 +5,10 @@
 #include <zlib.h>
 #include <functional>
 #include <fstream>
+#include <vector>
 #include "Level/tile/Tile.h"
 
-Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths()
+Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), random(rd())
 {
 
     this->width = width;
@@ -16,6 +17,24 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
 
     this->blocks.resize(width * height * depth);
     this->lightDepths.resize(width * height * depth);
+    this->calcLightDepths(0, 0, width, height);
+    bool loaded = this->load();
+    if(!loaded){
+        this->generateMap();
+    }
+}
+
+void Level::generateMap()
+{
+    int width = this->width;
+    int height = this->height;
+    int depth = this->depth;
+
+    // Assuming PerlinNoiseFilter::read returns a std::vector<int>
+    std::vector<int> noise1 = PerlinNoiseFilter(0).read(width, height);
+    std::vector<int> noise2 = PerlinNoiseFilter(0).read(width, height);
+    std::vector<int> noise3 = PerlinNoiseFilter(1).read(width, height);
+    std::vector<int> noise4 = PerlinNoiseFilter(1).read(width, height);
 
     for (int x = 0; x < width; ++x)
     {
@@ -23,16 +42,49 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
         {
             for (int y = 0; y < height; ++y)
             {
-                int index = (z * this->height + y) * this->width + x;
-                this->blocks[index] = (z <= depth * 2 / 3) ? 1 : 0; // Set rock/grass
+                int index = x + y * width;
+                int noiseValue1 = noise1[index];
+                int noiseValue2 = noise2[index];
+                int noiseValue3 = noise3[index];
+                int noiseValue4 = noise4[index];
+
+                if (noiseValue3 < 128)
+                {
+                    noiseValue2 = noiseValue1;
+                }
+
+                int maxNoise = std::max(noiseValue1, noiseValue2);
+                maxNoise = maxNoise / 8 + depth / 3;
+
+                int rockLevel = noiseValue4 / 8 + depth / 3;
+                if (rockLevel > maxNoise - 2)
+                {
+                    rockLevel = maxNoise - 2;
+                }
+
+                int blockIndex = (z * height + y) * width + x;
+                int blockId = 0;
+
+                if (z == maxNoise)
+                {
+                    blockId = Tile::grass->id;
+                }
+                else if (z < maxNoise)
+                {
+                    blockId = Tile::dirt->id;
+                }
+                if (z <= rockLevel)
+                {
+                    blockId = Tile::rock->id;
+                }
+
+                this->blocks[blockIndex] = blockId;
             }
         }
     }
-    this->calcLightDepths(0, 0, width, height);
-    load();
 }
 
-void Level::load()
+bool Level::load()
 {
     try
     {
@@ -68,10 +120,12 @@ void Level::load()
         }
 
         std::cout << "Level loaded successfully." << std::endl;
+        return true;
     }
     catch (const std::exception &ex)
     {
         std::cerr << "Error loading level: " << ex.what() << std::endl;
+        return false;
     }
 }
 
@@ -148,24 +202,18 @@ void Level::removeListener(LevelListener *listener)
     levelListeners.erase(std::remove(levelListeners.begin(), levelListeners.end(), listener), levelListeners.end());
 }
 
-bool Level::isTile(int x, int y, int z) 
+bool Level::isTile(int x, int y, int z)
 {
     return (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) && this->blocks[(y * this->height + z) * this->width + x] == 1;
 }
 
-bool Level::isSolidTile(int x, int y, int z) 
-{
-    return isTile(x, y, z);
-}
-
-bool Level::isLightBlocker(int x, int y, int z) 
+bool Level::isLightBlocker(int x, int y, int z)
 {
     Tile *tile = Tile::tiles[getTile(x, y, z)];
-
     return tile == nullptr ? false : tile->blocksLight();
 }
 
-std::vector<AABB> Level::getCubes(const AABB &aabb) 
+std::vector<AABB> Level::getCubes(const AABB &aabb)
 {
     std::vector<AABB> cubes;
     int minX = aabb.x0;
@@ -199,7 +247,7 @@ std::vector<AABB> Level::getCubes(const AABB &aabb)
     return cubes;
 }
 
-float Level::getBrightness(int x, int y, int z) 
+float Level::getBrightness(int x, int y, int z)
 {
     const float darkBrightness = 0.8f;
     const float brightBrightness = 1.0f;
@@ -212,18 +260,30 @@ float Level::getBrightness(int x, int y, int z)
     return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? (y < this->lightDepths[x + z * this->width] ? darkBrightness : brightBrightness) : brightBrightness;
 }
 
-void Level::setTile(int x, int y, int z, int tileId)
+bool Level::setTile(int x, int y, int z, int tileId)
 {
     if (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height)
     {
-
-        this->blocks[(y * this->height + z) * this->width + x] = tileId;
-        calcLightDepths(x, z, 1, 1);
-
-        for (int i = 0; i < this->levelListeners.size(); ++i)
+        if (tileId == this->blocks[(y * this->height + z) * this->width + x])
         {
-            this->levelListeners.at(i)->tileChanged(x, y, z);
+            return false;
         }
+        else
+        {
+            this->blocks[(y * this->height + z) * this->width + x] = tileId;
+            this->calcLightDepths(x, z, 1, 1);
+
+            for (int var5 = 0; var5 < this->levelListeners.size(); ++var5)
+            {
+                this->levelListeners.at(var5)->tileChanged(x, y, z);
+            }
+
+            return true;
+        }
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -235,4 +295,36 @@ bool Level::isLit(int x, int y, int z)
 int Level::getTile(int x, int y, int z)
 {
     return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? this->blocks[(y * this->height + z) * this->width + x] : 0;
+}
+
+bool Level::isSolidTile(int x, int y, int z)
+{
+    Tile *tile = Tile::tiles[this->getTile(x, y, z)];
+    return tile == nullptr ? false : tile->isSolid();
+}
+
+void Level::tick()
+{
+    this->unprocessed += this->width * this->height * this->depth;
+    int var1 = this->unprocessed / 400;
+    this->unprocessed -= var1 * 400;
+
+    std::uniform_int_distribution<int> widthDist(0, this->width - 1);
+    std::uniform_int_distribution<int> depthDist(0, this->depth - 1);
+    std::uniform_int_distribution<int> heightDist(0, this->height - 1);
+
+    for (int var2 = 0; var2 < var1; ++var2)
+    {
+        int var3 = widthDist(this->random);
+        int var4 = depthDist(this->random);
+        int var5 = heightDist(this->random);
+
+        Tile *var6 = Tile::tiles[this->getTile(var3, var4, var5)];
+        if (var6 != nullptr)
+        {
+
+            std::default_random_engine defaultRandom(this->random());
+            var6->tick(this, var3, var4, var5, defaultRandom);
+        }
+    }
 }

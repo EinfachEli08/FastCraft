@@ -298,7 +298,13 @@ void render(float deltaTime, GLFWwindow *window)
 
         if (mouse->isButtonClicked(1) && hitResult != nullptr)
         {
-            level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
+            Tile* tile = Tile::tiles[level->getTile(hitResult->x, hitResult->y, hitResult->z)];
+            bool var4 = level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
+            if (tile != nullptr && var4)
+            {
+                tile->destroy(level, hitResult->x, hitResult->y, hitResult->z, *particleEngine);
+            }
+
         }
         if (mouse->isButtonClicked(0) && hitResult != nullptr)
         {
@@ -335,7 +341,7 @@ void render(float deltaTime, GLFWwindow *window)
                 ++x;
             }
 
-            level->setTile(x, y, z, 1);
+            level->setTile(x, y, z, paintTexture);
         }
     }
     else
@@ -345,7 +351,12 @@ void render(float deltaTime, GLFWwindow *window)
 
         if (controller->isAxisButtonPressed(4) && hitResult != nullptr)
         {
-            level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
+            Tile *tile = Tile::tiles[level->getTile(hitResult->x, hitResult->y, hitResult->z)];
+            bool var4 = level->setTile(hitResult->x, hitResult->y, hitResult->z, 0);
+            if (tile != nullptr && var4)
+            {
+                tile->destroy(level, hitResult->x, hitResult->y, hitResult->z, *particleEngine);
+            }
         }
         if (controller->isAxisButtonPressed(5) && hitResult != nullptr)
         {
@@ -382,7 +393,7 @@ void render(float deltaTime, GLFWwindow *window)
                 ++x;
             }
 
-            level->setTile(x, y, z, 1);
+            level->setTile(x, y, z, paintTexture);
         }
     }
 
