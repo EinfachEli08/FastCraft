@@ -22,29 +22,25 @@ Tesselator &Tesselator::getInstance()
 
 void Tesselator::flush()
 {
-    this->buffer.clear();
-    if (buffer.size() < p)
-    {
-        buffer.resize(p);
-    }
-    std::memcpy(buffer.data(), array.data(), p * sizeof(float));
-    buffer.clear();
+    if (this->vertices == 0)
+        return; // Keine Daten, keine Operation.
 
+    // Direkt mit array.data() arbeiten
     if (this->hasTexture && this->hasColor)
     {
-        glInterleavedArrays(GL_T2F_C3F_V3F, 0, this->buffer.data());
+        glInterleavedArrays(GL_T2F_C3F_V3F, 0, this->array.data());
     }
     else if (this->hasTexture)
     {
-        glInterleavedArrays(GL_T2F_V3F, 0, this->buffer.data());
+        glInterleavedArrays(GL_T2F_V3F, 0, this->array.data());
     }
     else if (this->hasColor)
     {
-        glInterleavedArrays(GL_C3F_V3F, 0, this->buffer.data());
+        glInterleavedArrays(GL_C3F_V3F, 0, this->array.data());
     }
     else
     {
-        glInterleavedArrays(GL_V3F, 0, this->buffer.data());
+        glInterleavedArrays(GL_V3F, 0, this->array.data());
     }
 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -52,19 +48,18 @@ void Tesselator::flush()
     {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
-
     if (this->hasColor)
     {
         glEnableClientState(GL_COLOR_ARRAY);
     }
 
     glDrawArrays(GL_QUADS, 0, this->vertices);
+
     glDisableClientState(GL_VERTEX_ARRAY);
     if (this->hasTexture)
     {
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
-
     if (this->hasColor)
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -118,23 +113,23 @@ void Tesselator::vertexUV(float x, float y, float z, float u, float v)
 
 void Tesselator::vertex(float x, float y, float z)
 {
+    float *ptr = this->array.data() + this->p;
     if (this->hasTexture)
     {
-        this->array[this->p++] = this->u;
-        this->array[this->p++] = this->v;
+        *ptr++ = this->u;
+        *ptr++ = this->v;
     }
-
     if (this->hasColor)
     {
-        this->array[this->p++] = this->r;
-        this->array[this->p++] = this->g;
-        this->array[this->p++] = this->b;
+        *ptr++ = this->r;
+        *ptr++ = this->g;
+        *ptr++ = this->b;
     }
+    *ptr++ = x;
+    *ptr++ = y;
+    *ptr++ = z;
 
-    this->array[this->p++] = x;
-    this->array[this->p++] = y;
-    this->array[this->p++] = z;
-
+    this->p += (ptr - (this->array.data() + this->p)); // Update Index
     ++this->vertices;
 
     if (this->p >= MAX_FLOATS - this->len)
