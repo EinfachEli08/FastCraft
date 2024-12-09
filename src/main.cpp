@@ -161,14 +161,10 @@ void setupPickCamera(float timer, int widthIn, int heightIn)
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-
     pickMatrix(widthIn, heightIn, 5.0f, 5.0f, viewport);
-
     perspective(70.0f, screenWidth / screenHeight, 0.05f, 1000.0f);
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     moveCameraToPlayer(timer);
@@ -176,7 +172,7 @@ void setupPickCamera(float timer, int widthIn, int heightIn)
 
 void pick(float deltaTime)
 {
-    std::vector<GLuint> selectBuffer(512);
+    std::vector<GLuint> selectBuffer(2000);
     glSelectBuffer(selectBuffer.size(), selectBuffer.data());
     glRenderMode(GL_SELECT);
 
@@ -190,7 +186,6 @@ void pick(float deltaTime)
     GLuint closestDepth = std::numeric_limits<GLuint>::max();
     int hitCount = 0;
     std::array<int, 10> pos = {0};
-
     for (int i = 0; i < hits; ++i)
     {
         GLuint names = selectBuffer[bufferPos++];
@@ -205,12 +200,9 @@ void pick(float deltaTime)
             closestDepth = minDepth;
             hitCount = names;
 
-            for (GLuint j = 0; j < names; ++j)
+            for (int j = 0; j < names; ++j)
             {
-                if (j < pos.size())
-                {
-                    pos[j] = selectBuffer[bufferPos++];
-                }
+                pos[j] = selectBuffer[bufferPos++];
             }
         }
     }

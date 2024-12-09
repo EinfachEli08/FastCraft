@@ -121,14 +121,12 @@ void LevelRenderer::pick(Player *player)
     Tesselator& tess = Tesselator::getInstance();
     float selectionRadius = 3.0f;
     AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
-
     int x0 = static_cast<int>(pickBox.x0);
     int x1 = static_cast<int>(pickBox.x1 + 1.0f);
     int y0 = static_cast<int>(pickBox.y0);
     int y1 = static_cast<int>(pickBox.y1 + 1.0f);
     int z0 = static_cast<int>(pickBox.z0);
     int z1 = static_cast<int>(pickBox.z1 + 1.0f);
-
     glInitNames(); // Initialize name stack for picking
 
     for (int x = x0; x < x1; ++x)
@@ -140,21 +138,17 @@ void LevelRenderer::pick(Player *player)
             for (int z = z0; z < z1; ++z)
             {
                 glPushName(z);
-                if (this->level->isSolidTile(x, y, z))
-                {
-                    glPushName(0);
-                    Tile* tile = Tile::tiles[this->level->getTile(x, y, z)];
 
-                    if(tile != nullptr){
-                        glPushName(0);
-                        for (int face = 0; face < 6; face++)
-                        {
-                            glPushName(face);
-                            tess.init();
-                            tile->renderFace(tess, x, y, z, face);
-                            tess.flush();
-                            glPopName();
-                        }
+                Tile* tile = Tile::tiles[this->level->getTile(x, y, z)];
+                if(tile != nullptr){
+                    glPushName(0);
+
+                    for (int face = 0; face < 6; face++)
+                    {
+                        glPushName(face);
+                        tess.init();
+                        tile->renderFace(tess, x, y, z, face);
+                        tess.flush();
                         glPopName();
                     }
                     glPopName();
