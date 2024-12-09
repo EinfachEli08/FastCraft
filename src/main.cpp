@@ -146,15 +146,15 @@ void perspective(float fovY, float aspect, float zNear, float zFar)
     }
 }
 
-void moveCameraToPlayer(float timer)
+void moveCameraToPlayer(float var1)
 {
-    glTranslatef(0.0f, 0.0f, -0.3f);
-    glRotatef(player->xRot, 1.0f, 0.0f, 0.0f);
-    glRotatef(player->yRot, 0.0f, 1.0f, 0.0f);
-    float x = player->xo + (player->x - player->xo) * timer;
-    float y = player->yo + (player->y - player->yo) * timer;
-    float z = player->zo + (player->z - player->zo) * timer;
-    glTranslatef(-x, -y, -z);
+    glTranslatef(0.0F, 0.0F, -0.3F);
+    glRotatef(player->xRot, 1.0F, 0.0F, 0.0F);
+    glRotatef(player->yRot, 0.0F, 1.0F, 0.0F);
+    float var2 = player->xo + (player->x - player->xo) * var1;
+    float var3 = player->yo + (player->y - player->yo) * var1;
+    float var4 = player->zo + (player->z - player->zo) * var1;
+    glTranslatef(-var2, -var3, -var4);
 }
 
 void setupPickCamera(float timer, int widthIn, int heightIn)
@@ -398,21 +398,27 @@ void render(float deltaTime, GLFWwindow *window)
     glEnable(GL_FOG);
     levelRenderer->render(player, 0);
 
-    for (int var1 = 0; var1 < zombies.size(); ++var1)
+    for (size_t var8 = 0; var8 < zombies.size(); ++var8)
     {
-        // if (zombie->isLit() && frustum.isVisible(zombie->bb.x0, zombie->bb.y0, zombie->bb.z0, zombie->bb.x1, zombie->bb.y1, zombie->bb.z1))
-        zombies[var1].render(deltaTime); // Call tick() on each Zombie
+        Zombie &var10 = zombies[var8];
+        if (var10.isLit() && frustum.isVisible(var10.bb.x0, var10.bb.y0, var10.bb.z0, var10.bb.x1, var10.bb.y1, var10.bb.z1))
+        {
+            zombies[var8].render(deltaTime);
+        }
     }
 
     particleEngine->render(player, deltaTime, 0);
     setupFog(1);
     levelRenderer->render(player, 1);
 
-    /* for (int var1 = 0; var1 < zombies.size(); ++var1)
+    for (size_t var8 = 0; var8 < zombies.size(); ++var8)
     {
-        zombies[var1].render(deltaTime); // Call tick() on each Zombie
+        Zombie &var10 = zombies[var8]; 
+        if (!var10.isLit() && frustum.isVisible(var10.bb.x0, var10.bb.y0, var10.bb.z0, var10.bb.x1, var10.bb.y1, var10.bb.z1))
+        {
+            zombies[var8].render(deltaTime);
+        }
     }
-*/
 
     particleEngine->render(player, deltaTime, 1);
     glDisable(GL_LIGHTING);
