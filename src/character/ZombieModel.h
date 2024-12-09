@@ -18,5 +18,5 @@ public:
 
     ZombieModel();
 
-    void render(float speed, float timeOffs);
+    void render(double var2);
 };

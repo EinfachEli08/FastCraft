@@ -14,11 +14,8 @@ ZombieModel::ZombieModel() : head(0, 0), body(16, 16), arm0(40, 16), arm1(40, 16
     this->leg1.setPos(2.0f, 12.0f, 0.0f);
 }
 
-void ZombieModel::render(float speed, float timeOffs)
+void ZombieModel::render(double var2)
 {
-
-    double var2 = static_cast<double>(std::chrono::system_clock::now().time_since_epoch().count()) / 1.0e9D * 10.0D * speed + timeOffs;
-
     this->head.yRot = static_cast<float>(std::sin(var2 * 0.83)) * 1.0f;
     this->head.xRot = static_cast<float>(std::sin(var2)) * 0.8f;
 

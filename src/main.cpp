@@ -48,12 +48,13 @@ int var2 = 920330;
 float fogColor0[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
 float lb[16];
 
-void getBuffer(float var1, float var2, float var3, float var4)
+float* getBuffer(float var1, float var2, float var3, float var4)
 {
     lb[0] = var1;
     lb[1] = var2;
     lb[2] = var3;
     lb[3] = var4;
+    return lb;
 }
 
 void setupFog(int mode)
@@ -74,8 +75,7 @@ void setupFog(int mode)
         glEnable(GL_COLOR_MATERIAL);
 
         float ambientLight = 0.6F;
-        getBuffer(ambientLight, ambientLight, ambientLight, 1.0F);
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lb);
+       glLightModelfv(GL_LIGHT_MODEL_AMBIENT, getBuffer(ambientLight, ambientLight, ambientLight, 1.0F));
     }
 }
 
@@ -478,7 +478,7 @@ int init(GLFWwindow **window)
 
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

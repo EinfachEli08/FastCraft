@@ -77,7 +77,7 @@ void Zombie::render(float partialTick)
 
     glRotatef(this->rot * 57.29578f + 180.0f, 0.0f, 1.0f, 0.0f);
 
-    zombieModel.render(this->speed, this->timeOffs);
+    zombieModel.render(var2);
 
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
