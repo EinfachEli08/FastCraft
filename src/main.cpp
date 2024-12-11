@@ -42,10 +42,10 @@ int windowedWidth = 960, windowedHeight = 540;
 
 int windowedPosX = 0, windowedPosY = 0;
 
-int var1 = 16710650;
-float fogColor1[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
 int var2 = 920330;
-float fogColor0[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
+float fogColor1[4] = {(var2 >> 16 & 255) / 255.0F, (var2 >> 8 & 255) / 255.0F, (var2 & 255) / 255.0F, 1.0f};
+int var1 = 16710650;
+float fogColor0[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
 float lb[16];
 
 float* getBuffer(float var1, float var2, float var3, float var4)
