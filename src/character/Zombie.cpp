@@ -71,8 +71,7 @@ void Zombie::render(float partialTick)
     float var5 = static_cast<float>(-std::abs(std::sin(var2 * 0.6662)) * 5.0 - 23.0);
 
     glTranslatef(this->xo + (this->x - this->xo) * partialTick, this->yo + (this->y - this->yo) * partialTick, this->zo + (this->z - this->zo) * partialTick);
-    glScalef(1.0f, -1.0f, 1.0f);
-    glScalef(var4, var4, var4);
+    glScalef(var4, -var4, var4);
     glTranslatef(0.0f, var5, 0.0f);
 
     glRotatef(this->rot * 57.29578f + 180.0f, 0.0f, 1.0f, 0.0f);

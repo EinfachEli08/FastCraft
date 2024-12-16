@@ -181,6 +181,7 @@ void pick(float deltaTime)
     levelRenderer->pick(player);
 
     GLint hits = glRenderMode(GL_RENDER);
+    std::cout << hits << std::endl;
     size_t bufferPos = 0;
 
     GLuint closestDepth = std::numeric_limits<GLuint>::max();
