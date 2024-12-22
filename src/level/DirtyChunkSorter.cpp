@@ -12,8 +12,8 @@ DirtyChunkSorter::DirtyChunkSorter(Player *player, Frustum *frustum)
 
 int DirtyChunkSorter::compare(Chunk *var1, Chunk *var2)
 {
-    bool var3 = frustum->isVisible(var2->aabb.x0, var2->aabb.y0, var2->aabb.z0, var2->aabb.x1, var2->aabb.y1, var2->aabb.z1);
-    bool var4 = frustum->isVisible(var2->aabb.x0, var2->aabb.y0, var2->aabb.z0, var2->aabb.x1, var2->aabb.y1, var2->aabb.z1);
+    bool var3 = frustum->isVisible(&(var1->aabb));
+    bool var4 = frustum->isVisible(&(var2->aabb));
 
     if (var3 && !var4)
     {

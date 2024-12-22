@@ -236,9 +236,12 @@ std::vector<AABB> Level::getCubes(const AABB &aabb)
         {
             for (int z = minZ; z < maxZ; ++z)
             {
-                if (isSolidTile(x, y, z))
-                {
-                    cubes.emplace_back(x, y, z, (x + 1), (y + 1), (z + 1));
+                Tile *tile = Tile::tiles[this->getTile(x,y,z)];
+                if(tile != nullptr){
+                    AABB *aabb = tile->getAABB(x,y,z);
+                    if(aabb != nullptr){
+                        cubes.emplace_back(*aabb);
+                    }
                 }
             }
         }

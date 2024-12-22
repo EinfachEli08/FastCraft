@@ -1,6 +1,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <array>
+#include "phys/AABB.h"
 
 
 class Frustum
@@ -25,7 +26,7 @@ public:
     bool sphereInFrustum(float x, float y, float z, float radius) const;
     bool cubeFullyInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const;
     bool cubeInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const;
-    bool isVisible(float x0, float y0, float z0, float x1, float y1, float z1) const;
+    bool isVisible(AABB* aabb) const;
 
 private:
     Frustum() = default;

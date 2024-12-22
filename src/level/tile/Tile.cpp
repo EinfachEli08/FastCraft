@@ -3,6 +3,7 @@
 
 #include "level/tile/DirtTile.h"
 #include "level/tile/GrassTile.h"
+#include "level/tile/Bush.h"
 #include "particle/Particle.h"
 
 // Static tile instances
@@ -13,6 +14,7 @@ Tile *Tile::grass = new GrassTile(2);
 Tile *Tile::dirt = new DirtTile(3, 2);
 Tile *Tile::stoneBrick = new Tile(4, 16);
 Tile *Tile::wood = new Tile(5, 4);
+Tile *Tile::bush = new Bush(6);
 
 Tile::Tile(int id) : id(id), tex(0)
 {
@@ -201,8 +203,12 @@ void Tile::renderFaceNoTexture(Tesselator &tesselator, int x, int y, int z, int 
     }
 }
 
-AABB* Tile::getAABB(int x, int y, int z){
+AABB *Tile::getAABB(int x, int y, int z){
     return new AABB(x,y,z,x+1,y+1,z+1);
+}
+AABB *Tile::getTileAABB(int x, int y, int z)
+{
+    return new AABB(x, y, z, x + 1, y + 1, z + 1);
 }
 
 bool Tile::blocksLight()

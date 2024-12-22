@@ -1,13 +1,13 @@
 class HitResult
 {
 public:
+    int type;
     int x;
     int y;
     int z;
-    int o;
     int f;
 
     // Constructor
-    HitResult(int x, int y, int z, int o, int f)
-        : x(x), y(y), z(z), o(o), f(f) {}
+    HitResult(int type, int x, int y, int z, int f)
+        : type(type), x(x), y(y), z(z), f(f) {}
 };

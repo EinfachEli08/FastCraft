@@ -178,10 +178,9 @@ void pick(float deltaTime)
 
     setupPickCamera(deltaTime, screenWidth / 2, screenHeight / 2);
 
-    levelRenderer->pick(player);
+    levelRenderer->pick(player, Frustum::getInstance());
 
     GLint hits = glRenderMode(GL_RENDER);
-    std::cout << hits << std::endl;
     size_t bufferPos = 0;
 
     GLuint closestDepth = std::numeric_limits<GLuint>::max();
@@ -218,28 +217,25 @@ void pick(float deltaTime)
     }
 }
 
-void setupOrthoCamera()
+void drawGui()
 {
+    int sw = screenWidth * 240 / screenHeight;
+    int sh = screenHeight * 240 / screenHeight;
+    glClear(GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0D, screenWidth, screenHeight, 0.0D, 100.0D, 300.0D);
+    glOrtho(0.0D, (double)sw, (double)sh, 0.0D, 100.0D, 300.0D);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
-}
-
-void drawGui()
-{
-    glClear(GL_DEPTH_BUFFER_BIT);
-    setupOrthoCamera();
     glPushMatrix();
-    glTranslatef((screenWidth - 48), 48.0F, 0.0F);
-    Tesselator tess;
-    glScalef(48.0F, 48.0F, 48.0F);
+    glTranslatef((float)(sw - 16), 16.0F, 0.0F);
+    Tesselator& tess = Tesselator::getInstance();
+    glScalef(16.0F, 16.0F, 16.0F);
     glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
     glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-    glTranslatef(1.5F, -0.5F, -0.5F);
-
+    glTranslatef(-1.5F, 0.5F, -0.5F);
+    glScalef(-1.0F, -1.0F, 1.0F);
     GLuint texture;
     try
     {
@@ -249,7 +245,6 @@ void drawGui()
     {
         std::cerr << e.what() << std::endl;
     }
-
     glBindTexture(GL_TEXTURE_2D, texture);
     glEnable(GL_TEXTURE_2D);
     tess.init();
@@ -257,18 +252,18 @@ void drawGui()
     tess.flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
-    int wCenter = screenWidth / 2;
-    int hCenter = screenHeight / 2;
-
+    int wCenter = sw / 2;
+    int hCenter = sh / 2;
+    glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     tess.init();
-    tess.vertex((wCenter + 1), (hCenter - 8), 0.0F);
-    tess.vertex((wCenter - 0), (hCenter - 8), 0.0F);
-    tess.vertex((wCenter - 0), (hCenter + 9), 0.0F);
-    tess.vertex((wCenter + 1), (hCenter + 9), 0.0F);
-    tess.vertex((wCenter + 9), (hCenter - 0), 0.0F);
-    tess.vertex((wCenter + 8), (hCenter - 0), 0.0F);
-    tess.vertex((wCenter + 8), (hCenter + 1), 0.0F);
-    tess.vertex((wCenter + 9), (hCenter + 1), 0.0F);
+    tess.vertex((wCenter + 1), (hCenter - 4), 0.0F);
+    tess.vertex((wCenter - 0), (hCenter - 4), 0.0F);
+    tess.vertex((wCenter - 0), (hCenter + 5), 0.0F);
+    tess.vertex((wCenter + 1), (hCenter + 5), 0.0F);
+    tess.vertex((wCenter + 5), (hCenter - 0), 0.0F);
+    tess.vertex((wCenter + 4), (hCenter - 0), 0.0F);
+    tess.vertex((wCenter + 4), (hCenter + 1), 0.0F);
+    tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.flush();
 }
 
@@ -402,7 +397,7 @@ void render(float deltaTime, GLFWwindow *window)
     for (size_t var8 = 0; var8 < zombies.size(); ++var8)
     {
         Zombie &var10 = zombies[var8];
-        if (var10.isLit() && frustum.isVisible(var10.bb.x0, var10.bb.y0, var10.bb.z0, var10.bb.x1, var10.bb.y1, var10.bb.z1))
+        if (var10.isLit() && frustum.isVisible(&(var10.bb)))
         {
             zombies[var8].render(deltaTime);
         }
@@ -415,7 +410,7 @@ void render(float deltaTime, GLFWwindow *window)
     for (size_t var8 = 0; var8 < zombies.size(); ++var8)
     {
         Zombie &var10 = zombies[var8]; 
-        if (!var10.isLit() && frustum.isVisible(var10.bb.x0, var10.bb.y0, var10.bb.z0, var10.bb.x1, var10.bb.y1, var10.bb.z1))
+        if (!var10.isLit() && frustum.isVisible(&(var10.bb)))
         {
             zombies[var8].render(deltaTime);
         }
@@ -427,7 +422,9 @@ void render(float deltaTime, GLFWwindow *window)
     glDisable(GL_FOG);
     if (hitResult != nullptr)
     {
+        glDisable(GL_ALPHA_TEST);
         levelRenderer->renderHit(*hitResult);
+        glEnable(GL_ALPHA_TEST);
     }
 
     drawGui();
@@ -494,6 +491,8 @@ int init(GLFWwindow **window)
     glClearDepth(1.0D);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5F);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -538,6 +537,10 @@ void tick()
     if (keyboard->isKeyPressed(GLFW_KEY_4))
     {
         paintTexture = 5;
+    }
+    if (keyboard->isKeyPressed(GLFW_KEY_4))
+    {
+        paintTexture = 6;
     }
 
     if (keyboard->isKeyPressed(GLFW_KEY_G))

@@ -132,7 +132,7 @@ void Tesselator::vertex(float x, float y, float z)
     this->p += (ptr - (this->array.data() + this->p)); // Update Index
     ++this->vertices;
 
-    if (this->p >= MAX_FLOATS - this->len)
+    if (this->vertices % 4 == 0 && this->p >= MAX_FLOATS - this->len*4)
     {
         this->flush();
     }

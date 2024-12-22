@@ -17,6 +17,7 @@ public:
     static Tile *dirt;
     static Tile *stoneBrick;
     static Tile *wood;
+    static Tile *bush;
 
     int id;
     int tex;
@@ -32,9 +33,10 @@ public:
     virtual bool isSolid();
     virtual void tick(Level *level, int x, int y, int z, std::default_random_engine &random);
     virtual void destroy(Level *level, int x, int y, int z, ParticleEngine &particleEngine);
-    AABB* getAABB(int x, int y, int z);
+    AABB *getAABB(int x, int y, int z);
+    AABB *getTileAABB(int x, int y, int z);
 
-protected:
-    virtual int getTexture(int face);
+protected: 
+virtual int getTexture(int face);
     bool shouldRenderFace(Level *level, int x, int y, int z, int size);
 };

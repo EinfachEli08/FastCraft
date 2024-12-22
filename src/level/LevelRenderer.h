@@ -33,7 +33,7 @@ public:
 
     void renderHit(HitResult hit);
 
-    void pick(Player *player);
+    void pick(Player *player, Frustum frustum);
 
     void setDirty(int x0, int y0, int z0, int x1, int y1, int z1);
 

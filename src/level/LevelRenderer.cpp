@@ -116,7 +116,7 @@ void LevelRenderer::updateDirtyChunks(Player *player)
     }
 }
 
-void LevelRenderer::pick(Player *player)
+void LevelRenderer::pick(Player *player, Frustum frustum)
 {
     Tesselator& tess = Tesselator::getInstance();
     float selectionRadius = 3.0f;
@@ -128,24 +128,27 @@ void LevelRenderer::pick(Player *player)
     int z0 = static_cast<int>(pickBox.z0);
     int z1 = static_cast<int>(pickBox.z1 + 1.0f);
     glInitNames(); // Initialize name stack for picking
+    glPushName(0);
+    glPushName(0);
 
     for (int x = x0; x < x1; ++x)
     {
-        glPushName(x);
+        glLoadName(x);
+        glPushName(0);
         for (int y = y0; y < y1; ++y)
         {
-            glPushName(y);
+            glLoadName(y);
+            glPushName(0);
             for (int z = z0; z < z1; ++z)
             {
-                glPushName(z);
-
-                Tile* tile = Tile::tiles[this->level->getTile(x, y, z)];
-                if(tile != nullptr){
+                Tile *tile = Tile::tiles[this->level->getTile(x, y, z)];
+                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(z,y,z)))
+                {
+                    glLoadName(z);
                     glPushName(0);
-
                     for (int face = 0; face < 6; face++)
                     {
-                        glPushName(face);
+                        glLoadName(face);
                         tess.init();
                         tile->renderFace(tess, x, y, z, face);
                         tess.flush();
@@ -159,6 +162,8 @@ void LevelRenderer::pick(Player *player)
         }
         glPopName();
     }
+    glPopName();
+    glPopName();
 }
 
 void LevelRenderer::renderHit(HitResult hit)

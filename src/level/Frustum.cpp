@@ -119,7 +119,7 @@ bool Frustum::cubeInFrustum(float x0, float y0, float z0, float x1, float y1, fl
     return false;
 }
 
-bool Frustum::isVisible(float x0, float y0, float z0, float x1, float y1, float z1) const
+bool Frustum::isVisible(AABB* aabb) const
 {
-    return this->cubeInFrustum(x0, y0, z0, x1, y1, z1);
+    return this->cubeInFrustum(aabb->x0, aabb->y0, aabb->z0, aabb->x1, aabb->y1, aabb->z1);
 }
