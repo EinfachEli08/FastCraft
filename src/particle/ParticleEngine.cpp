@@ -29,8 +29,11 @@ void ParticleEngine::render(Player *player, float deltaTime, int renderMode)
 
     float var5 = -((float)std::cos((double)player->yRot * Math::PI / 180.0f));
     float var6 = -((float)std::sin((double)player->yRot * Math::PI / 180.0f));
-    float var7 = 1.0f;
-    
+
+    float var7 = -var6 * (float)std::sin((double)player->xRot * Math::PI / 180.0D);
+    float var8 = var5 * (float)std::sin((double)player->xRot * Math::PI / 180.0D);
+    float var9 = (float)std::cos((double)player->xRot * Math::PI / 180.0D);
+
     Tesselator &tesselator = Tesselator::getInstance();
     glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
     tesselator.init();
@@ -40,7 +43,7 @@ void ParticleEngine::render(Player *player, float deltaTime, int renderMode)
         Particle *particle = this->particles[i];
         if (particle->isLit() ^ renderMode == 1)
         {
-            particle->render(tesselator, deltaTime, var5, var7, var6);
+            particle->render(tesselator, deltaTime, var5, var9, var6, var7, var8);
         }
     }
 

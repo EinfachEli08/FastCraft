@@ -127,7 +127,7 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
     int y1 = static_cast<int>(pickBox.y1 + 1.0f);
     int z0 = static_cast<int>(pickBox.z0);
     int z1 = static_cast<int>(pickBox.z1 + 1.0f);
-    glInitNames(); // Initialize name stack for picking
+    glInitNames();
     glPushName(0);
     glPushName(0);
 
