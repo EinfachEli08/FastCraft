@@ -3,7 +3,7 @@
 
 #include "Entity.h"
 #include "level/Level.h"
-#include "level/Tesselator.h"
+#include "renderer/Tesselator.h"
 
 class Particle : public Entity
 {

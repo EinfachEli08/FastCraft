@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include "Level/tile/Tile.h"
+#include "Level/LevelGen.h"
 
 Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), random(rd())
 {
@@ -14,74 +15,16 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
     this->width = width;
     this->height = height;
     this->depth = depth;
-
     this->blocks.resize(width * height * depth);
     this->lightDepths.resize(width * height * depth);
-    this->calcLightDepths(0, 0, width, height);
     bool loaded = this->load();
+
     if(!loaded){
-        this->generateMap();
+        LevelGen *levelGen = new LevelGen(width, height, depth);
+        this->blocks = levelGen->generateMap();
     }
-}
-
-void Level::generateMap()
-{
-    int width = this->width;
-    int height = this->height;
-    int depth = this->depth;
-
-    // Assuming PerlinNoiseFilter::read returns a std::vector<int>
-    std::vector<int> noise1 = PerlinNoiseFilter(0).read(width, height);
-    std::vector<int> noise2 = PerlinNoiseFilter(0).read(width, height);
-    std::vector<int> noise3 = PerlinNoiseFilter(1).read(width, height);
-    std::vector<int> noise4 = PerlinNoiseFilter(1).read(width, height);
-
-    for (int x = 0; x < width; ++x)
-    {
-        for (int z = 0; z < depth; ++z)
-        {
-            for (int y = 0; y < height; ++y)
-            {
-                int index = x + y * width;
-                int noiseValue1 = noise1[index];
-                int noiseValue2 = noise2[index];
-                int noiseValue3 = noise3[index];
-                int noiseValue4 = noise4[index];
-
-                if (noiseValue3 < 128)
-                {
-                    noiseValue2 = noiseValue1;
-                }
-
-                int maxNoise = std::max(noiseValue1, noiseValue2);
-                maxNoise = maxNoise / 8 + depth / 3;
-
-                int rockLevel = noiseValue4 / 8 + depth / 3;
-                if (rockLevel > maxNoise - 2)
-                {
-                    rockLevel = maxNoise - 2;
-                }
-
-                int blockIndex = (z * height + y) * width + x;
-                int blockId = 0;
-
-                if (z == maxNoise)
-                {
-                    blockId = Tile::grass->id;
-                }
-                else if (z < maxNoise)
-                {
-                    blockId = Tile::dirt->id;
-                }
-                if (z <= rockLevel)
-                {
-                    blockId = Tile::rock->id;
-                }
-
-                this->blocks[blockIndex] = blockId;
-            }
-        }
-    }
+   
+    this->calcLightDepths(0, 0, width, height);
 }
 
 bool Level::load()

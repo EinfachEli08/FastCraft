@@ -4,6 +4,7 @@
 #include "character/Cube.h"
 #include "utils/Math.h"
 #include "character/ZombieModel.h"
+#include "renderer/Textures.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -11,6 +12,7 @@ class Zombie : public Entity
 {
 private:
     static ZombieModel zombieModel;
+    Textures *textures;
 
 public:
     Cube head;
@@ -24,7 +26,7 @@ public:
     float speed;
     float rotA;
 
-    Zombie(Level *level, float x, float y, float z);
+    Zombie(Level *level, Textures *textures, float x, float y, float z);
 
     void tick();
     void render(float partialTick);

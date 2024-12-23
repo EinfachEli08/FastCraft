@@ -100,18 +100,18 @@ bool Frustum::cubeFullyInFrustum(float x0, float y0, float z0, float x1, float y
     return true;
 }
 
-bool Frustum::cubeInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const
+bool Frustum::cubeInFrustum(AABB* aabb) const
 {
     for (int i = 0; i < 6; ++i)
     {
-        if (this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] > 0 ||
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] > 0)
+        if (this->m_Frustum[i][0] * aabb->x0 + this->m_Frustum[i][1] * aabb->y0 + this->m_Frustum[i][2] * aabb->z0 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x1 + this->m_Frustum[i][1] * aabb->y0 + this->m_Frustum[i][2] * aabb->z0 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x0 + this->m_Frustum[i][1] * aabb->y1 + this->m_Frustum[i][2] * aabb->z0 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x1 + this->m_Frustum[i][1] * aabb->y1 + this->m_Frustum[i][2] * aabb->z0 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x0 + this->m_Frustum[i][1] * aabb->y0 + this->m_Frustum[i][2] * aabb->z1 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x1 + this->m_Frustum[i][1] * aabb->y0 + this->m_Frustum[i][2] * aabb->z1 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x0 + this->m_Frustum[i][1] * aabb->y1 + this->m_Frustum[i][2] * aabb->z1 + this->m_Frustum[i][3] > 0 ||
+            this->m_Frustum[i][0] * aabb->x1 + this->m_Frustum[i][1] * aabb->y1 + this->m_Frustum[i][2] * aabb->z1 + this->m_Frustum[i][3] > 0)
         {
             return true;
         }
@@ -121,5 +121,5 @@ bool Frustum::cubeInFrustum(float x0, float y0, float z0, float x1, float y1, fl
 
 bool Frustum::isVisible(AABB* aabb) const
 {
-    return this->cubeInFrustum(aabb->x0, aabb->y0, aabb->z0, aabb->x1, aabb->y1, aabb->z1);
+    return this->cubeInFrustum(aabb);
 }

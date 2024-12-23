@@ -3,7 +3,8 @@
 #include <iostream>
 #include <chrono>
 #include <cmath>
-#include "Textures.h"
+#include <cstring>
+#include "renderer/Textures.h"
 #include "Timer.h"
 #include "level/LevelRenderer.h"
 #include "Player.h"
@@ -27,6 +28,8 @@ int fps = 0;
 Level *level;
 Player *player;
 int paintTexture = 1;
+int editMode = 0;
+Textures *textures;
 ParticleEngine *particleEngine;
 LevelRenderer *levelRenderer;
 Mouse *mouse;
@@ -55,6 +58,60 @@ float* getBuffer(float var1, float var2, float var3, float var4)
     lb[2] = var3;
     lb[3] = var4;
     return lb;
+}
+
+char *errorString(GLenum glError)
+{
+    const char *errorMessage;
+    switch (glError)
+    {
+    case GL_NO_ERROR:
+        errorMessage = "No error";
+        break;
+    case GL_INVALID_ENUM:
+        errorMessage = "Invalid enum";
+        break;
+    case GL_INVALID_VALUE:
+        errorMessage = "Invalid value";
+        break;
+    case GL_INVALID_OPERATION:
+        errorMessage = "Invalid operation";
+        break;
+    case GL_STACK_OVERFLOW:
+        errorMessage = "Stack overflow";
+        break;
+    case GL_STACK_UNDERFLOW:
+        errorMessage = "Stack underflow";
+        break;
+    case GL_OUT_OF_MEMORY:
+        errorMessage = "Out of memory";
+        break;
+    case GL_INVALID_FRAMEBUFFER_OPERATION:
+        errorMessage = "Invalid framebuffer operation";
+        break;
+    default:
+        errorMessage = "Unknown error";
+        break;
+    }
+
+    // Allocate memory for the returned string
+    char *result = new char[strlen(errorMessage) + 1];
+    strcpy(result, errorMessage);
+
+    return result; // Caller is responsible for freeing this memory with delete[]
+}
+
+void checkGlError(char *var1)
+{
+    int var2 = glGetError();
+    if (var2 != 0)
+    {
+        char* var3 = errorString(var2);
+        std::cout << "########## GL ERROR ##########" << std::endl;
+        std::cout << "@ " << var1 << std::endl;
+        std::cout << var2 << ": " << var3 << std::endl;
+        //exit(0);
+    }
 }
 
 void setupFog(int mode)
@@ -215,6 +272,7 @@ void pick(float deltaTime)
     {
         hitResult = nullptr;
     }
+    //std::cout << hitResult	<<std::endl;
 }
 
 void drawGui()
@@ -228,6 +286,7 @@ void drawGui()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
+    checkGlError("GUI: Init");
     glPushMatrix();
     glTranslatef((float)(sw - 16), 16.0F, 0.0F);
     Tesselator& tess = Tesselator::getInstance();
@@ -236,22 +295,27 @@ void drawGui()
     glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
     glTranslatef(-1.5F, 0.5F, -0.5F);
     glScalef(-1.0F, -1.0F, 1.0F);
-    GLuint texture;
+    
+    GLuint text;
     try
     {
-        texture = Textures::loadTexture("assets/terrain.png", 9728);
+        text = textures->loadTexture("assets/terrain.png", 9728);
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, text);
     glEnable(GL_TEXTURE_2D);
     tess.init();
     Tile::tiles[paintTexture]->render(tess, level, 0, -2, 0, 0);
     tess.flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
+
+    checkGlError("GUI: Draw selected");
+    //TODO: Fontrenderer using NANOVG
+    checkGlError("GUI: Draw text");
     int wCenter = sw / 2;
     int hCenter = sh / 2;
     glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -265,6 +329,7 @@ void drawGui()
     tess.vertex((wCenter + 4), (hCenter + 1), 0.0F);
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.flush();
+    checkGlError("GUI: Draw crosshair");
 }
 
 void setupCamera(float timer)
@@ -383,17 +448,18 @@ void render(float deltaTime, GLFWwindow *window)
             level->setTile(x, y, z, paintTexture);
         }
     }
-
+    checkGlError("Picked");
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     setupCamera(deltaTime);
+    checkGlError("Set up camera");
     glEnable(GL_CULL_FACE);
     Frustum frustum = Frustum::getInstance();
     levelRenderer->updateDirtyChunks(player);
-
+    checkGlError("Update Chunks");
     setupFog(0);
     glEnable(GL_FOG);
     levelRenderer->render(player, 0);
-
+    checkGlError("Rendered level");
     for (size_t var8 = 0; var8 < zombies.size(); ++var8)
     {
         Zombie &var10 = zombies[var8];
@@ -402,8 +468,9 @@ void render(float deltaTime, GLFWwindow *window)
             zombies[var8].render(deltaTime);
         }
     }
-
+    checkGlError("Rendered entities");
     particleEngine->render(player, deltaTime, 0);
+    checkGlError("Rendered particles");
     setupFog(1);
     levelRenderer->render(player, 1);
 
@@ -420,14 +487,16 @@ void render(float deltaTime, GLFWwindow *window)
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_FOG);
+    checkGlError("Rendered rest");
     if (hitResult != nullptr)
     {
         glDisable(GL_ALPHA_TEST);
-        levelRenderer->renderHit(*hitResult);
+        levelRenderer->renderHit(*hitResult,editMode,paintTexture);
         glEnable(GL_ALPHA_TEST);
     }
-
+    checkGlError("Rendered hit");
     drawGui();
+    checkGlError("Rendered gui");
     glfwSwapBuffers(window);
 }
 
@@ -485,6 +554,8 @@ int init(GLFWwindow **window)
         return -1;
     }
 
+    checkGlError("Pre startup");
+
     glEnable(GL_TEXTURE_2D);
     glShadeModel(GL_SMOOTH);
     glClearColor(0.5F, 0.8F, 1.0F, 0.0F);
@@ -497,9 +568,12 @@ int init(GLFWwindow **window)
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
 
+    checkGlError("Startup");
+
+    textures = new Textures();
     level = new Level(256, 256, 64);
     player = new Player(level);
-    levelRenderer = new LevelRenderer(level);
+    levelRenderer = new LevelRenderer(level, textures);
     mouse = new Mouse();
     keyboard = new Keyboard();
     controller = new Controller(GLFW_JOYSTICK_1);
@@ -507,10 +581,11 @@ int init(GLFWwindow **window)
 
     for (int i = 0; i < 10; ++i)
     {
-        zombies.emplace_back(level, 128.0F, 0.0F, 128.0F);
+        zombies.emplace_back(level, textures, 128.0F, 0.0F, 128.0F);
         zombies[i].resetPos();
     }
 
+    checkGlError("Post startup");
     return 0;
 }
 
@@ -545,7 +620,7 @@ void tick()
 
     if (keyboard->isKeyPressed(GLFW_KEY_G))
     {
-        zombies.emplace_back(level, player->x, player->y, player->z);
+        zombies.emplace_back(level,textures, player->x, player->y, player->z);
     }
 
     for (size_t var1 = 0; var1 < zombies.size(); ++var1)
@@ -589,8 +664,9 @@ int main()
         {
             tick();
         }
-
+        checkGlError("Pre render");
         render(timer.a, window);
+        checkGlError("Post render");
 
         ++fps;
         long long current_time = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;

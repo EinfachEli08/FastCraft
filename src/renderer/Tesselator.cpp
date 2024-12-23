@@ -80,6 +80,7 @@ void Tesselator::init()
     this->clear();
     this->hasColor = false;
     this->hasTexture = false;
+    this->hasNoColor = false;
 }
 
 void Tesselator::tex(float u, float v)
@@ -95,14 +96,17 @@ void Tesselator::tex(float u, float v)
 
 void Tesselator::color(float r, float g, float b)
 {
-    if (!this->hasColor)
-    {
-        this->len += 3;
+    if(!this->hasNoColor){
+        if (!this->hasColor)
+        {
+            this->len += 3;
+        }
+        this->hasColor = true;
+        this->r = r;
+        this->g = g;
+        this->b = b;
     }
-    this->hasColor = true;
-    this->r = r;
-    this->g = g;
-    this->b = b;
+
 }
 
 void Tesselator::vertexUV(float x, float y, float z, float u, float v)
@@ -136,4 +140,17 @@ void Tesselator::vertex(float x, float y, float z)
     {
         this->flush();
     }
+}
+
+void Tesselator::color(int hex)
+{
+    float var2 = (float)(hex >> 16 & 255) / 255.0F;
+    float var3 = (float)(hex >> 8 & 255) / 255.0F;
+    float var4 = (float)(hex & 255) / 255.0F;
+    this->color(var2, var3, var4);
+}
+
+void Tesselator::noColor()
+{
+   this->hasNoColor = true;
 }

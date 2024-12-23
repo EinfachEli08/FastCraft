@@ -4,9 +4,9 @@
 #include <vector>
 #include "Particle.h"
 #include "Player.h"
-#include "Textures.h"
+#include "renderer/Textures.h"
 #include "level/Level.h"
-#include "level/Tesselator.h"
+#include "renderer/Tesselator.h"
 
 class ParticleEngine
 {

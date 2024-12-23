@@ -3,7 +3,7 @@
 #include <chrono>
 #include <functional>
 #include "Player.h"
-#include "Frustum.h"
+#include "renderer/Frustum.h"
 #include "Chunk.h"
 
 class DirtyChunkSorter

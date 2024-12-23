@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "level/Chunk.h"
-#include "level/Tesselator.h"
+#include "renderer/Tesselator.h"
 #include "Player.h"
 #include "HitResult.h"
 #include "level/DirtyChunkSorter.h"
@@ -22,16 +22,17 @@ private:
     std::vector<Chunk *> chunks;
     int xChunks, yChunks, zChunks;
     std::vector<Chunk *> getAllDirtyChunks();
+    Textures* textures;
 
 public:
-    LevelRenderer(Level *level);
+    LevelRenderer(Level *level, Textures* textures);
     ~LevelRenderer();
 
     void updateDirtyChunks(Player *player);
 
     void render(Player *player, int contextID);
 
-    void renderHit(HitResult hit);
+    void renderHit(HitResult hit, int editMode, int paintTexture);
 
     void pick(Player *player, Frustum frustum);
 

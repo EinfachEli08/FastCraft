@@ -15,6 +15,7 @@ Entity::Entity(Level *level) : level(level), onGround(false), heightOffset(0.0f)
     this->resetPos();
 }
 
+// Remove the entity
 void Entity::remove(){
     this->removed = true;
 }
@@ -39,11 +40,11 @@ void Entity::setPos(float x, float y, float z)
     this->bb = AABB(x - var4, y - var5, z - var4, x + var4, y + var5, z + var4);
 }
 
+// Set size
 void Entity::setSize(float bbWidth, float bbHeight){
 this->bbWidth = bbWidth;
 this->bbHeight = bbHeight;
 }
-
 
 // Rotate the entity
 void Entity::turn(float yRotDelta, float xRotDelta)
@@ -134,10 +135,15 @@ void Entity::moveRelative(float x, float z, float speed)
     }
 }
 
+// Check if Entity is lit
 bool Entity::isLit()
 {
     int x = this->x;
     int y = this->y;
     int z = this->z;
     return this->level->isLit(x, y, z);
+}
+
+void Entity::render(float partialTicks)
+{
 }

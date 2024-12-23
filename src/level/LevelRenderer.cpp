@@ -4,23 +4,24 @@
 #include <chrono>
 #include <algorithm>
 
-LevelRenderer::LevelRenderer(Level *level) : level(level)
+LevelRenderer::LevelRenderer(Level *level, Textures* textures) : level(level)
 {
+    this->textures = textures;
     level->addListener(this);
 
     // Calculate how many chunks we have in each dimension
-    xChunks = level->width / CHUNK_SIZE;
-    yChunks = level->depth / CHUNK_SIZE;
-    zChunks = level->height / CHUNK_SIZE;
+    this->xChunks = level->width / CHUNK_SIZE;
+    this->yChunks = level->depth / CHUNK_SIZE;
+    this->zChunks = level->height / CHUNK_SIZE;
 
     // Initialize chunks
-    chunks.resize(xChunks * yChunks * zChunks);
+    chunks.resize(this->xChunks * this->yChunks * this->zChunks);
 
-    for (int x = 0; x < xChunks; ++x)
+    for (int x = 0; x < this->xChunks; ++x)
     {
-        for (int y = 0; y < yChunks; ++y)
+        for (int y = 0; y < this->yChunks; ++y)
         {
-            for (int z = 0; z < zChunks; ++z)
+            for (int z = 0; z < this->zChunks; ++z)
             {
                 int x0 = x * CHUNK_SIZE;
                 int y0 = y * CHUNK_SIZE;
@@ -44,7 +45,7 @@ LevelRenderer::LevelRenderer(Level *level) : level(level)
                     z1 = level->height;
                 }
 
-                chunks[(x + y * xChunks) * zChunks + z] = new Chunk(level, x0, y0, z0, x1, y1, z1);
+                chunks[(x + y * this->xChunks) * this->zChunks + z] = new Chunk(level, x0, y0, z0, x1, y1, z1);
             }
         }
     }
@@ -92,7 +93,7 @@ void LevelRenderer::render(Player *player, int contextID)
 
     for (int i = 0; i < chunks.size(); ++i)
     {
-        if (frustum.cubeInFrustum(chunks[i]->aabb.x0, chunks[i]->aabb.y0, chunks[i]->aabb.z0, chunks[i]->aabb.x1, chunks[i]->aabb.y1, chunks[i]->aabb.z1))
+        if (frustum.cubeInFrustum(&(chunks[i]->aabb)))
         {
             chunks[i]->render(contextID); // Render the chunk if inside the frustum
         }
@@ -166,15 +167,68 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
     glPopName();
 }
 
-void LevelRenderer::renderHit(HitResult hit)
+void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
 {
     Tesselator& tess = Tesselator::getInstance();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
-    tess.init();
-    Tile::rock->renderFaceNoTexture(tess, hit.x, hit.y, hit.z, hit.f);
-    tess.flush();
+    if(editMode == 0){
+        tess.init();
+
+        for (int i = 0; i < 6; i++)
+        {
+            Tile::rock->renderFaceNoTexture(tess, hit.x, hit.y, hit.z, i);
+        }
+        
+        tess.flush();
+    }else{
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        float var10 = (float)std::sin((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0D) * 0.2F + 0.8F;
+        glColor4f(var10, var10, var10, (float)std::sin((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 200.0D) * 0.2F + 0.5F);
+        glEnable(GL_TEXTURE_2D);
+        int var6 = this->textures->loadTexture("/terrain.png", 9728);
+        glBindTexture(GL_TEXTURE_2D, var6);
+        int var7 = hit.x;
+        int var8 = hit.y;
+        int var9 = hit.z;
+        if (hit.f == 0)
+        {
+            --var8;
+        }
+
+        if (hit.f == 1)
+        {
+            ++var8;
+        }
+
+        if (hit.f == 2)
+        {
+            --var9;
+        }
+
+        if (hit.f == 3)
+        {
+            ++var9;
+        }
+
+        if (hit.f == 4)
+        {
+            --var7;
+        }
+
+        if (hit.f == 5)
+        {
+            ++var7;
+        }
+        tess.init();
+        tess.noColor();
+        Tile::tiles[paintTexture]->render(tess, this->level, 0, var7, var8, var9);
+        Tile::tiles[paintTexture]->render(tess, this->level, 1, var7, var8, var9);
+        tess.flush();
+        glDisable(GL_TEXTURE_2D);
+    }
+    
     glDisable(GL_BLEND);
 }
 

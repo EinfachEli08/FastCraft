@@ -3,9 +3,9 @@
 #include <chrono>
 
 #include "level/Level.h"
-#include "level/Tesselator.h"
+#include "renderer/Tesselator.h"
 #include "Player.h"
-#include "Textures.h"
+#include "renderer/Textures.h"
 #include "level/tile/Tile.h"
 
 class Chunk

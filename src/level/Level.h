@@ -17,7 +17,6 @@ public:
     int depth;
 
     Level(int width, int height, int depth);
-    void generateMap();
     bool load();
     void save();
     void calcLightDepths(int var1, int var2, int var3, int var4);
