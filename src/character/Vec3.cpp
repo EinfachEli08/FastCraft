@@ -6,7 +6,7 @@ Vec3::Vec3(float var1, float var2, float var3){
     this->z = var3;
 }
 
-Vec3 Vec3::interpolateTo(const Vec3 &var1, float var2) const
+Vec3 Vec3::interpolateTo(Vec3 &var1, float var2)
 {
     float var3 = this->x + (var1.x - this->x) * var2;
     float var4 = this->y + (var1.y - this->y) * var2;

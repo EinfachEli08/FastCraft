@@ -31,12 +31,76 @@ void Cube::addBox(float x, float y, float z, int width, int height, int depth)
     vertices[6] = Vertex(x1, y1, z1, 8.0f, 8.0f);
     vertices[7] = Vertex(x, y1, z1, 8.0f, 0.0f);
 
-    this->polygons[0] = Polygon({vertices[5], vertices[1], vertices[2], vertices[6]}, this->xTexOffs + depth + width, this->yTexOffs + depth, this->xTexOffs + depth + width + depth, this->yTexOffs + depth + height);
-    this->polygons[1] = Polygon({vertices[0], vertices[4], vertices[7], vertices[3]}, this->xTexOffs + 0, this->yTexOffs + depth, this->xTexOffs + depth, this->yTexOffs + depth + height);
-    this->polygons[2] = Polygon({vertices[5], vertices[4], vertices[0], vertices[1]}, this->xTexOffs + depth, yTexOffs, this->xTexOffs + depth + width, this->yTexOffs + depth);
-    this->polygons[3] = Polygon({vertices[2], vertices[3], vertices[7], vertices[6]}, this->xTexOffs + depth + width, this->yTexOffs, this->xTexOffs + depth + width + width, this->yTexOffs + depth);
-    this->polygons[4] = Polygon({vertices[1], vertices[0], vertices[3], vertices[2]}, this->xTexOffs + depth, this->yTexOffs + depth, this->xTexOffs + depth + width, this->yTexOffs + depth + height);
-    this->polygons[5] = Polygon({vertices[4], vertices[5], vertices[6], vertices[7]}, this->xTexOffs + depth + width + depth, this->yTexOffs + depth, this->xTexOffs + depth + width + depth + width, this->yTexOffs + depth + height);
+    this->polygons[0] = Polygon(
+        {
+            vertices[5], 
+            vertices[1], 
+            vertices[2], 
+            vertices[6]
+        }, 
+        this->xTexOffs + depth + width, 
+        this->yTexOffs + depth, 
+        this->xTexOffs + depth + width + depth, 
+        this->yTexOffs + depth + height
+        );
+    this->polygons[1] = Polygon(
+        {
+            vertices[0], 
+            vertices[4], 
+            vertices[7], 
+            vertices[3]
+        }, 
+        this->xTexOffs + 0, 
+        this->yTexOffs + depth, 
+        this->xTexOffs + depth, 
+        this->yTexOffs + depth + height);
+    this->polygons[2] = Polygon(
+        {
+            vertices[5], 
+            vertices[4], 
+            vertices[0], 
+            vertices[1]
+        }, 
+        this->xTexOffs + depth, 
+        this->yTexOffs, 
+        this->xTexOffs + depth + width, 
+        this->yTexOffs + depth
+        );
+    this->polygons[3] = Polygon(
+        {
+            vertices[2], 
+            vertices[3], 
+            vertices[7], 
+            vertices[6]
+        }, 
+        this->xTexOffs + depth + width, 
+        this->yTexOffs, 
+        this->xTexOffs + depth + width + width, 
+        this->yTexOffs + depth
+        );
+    this->polygons[4] = Polygon(
+        {
+            vertices[1],
+            vertices[0], 
+            vertices[3], 
+            vertices[2]
+        }, 
+        this->xTexOffs + depth, 
+        this->yTexOffs + depth, 
+        this->xTexOffs + depth + width, 
+        this->yTexOffs + depth + height);
+    this->polygons[5] = Polygon(
+        {
+            vertices[4], 
+            vertices[5], 
+            vertices[6], 
+            vertices[7]
+        }, 
+        this->xTexOffs + depth + width + depth, 
+        this->yTexOffs + depth, 
+        this->xTexOffs + depth + width + depth + width, 
+        this->yTexOffs + depth + height
+        );
 }
 
 void Cube::setPos(float x, float y, float z)

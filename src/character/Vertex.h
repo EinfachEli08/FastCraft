@@ -4,11 +4,14 @@
 class Vertex
 {
 public:
-    float x, y, z, u, v;
+    Vec3 pos;
+    float u;
+    float v;
+    Vertex() : pos(0.0f, 0.0f, 0.0f), u(0.0f), v(0.0f) {}
 
-    Vertex();                                                           
-    Vertex(float var1, float var2, float var3, float var4, float var5); 
-    Vertex(const Vertex &var1, float var2, float var3);                
-    Vertex(const Vec3 &var1, float var2, float var3);                   
-    Vertex remap(float var1, float var2) const;                         
+    Vertex(float x, float y, float z, float u, float v);
+    Vertex(const Vertex &other, float u, float v);
+    Vertex(const Vec3 &position, float u, float v);
+
+    Vertex remap(float u, float v) const;
 };

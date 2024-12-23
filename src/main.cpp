@@ -15,8 +15,8 @@
 #include "character/Cube.h"
 #include "character/Zombie.h"
 
-int screenWidth = 960;
-int screenHeight = 600;
+int screenWidth = 854;
+int screenHeight = 480;
 
 double mouseX = 0.0;
 double mouseY = 0.0;
@@ -229,37 +229,40 @@ void setupPickCamera(float timer, int widthIn, int heightIn)
 
 void pick(float deltaTime)
 {
-    std::vector<GLuint> selectBuffer(2000);
+    std::vector<GLuint> selectBuffer(512);
     glSelectBuffer(selectBuffer.size(), selectBuffer.data());
     glRenderMode(GL_SELECT);
 
     setupPickCamera(deltaTime, screenWidth / 2, screenHeight / 2);
 
-    levelRenderer->pick(player, Frustum::getInstance());
+    levelRenderer->pick(player, Frustum::getInstance()); 
 
     GLint hits = glRenderMode(GL_RENDER);
-    size_t bufferPos = 0;
-
-    GLuint closestDepth = std::numeric_limits<GLuint>::max();
+    GLuint closestDepth = 0;
+    int pos[10] = {0};
     int hitCount = 0;
-    std::array<int, 10> pos = {0};
+
+    auto it = selectBuffer.begin();
     for (int i = 0; i < hits; ++i)
     {
-        GLuint names = selectBuffer[bufferPos++];
-        GLuint minDepth = selectBuffer[bufferPos++];
-        bufferPos++;
+        GLuint names = *it++;
+        GLuint minDepth = *it++;
+        it++;
+
         if (minDepth >= closestDepth && i != 0)
         {
-            bufferPos += names;
+            for (GLuint j = 0; j < names; ++j)
+            {
+                ++it;
+            }
         }
         else
         {
             closestDepth = minDepth;
             hitCount = names;
-
-            for (int j = 0; j < names; ++j)
+            for (GLuint j = 0; j < names; ++j)
             {
-                pos[j] = selectBuffer[bufferPos++];
+                pos[j] = *it++;
             }
         }
     }
@@ -272,7 +275,6 @@ void pick(float deltaTime)
     {
         hitResult = nullptr;
     }
-    //std::cout << hitResult	<<std::endl;
 }
 
 void drawGui()
@@ -322,11 +324,14 @@ void drawGui()
     tess.init();
     tess.vertex((wCenter + 1), (hCenter - 4), 0.0F);
     tess.vertex((wCenter - 0), (hCenter - 4), 0.0F);
+
     tess.vertex((wCenter - 0), (hCenter + 5), 0.0F);
     tess.vertex((wCenter + 1), (hCenter + 5), 0.0F);
+
     tess.vertex((wCenter + 5), (hCenter - 0), 0.0F);
-    tess.vertex((wCenter + 4), (hCenter - 0), 0.0F);
-    tess.vertex((wCenter + 4), (hCenter + 1), 0.0F);
+    tess.vertex((wCenter - 4), (hCenter - 0), 0.0F);
+    
+    tess.vertex((wCenter - 4), (hCenter + 1), 0.0F);
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.flush();
     checkGlError("GUI: Draw crosshair");
@@ -625,7 +630,7 @@ void tick()
 
     for (size_t var1 = 0; var1 < zombies.size(); ++var1)
     {
-        zombies[var1].tick(); // Call tick() on each Zombie
+        zombies[var1].tick();
     }
 
     player->tick(controller, 0.125);
@@ -633,7 +638,15 @@ void tick()
 
 void destroy()
 {
-    level->save();
+    try
+    {
+        level->save();
+    }
+    catch(const std::exception& e)
+    {
+    }
+    
+   
     glfwTerminate();
 }
 

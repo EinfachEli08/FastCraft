@@ -20,7 +20,7 @@ public:
 
     Cube(int xTexOffs, int yTexOffs);
 
-    void setTexOffs(int var1, int var2);
+    void setTexOffs(int xTexOffs, int yTexOffs);
 
     void addBox(float x, float y, float z, int width, int height, int depth);
 
