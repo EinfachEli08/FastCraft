@@ -1,6 +1,7 @@
 #include "utils/OpenGLHeaders.h"
 #include <vector>
 #include <iostream>
+#include <thread>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -23,12 +24,16 @@ double mouseY = 0.0;
 
 long long millis = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
 Timer timer(20.0F);
-int fps = 0;
 
 Level *level;
 Player *player;
 int paintTexture = 1;
 int editMode = 0;
+
+bool running = false;
+bool pause = false;
+bool mouseGrabbed = false;
+
 Textures *textures;
 ParticleEngine *particleEngine;
 LevelRenderer *levelRenderer;
@@ -36,10 +41,11 @@ Mouse *mouse;
 Keyboard *keyboard;
 Controller *controller;
 int stickSpeed = 9;
-std::vector<Zombie> zombies;
+std::vector<Entity> entities;
 HitResult *hitResult;
 
 bool isFullscreen = false;
+bool appletMode = false;
 
 int windowedWidth = 960, windowedHeight = 540;
 
@@ -51,7 +57,7 @@ int var1 = 16710650;
 float fogColor0[4] = {(var1 >> 16 & 255) / 255.0F, (var1 >> 8 & 255) / 255.0F, (var1 & 255) / 255.0F, 1.0f};
 float lb[16];
 
-float* getBuffer(float var1, float var2, float var3, float var4)
+float *getBuffer(float var1, float var2, float var3, float var4)
 {
     lb[0] = var1;
     lb[1] = var2;
@@ -106,11 +112,11 @@ void checkGlError(char *var1)
     int var2 = glGetError();
     if (var2 != 0)
     {
-        char* var3 = errorString(var2);
+        char *var3 = errorString(var2);
         std::cout << "########## GL ERROR ##########" << std::endl;
         std::cout << "@ " << var1 << std::endl;
         std::cout << var2 << ": " << var3 << std::endl;
-        //exit(0);
+        // exit(0);
     }
 }
 
@@ -132,7 +138,7 @@ void setupFog(int mode)
         glEnable(GL_COLOR_MATERIAL);
 
         float ambientLight = 0.6F;
-       glLightModelfv(GL_LIGHT_MODEL_AMBIENT, getBuffer(ambientLight, ambientLight, ambientLight, 1.0F));
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, getBuffer(ambientLight, ambientLight, ambientLight, 1.0F));
     }
 }
 
@@ -235,7 +241,7 @@ void pick(float deltaTime)
 
     setupPickCamera(deltaTime, screenWidth / 2, screenHeight / 2);
 
-    levelRenderer->pick(player, Frustum::getInstance()); 
+    levelRenderer->pick(player, Frustum::getInstance());
 
     GLint hits = glRenderMode(GL_RENDER);
     GLuint closestDepth = 0;
@@ -291,13 +297,13 @@ void drawGui()
     checkGlError("GUI: Init");
     glPushMatrix();
     glTranslatef((float)(sw - 16), 16.0F, 0.0F);
-    Tesselator& tess = Tesselator::getInstance();
+    Tesselator &tess = Tesselator::getInstance();
     glScalef(16.0F, 16.0F, 16.0F);
     glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
     glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
     glTranslatef(-1.5F, 0.5F, -0.5F);
     glScalef(-1.0F, -1.0F, 1.0F);
-    
+
     GLuint text;
     try
     {
@@ -316,7 +322,7 @@ void drawGui()
     glPopMatrix();
 
     checkGlError("GUI: Draw selected");
-    //TODO: Fontrenderer using NANOVG
+    // TODO: Fontrenderer using NANOVG
     checkGlError("GUI: Draw text");
     int wCenter = sw / 2;
     int hCenter = sh / 2;
@@ -330,7 +336,7 @@ void drawGui()
 
     tess.vertex((wCenter + 5), (hCenter - 0), 0.0F);
     tess.vertex((wCenter - 4), (hCenter - 0), 0.0F);
-    
+
     tess.vertex((wCenter - 4), (hCenter + 1), 0.0F);
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.flush();
@@ -345,6 +351,48 @@ void setupCamera(float timer)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     moveCameraToPlayer(timer);
+}
+
+void grabMouse(GLFWwindow *window)
+{
+    try
+    {
+        if (!mouseGrabbed)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            mouseGrabbed = true;
+            std::cout << "Mouse grabbed successfully.\n";
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error grabbing mouse: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown error occurred while grabbing the mouse." << std::endl;
+    }
+}
+
+void releaseMouse(GLFWwindow *window)
+{
+    try
+    {
+        if (mouseGrabbed)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            mouseGrabbed = false;
+            std::cout << "Mouse released successfully.\n";
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error releasing mouse: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown error occurred while releasing the mouse." << std::endl;
+    }
 }
 
 void render(float deltaTime, GLFWwindow *window)
@@ -465,26 +513,28 @@ void render(float deltaTime, GLFWwindow *window)
     glEnable(GL_FOG);
     levelRenderer->render(player, 0);
     checkGlError("Rendered level");
-    for (size_t var8 = 0; var8 < zombies.size(); ++var8)
+
+    for (int index = 0; index < entities.size(); ++index)
     {
-        Zombie &var10 = zombies[var8];
-        if (var10.isLit() && frustum.isVisible(&(var10.bb)))
+        Entity &entity = entities[index];
+        if (entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
-            zombies[var8].render(deltaTime);
+            entity.render(deltaTime); 
         }
     }
+
     checkGlError("Rendered entities");
     particleEngine->render(player, deltaTime, 0);
     checkGlError("Rendered particles");
     setupFog(1);
     levelRenderer->render(player, 1);
 
-    for (size_t var8 = 0; var8 < zombies.size(); ++var8)
+    for (int index = 0; index < entities.size(); ++index)
     {
-        Zombie &var10 = zombies[var8]; 
-        if (!var10.isLit() && frustum.isVisible(&(var10.bb)))
+        Entity &entity = entities[index]; 
+        if (entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
-            zombies[var8].render(deltaTime);
+            entity.render(deltaTime); 
         }
     }
 
@@ -496,7 +546,7 @@ void render(float deltaTime, GLFWwindow *window)
     if (hitResult != nullptr)
     {
         glDisable(GL_ALPHA_TEST);
-        levelRenderer->renderHit(*hitResult,editMode,paintTexture);
+        levelRenderer->renderHit(*hitResult, editMode, paintTexture);
         glEnable(GL_ALPHA_TEST);
     }
     checkGlError("Rendered hit");
@@ -505,26 +555,23 @@ void render(float deltaTime, GLFWwindow *window)
     glfwSwapBuffers(window);
 }
 
-int init(GLFWwindow **window)
+void init(GLFWwindow **window)
 {
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
-        return -1;
     }
 
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     if (!monitor)
     {
         std::cerr << "Failed to get primary monitor!" << std::endl;
-        return -1;
     }
 
     const GLFWvidmode *mode = glfwGetVideoMode(monitor);
     if (!mode)
     {
         std::cerr << "Failed to get video mode!" << std::endl;
-        return -1;
     }
 
     int windowPosX = (mode->width - screenWidth) / 2;
@@ -539,7 +586,6 @@ int init(GLFWwindow **window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
-        return -1;
     }
 
     glfwSetWindowPos(*window, windowPosX, windowPosY);
@@ -548,7 +594,7 @@ int init(GLFWwindow **window)
 
     glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
 
-    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSwapInterval(0);
 
@@ -556,7 +602,6 @@ int init(GLFWwindow **window)
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         glfwTerminate();
-        return -1;
     }
 
     checkGlError("Pre startup");
@@ -586,17 +631,26 @@ int init(GLFWwindow **window)
 
     for (int i = 0; i < 10; ++i)
     {
-        zombies.emplace_back(level, textures, 128.0F, 0.0F, 128.0F);
-        zombies[i].resetPos();
+        Zombie zombie = Zombie(level, textures, 128.0F, 0.0F, 128.0F);
+        zombie.resetPos();
+        entities.push_back(zombie);
+    }
+
+    if (!appletMode)
+    {
+        grabMouse(*window);
     }
 
     checkGlError("Post startup");
-    return 0;
 }
 
-void tick()
+void tick(GLFWwindow *window)
 {
 
+    if (keyboard->getEventKey() == keyboard->isKeyPressed(GLFW_KEY_ESCAPE) && (appletMode || !isFullscreen))
+    {
+        releaseMouse(window);
+    }
     if (keyboard->isKeyPressed(GLFW_KEY_ENTER))
     {
         level->save();
@@ -625,12 +679,12 @@ void tick()
 
     if (keyboard->isKeyPressed(GLFW_KEY_G))
     {
-        zombies.emplace_back(level,textures, player->x, player->y, player->z);
+        entities.push_back(Zombie(level, textures, player->x, player->y, player->z));
     }
 
-    for (size_t var1 = 0; var1 < zombies.size(); ++var1)
+    for (size_t var1 = 0; var1 < entities.size(); ++var1)
     {
-        zombies[var1].tick();
+        entities[var1].tick();
     }
 
     player->tick(controller, 0.125);
@@ -642,60 +696,99 @@ void destroy()
     {
         level->save();
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
     }
-    
-   
+
     glfwTerminate();
+}
+
+void stop()
+{
+    running = false;
+}
+
+void run()
+{
+    running = true;
+
+    double xpos, ypos;
+    GLFWwindow *window = nullptr;
+    try
+    {
+        init(&window);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Failed to start Minecraft " << e.what() << '\n';
+        exit(0);
+    }
+
+    long long current_time = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
+    int fps = 0;
+
+    try
+    {
+        while (running)
+        {
+            if (pause)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            else
+            {
+
+                if (glfwWindowShouldClose(window))
+                {
+                    stop();
+                }
+
+                mouse->update(xpos, -ypos);
+                keyboard->update();
+                controller->update();
+
+                if (keyboard->isKeyPressed(GLFW_KEY_F11) || controller->isButtonPressed(6))
+                {
+                    toggleFullscreen(window);
+                }
+
+                timer.advanceTime();
+
+                for (int i = 0; i < timer.ticks; ++i)
+                {
+                    tick(window);
+                }
+
+                checkGlError("Pre render");
+                render(timer.a, window);
+                checkGlError("Post render");
+
+                ++fps;
+                if (current_time >= millis + 1000)
+                {
+                    std::cout << fps << " fps" << std::endl;
+                    millis += 1000;
+                    fps = 0;
+                }
+
+                glfwGetCursorPos(window, &xpos, &ypos);
+
+                glfwPollEvents();
+            }
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+    destroy();
 }
 
 int main()
 {
-    double xpos, ypos;
-    GLFWwindow *window = nullptr;
-
-    if (init(&window) < 0)
-    {
-        return -1;
-    }
-
-    while (!keyboard->isKeyPressed(GLFW_KEY_ESCAPE) && !glfwWindowShouldClose(window))
-    {
-        mouse->update(xpos, -ypos);
-        keyboard->update();
-        controller->update();
-
-        if (keyboard->isKeyPressed(GLFW_KEY_F11) || controller->isButtonPressed(6))
-        {
-            toggleFullscreen(window);
-        }
-
-        timer.advanceTime();
-
-        for (int i = 0; i < timer.ticks; ++i)
-        {
-            tick();
-        }
-        checkGlError("Pre render");
-        render(timer.a, window);
-        checkGlError("Post render");
-
-        ++fps;
-        long long current_time = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
-        if (current_time >= millis + 1000)
-        {
-            std::cout << fps << " fps" << std::endl;
-            millis += 1000;
-            fps = 0;
-        }
-
-        glfwGetCursorPos(window, &xpos, &ypos);
-
-        glfwPollEvents();
-    }
-
-    destroy();
+    appletMode = true;
+    run();
 
     return 0;
 }
