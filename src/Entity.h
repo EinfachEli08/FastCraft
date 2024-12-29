@@ -32,10 +32,10 @@ public:
 
     void turn(float yRot, float xRot);
 
-    void tick();
+    virtual void tick();
     virtual void move(float dx, float dy, float dz);
     virtual void moveRelative(float x, float z, float speed);
-    void render(float partialTicks);
+    virtual void render(float partialTicks);
     void remove();
     bool isLit();
 };

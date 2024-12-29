@@ -2,8 +2,6 @@
 #include <cmath>
 #include <algorithm>
 
-
-
 // Constructor
 Entity::Entity(Level *level) : level(level), onGround(false), heightOffset(0.0f)
 {
@@ -16,7 +14,8 @@ Entity::Entity(Level *level) : level(level), onGround(false), heightOffset(0.0f)
 }
 
 // Remove the entity
-void Entity::remove(){
+void Entity::remove()
+{
     this->removed = true;
 }
 
@@ -35,15 +34,16 @@ void Entity::setPos(float x, float y, float z)
     this->x = x;
     this->y = y;
     this->z = z;
-    float var4 = this->bbWidth/ 2.0F;
+    float var4 = this->bbWidth / 2.0F;
     float var5 = this->bbHeight / 2.0F;
     this->bb = AABB(x - var4, y - var5, z - var4, x + var4, y + var5, z + var4);
 }
 
 // Set size
-void Entity::setSize(float bbWidth, float bbHeight){
-this->bbWidth = bbWidth;
-this->bbHeight = bbHeight;
+void Entity::setSize(float bbWidth, float bbHeight)
+{
+    this->bbWidth = bbWidth;
+    this->bbHeight = bbHeight;
 }
 
 // Rotate the entity
@@ -146,4 +146,5 @@ bool Entity::isLit()
 
 void Entity::render(float partialTicks)
 {
+    puts("Heil Scholz!");
 }

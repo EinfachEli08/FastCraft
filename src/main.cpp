@@ -41,7 +41,7 @@ Mouse *mouse;
 Keyboard *keyboard;
 Controller *controller;
 int stickSpeed = 9;
-std::vector<Entity> entities;
+std::vector<Entity *> entities;
 HitResult *hitResult;
 
 bool isFullscreen = false;
@@ -113,10 +113,10 @@ void checkGlError(char *var1)
     if (var2 != 0)
     {
         char *var3 = errorString(var2);
-        std::cout << "########## GL ERROR ##########" << std::endl;
-        std::cout << "@ " << var1 << std::endl;
-        std::cout << var2 << ": " << var3 << std::endl;
-        // exit(0);
+        // std::cout << "########## GL ERROR ##########" << std::endl;
+        // std::cout << "@ " << var1 << std::endl;
+        // std::cout << var2 << ": " << var3 << std::endl;
+        //  exit(0);
     }
 }
 
@@ -160,6 +160,7 @@ void toggleFullscreen(GLFWwindow *window)
     }
 
     isFullscreen = !isFullscreen;
+    appletMode = !appletMode;
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -516,7 +517,7 @@ void render(float deltaTime, GLFWwindow *window)
 
     for (int index = 0; index < entities.size(); ++index)
     {
-        Entity &entity = entities[index];
+        Entity &entity = *entities[index];
         if (entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
             entity.render(deltaTime); 
@@ -531,8 +532,8 @@ void render(float deltaTime, GLFWwindow *window)
 
     for (int index = 0; index < entities.size(); ++index)
     {
-        Entity &entity = entities[index]; 
-        if (entity.isLit() && frustum.isVisible(&(entity.bb)))
+        Entity &entity = *entities[index];
+        if (!entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
             entity.render(deltaTime); 
         }
@@ -594,7 +595,7 @@ void init(GLFWwindow **window)
 
     glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
 
-    // glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSwapInterval(0);
 
@@ -631,9 +632,10 @@ void init(GLFWwindow **window)
 
     for (int i = 0; i < 10; ++i)
     {
-        Zombie zombie = Zombie(level, textures, 128.0F, 0.0F, 128.0F);
-        zombie.resetPos();
+        Zombie *zombie = new Zombie(level, textures, 128.0F, 0.0F, 128.0F);
+        zombie->resetPos();
         entities.push_back(zombie);
+        std::cout << "Added Zombie + " << i + 1 << std::endl;
     }
 
     if (!appletMode)
@@ -679,12 +681,12 @@ void tick(GLFWwindow *window)
 
     if (keyboard->isKeyPressed(GLFW_KEY_G))
     {
-        entities.push_back(Zombie(level, textures, player->x, player->y, player->z));
+        entities.push_back(new Zombie(level, textures, player->x, player->y, player->z));
     }
 
-    for (size_t var1 = 0; var1 < entities.size(); ++var1)
+    for (int i = 0; i < entities.size(); ++i)
     {
-        entities[var1].tick();
+        entities[i]->tick();
     }
 
     player->tick(controller, 0.125);

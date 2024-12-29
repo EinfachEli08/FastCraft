@@ -28,6 +28,6 @@ public:
 
     Zombie(Level *level, Textures *textures, float x, float y, float z);
 
-    void tick();
-    void render(float partialTick);
+    void tick() override;
+    void render(float partialTick) override;
 };

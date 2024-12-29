@@ -19,7 +19,6 @@ Zombie::Zombie(Level *level, Textures *textures, float x, float y, float z)
     this->timeOffs = static_cast<float>(Math::random()) * 1239813.0f;
     this->rot = static_cast<float>(Math::random()) * static_cast<float>(Math::PI * 2.0);
     this->speed = 1.0f;
-
 }
 
 void Zombie::tick()
