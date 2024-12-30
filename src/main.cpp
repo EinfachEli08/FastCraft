@@ -8,6 +8,7 @@
 #include "renderer/Textures.h"
 #include "Timer.h"
 #include "level/LevelRenderer.h"
+#include "gui/Font.h"
 #include "Player.h"
 #include "particle/ParticleEngine.h"
 #include "utils/Mouse.h"
@@ -15,6 +16,9 @@
 #include "utils/Controller.h"
 #include "character/Cube.h"
 #include "character/Zombie.h"
+#include "nano/nanovg.h"
+#define NANOVG_GL3_IMPLEMENTATION
+#include "nano/nanovg_gl.h"
 
 int screenWidth = 854;
 int screenHeight = 480;
@@ -34,8 +38,12 @@ bool running = false;
 bool pause = false;
 bool mouseGrabbed = false;
 
+std::string fpsString = "";
+
+NVGcontext *vg;
 Textures *textures;
 ParticleEngine *particleEngine;
+Font *font;
 LevelRenderer *levelRenderer;
 Mouse *mouse;
 Keyboard *keyboard;
@@ -342,6 +350,30 @@ void drawGui()
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.flush();
     checkGlError("GUI: Draw crosshair");
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+
+    // NanoVG rendering
+    nvgBeginFrame(vg, screenWidth, screenHeight, 1.0f);
+
+    font->drawShadow("FastCraft Engine Classic", 4.0f, 4.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
+    font->drawShadow(fpsString, 4.0f, 24.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
+
+    nvgEndFrame(vg);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopClientAttrib();
+    glPopAttrib();
+
+    checkGlError("GUI: NVG font");
 }
 
 void setupCamera(float timer)
@@ -520,7 +552,7 @@ void render(float deltaTime, GLFWwindow *window)
         Entity &entity = *entities[index];
         if (entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
-            entity.render(deltaTime); 
+            entity.render(deltaTime);
         }
     }
 
@@ -535,7 +567,7 @@ void render(float deltaTime, GLFWwindow *window)
         Entity &entity = *entities[index];
         if (!entity.isLit() && frustum.isVisible(&(entity.bb)))
         {
-            entity.render(deltaTime); 
+            entity.render(deltaTime);
         }
     }
 
@@ -605,6 +637,13 @@ void init(GLFWwindow **window)
         glfwTerminate();
     }
 
+    vg = nvgCreateGL3(NVG_STENCIL_STROKES);
+    if (vg == nullptr)
+    {
+        std::cerr << "Could not initialize NanoVG" << std::endl;
+        return;
+    }
+
     checkGlError("Pre startup");
 
     glEnable(GL_TEXTURE_2D);
@@ -629,13 +668,13 @@ void init(GLFWwindow **window)
     keyboard = new Keyboard();
     controller = new Controller(GLFW_JOYSTICK_1);
     particleEngine = new ParticleEngine(level);
+    font = new Font(vg, "assets/MinecraftRegular.ttf");
 
     for (int i = 0; i < 10; ++i)
     {
         Zombie *zombie = new Zombie(level, textures, 128.0F, 0.0F, 128.0F);
         zombie->resetPos();
         entities.push_back(zombie);
-        std::cout << "Added Zombie + " << i + 1 << std::endl;
     }
 
     if (!appletMode)
@@ -702,6 +741,7 @@ void destroy()
     {
     }
 
+    nvgDeleteGL3(vg);
     glfwTerminate();
 }
 
@@ -726,11 +766,16 @@ void run()
         exit(0);
     }
 
-    long long current_time = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
+    long long millis = std::chrono::system_clock::now().time_since_epoch().count() / 1000000;
     int fps = 0;
 
     try
     {
+        using clock = std::chrono::high_resolution_clock;
+
+        auto start_time = clock::now();
+        auto last_time = clock::now();
+
         while (running)
         {
             if (pause)
@@ -764,12 +809,19 @@ void run()
                 checkGlError("Pre render");
                 render(timer.a, window);
                 checkGlError("Post render");
-
                 ++fps;
-                if (current_time >= millis + 1000)
+
+                auto now = clock::now();
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+
+                // Frame-Update-Logik
+                fps++;
+
+                if (elapsed >= 1000)
                 {
-                    std::cout << fps << " fps" << std::endl;
-                    millis += 1000;
+                    fpsString = std::to_string(fps) + " fps, " + std::to_string(Chunk::updates) + " chunk updates";
+                    Chunk::updates = 0;
+                    start_time = now;
                     fps = 0;
                 }
 
