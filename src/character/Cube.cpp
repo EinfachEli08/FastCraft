@@ -118,7 +118,6 @@ void Cube::render(){
     }
 
     const float DEG_TO_RAD = 57.29578f;
-
     glPushMatrix();
     glTranslatef(this->x, this->y, this->z);
     glRotatef(this->zRot * DEG_TO_RAD, 0.0f, 0.0f, 1.0f);

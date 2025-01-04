@@ -146,5 +146,4 @@ bool Entity::isLit()
 
 void Entity::render(float partialTicks)
 {
-    puts("Heil Scholz!");
 }

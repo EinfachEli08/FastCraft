@@ -13,8 +13,9 @@ void Bush::tick(Level *level, int x, int y, int z, std::default_random_engine &r
     }
 }
 
-void Bush::render(Tesselator *tess, Level *level, int var3, int x, int y, int z){
-    if (!(level->isLit(x, y, z) ^ var3 != 1))
+void Bush::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
+{
+    if (!(level->isLit(x, y, z) ^ size != 1))
     {
         int var7 = this->getTexture(15);
         float var8 = (float)(var7 % 16) / 16.0F;
@@ -22,7 +23,7 @@ void Bush::render(Tesselator *tess, Level *level, int var3, int x, int y, int z)
         float var10 = (float)(var7 / 16) / 16.0F;
         float var11 = var10 + 0.999F / 16.0F;
         double var12 = 2;
-        tess->color(1.0F, 1.0F, 1.0F);
+        tess.color(1.0F, 1.0F, 1.0F);
 
         for (int var13 = 0; var13 < var12; ++var13)
         {
@@ -34,14 +35,14 @@ void Bush::render(Tesselator *tess, Level *level, int var3, int x, int y, int z)
             float var19 = (float)y + 1.0F;
             float var20 = (float)z + 0.5F - var15;
             float var21 = (float)z + 0.5F + var15;
-            tess->vertexUV(var16, var19, var20, var9, var10);
-            tess->vertexUV(var17, var19, var21, var8, var10);
-            tess->vertexUV(var17, var18, var21, var8, var11);
-            tess->vertexUV(var16, var18, var20, var9, var11);
-            tess->vertexUV(var17, var19, var21, var8, var10);
-            tess->vertexUV(var16, var19, var20, var9, var10);
-            tess->vertexUV(var16, var18, var20, var9, var11);
-            tess->vertexUV(var17, var18, var21, var8, var11);
+            tess.vertexUV(var16, var19, var20, var9, var10);
+            tess.vertexUV(var17, var19, var21, var8, var10);
+            tess.vertexUV(var17, var18, var21, var8, var11);
+            tess.vertexUV(var16, var18, var20, var9, var11);
+            tess.vertexUV(var17, var19, var21, var8, var10);
+            tess.vertexUV(var16, var19, var20, var9, var10);
+            tess.vertexUV(var16, var18, var20, var9, var11);
+            tess.vertexUV(var17, var18, var21, var8, var11);
         }
     }
 }

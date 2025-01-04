@@ -76,7 +76,6 @@ void Zombie::render(float partialTick)
     glScalef(1.0F, -1.0F, 1.0F);
     glScalef(var4, var4, var4);
     glTranslatef(0.0F, var5, 0.0F);
-
     glRotatef(this->rot * 57.29578f + 180.0f, 0.0f, 1.0f, 0.0f);
 
     zombieModel.render(var2);
