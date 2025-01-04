@@ -14,7 +14,6 @@ Font::Font(NVGcontext *vg, const std::string &fontPath) : vg(vg)
 
 Font::~Font()
 {
-    // NanoVG automatically handles font cleanup when the context is destroyed
 }
 
 void Font::drawShadow(const std::string &text, float x, float y, float fontSize, NVGcolor color)

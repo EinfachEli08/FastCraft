@@ -1,12 +1,8 @@
-
 #include "Zombie.h"
-
 #include <renderer/Textures.h>
 #include <chrono>
 #include <glad/glad.h>
 #include "renderer/Textures.h"
-
-ZombieModel Zombie::zombieModel;
 
 Zombie::Zombie(Level *level, Textures *textures, float x, float y, float z)
     : Entity(level),
@@ -78,7 +74,25 @@ void Zombie::render(float partialTick)
     glTranslatef(0.0F, var5, 0.0F);
     glRotatef(this->rot * 57.29578f + 180.0f, 0.0f, 1.0f, 0.0f);
 
-    zombieModel.render(var2);
+    ZombieModel zombieModel = ZombieModel();
+    zombieModel.head.yRot = (float)std::sin((double)var2 * 0.83D);
+    zombieModel.head.xRot = (float)std::sin((double)var2) * 0.8f;
+
+    zombieModel.arm0.xRot = (float)std::sin((double)var2 * 0.6662D + Math::PI) * 2.0f;
+    zombieModel.arm0.zRot = (float)(std::sin((double)var2 * 0.2312D)) + 1.0D;
+
+    zombieModel.arm1.xRot = (float)std::sin((double)var2 * 0.6662D) * 2.0f;
+    zombieModel.arm1.zRot = (float)(std::sin((double)var2 * 0.2812D) - 1.0D);
+
+    zombieModel.leg0.xRot = (float)std::sin((double)var2 * 0.6662D) * 1.4f;
+    zombieModel.leg1.xRot = (float)std::sin((double)var2 * 0.6662D + Math::PI) * 1.4f;
+
+    zombieModel.head.render();
+    zombieModel.body.render();
+    zombieModel.arm0.render();
+    zombieModel.arm1.render();
+    zombieModel.leg0.render();
+    zombieModel.leg1.render();
 
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);

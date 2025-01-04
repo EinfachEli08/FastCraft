@@ -158,11 +158,11 @@ void Fastcraft::perspective(float fovY, float aspect, float zNear, float zFar)
 void Fastcraft::focusPlayerCamera(float var1)
 {
     glTranslatef(0.0F, 0.0F, -0.3F);
-    glRotatef(player->xRot, 1.0F, 0.0F, 0.0F);
-    glRotatef(player->yRot, 0.0F, 1.0F, 0.0F);
-    float var2 = player->xo + (player->x - player->xo) * var1;
-    float var3 = player->yo + (player->y - player->yo) * var1;
-    float var4 = player->zo + (player->z - player->zo) * var1;
+    glRotatef(thePlayer->xRot, 1.0F, 0.0F, 0.0F);
+    glRotatef(thePlayer->yRot, 0.0F, 1.0F, 0.0F);
+    float var2 = thePlayer->xo + (thePlayer->x - thePlayer->xo) * var1;
+    float var3 = thePlayer->yo + (thePlayer->y - thePlayer->yo) * var1;
+    float var4 = thePlayer->zo + (thePlayer->z - thePlayer->zo) * var1;
     glTranslatef(-var2, -var3, -var4);
 }
 
@@ -187,7 +187,7 @@ void Fastcraft::pick(float deltaTime)
 
     setupPickCamera(deltaTime, width / 2, height / 2);
 
-    levelRenderer->pick(player, Frustum::getInstance());
+    levelRenderer->pick(thePlayer, Frustum::getInstance());
 
     GLint hits = glRenderMode(GL_RENDER);
     GLuint closestDepth = 0;
@@ -369,7 +369,7 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
 {
     if (!controller->isConnected())
     {
-        player->turn(mouse->getDX(), mouse->getDY());
+        thePlayer->turn(mouse->getDX(), mouse->getDY());
         pick(deltaTime);
 
         if (mouse->isButtonClicked(1) && hitResult != nullptr)
@@ -421,7 +421,7 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
     }
     else
     {
-        player->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3));
+        thePlayer->turn(stickSpeed * controller->getAxisPosition(2), stickSpeed * -controller->getAxisPosition(3));
         pick(deltaTime);
 
         if (controller->isAxisButtonPressed(4) && hitResult != nullptr)
@@ -477,11 +477,11 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
     reportGLError("Set up camera");
     glEnable(GL_CULL_FACE);
     Frustum frustum = Frustum::getInstance();
-    levelRenderer->updateDirtyChunks(player);
+    levelRenderer->updateDirtyChunks(thePlayer);
     reportGLError("Update Chunks");
     setupFog(0);
     glEnable(GL_FOG);
-    levelRenderer->render(player, 0);
+    levelRenderer->render(thePlayer, 0);
     reportGLError("Rendered level");
 
     for (int index = 0; index < entities.size(); ++index)
@@ -494,10 +494,10 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
     }
 
     reportGLError("Rendered entities");
-    particleEngine->render(player, deltaTime, 0);
+    particleEngine->render(thePlayer, deltaTime, 0);
     reportGLError("Rendered particles");
     setupFog(1);
-    levelRenderer->render(player, 1);
+    levelRenderer->render(thePlayer, 1);
 
     for (int index = 0; index < entities.size(); ++index)
     {
@@ -508,7 +508,7 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
         }
     }
 
-    particleEngine->render(player, deltaTime, 1);
+    particleEngine->render(thePlayer, deltaTime, 1);
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_FOG);
@@ -599,7 +599,7 @@ void Fastcraft::init(GLFWwindow **window)
 
     textures = new Textures();
     level = new Level(256, 256, 64);
-    player = new Player(level);
+    thePlayer = new Player(level);
     levelRenderer = new LevelRenderer(level, textures);
     mouse = new Mouse();
     keyboard = new Keyboard();
@@ -657,7 +657,7 @@ void Fastcraft::tick(GLFWwindow *window)
 
     if (keyboard->isKeyPressed(GLFW_KEY_G))
     {
-        entities.push_back(new Zombie(level, textures, player->x, player->y, player->z));
+        entities.push_back(new Zombie(level, textures, thePlayer->x, thePlayer->y, thePlayer->z));
     }
 
     for (int i = 0; i < entities.size(); ++i)
@@ -665,7 +665,7 @@ void Fastcraft::tick(GLFWwindow *window)
         entities[i]->tick();
     }
 
-    player->tick(controller, 0.125);
+    thePlayer->tick(controller, 0.125);
 }
 
 void Fastcraft::destroy()

@@ -1,23 +1,18 @@
 #include "utils/OpenGLHeaders.h"
 #include "Cube.h"
 
-
-Cube::Cube(int xTexOffs, int yTexOffs){
-    this->xTexOffs = xTexOffs;
-    this->yTexOffs = yTexOffs;
-}
+Cube::Cube(int textureOffsetX, int textureOffsetY)
+    : textureOffsetX(textureOffsetX), textureOffsetY(textureOffsetY) {}
 
 void Cube::setTexOffs(int var1, int var2)
 {
-    this->xTexOffs = var1;
-    this->yTexOffs = var2;
+    this->textureOffsetX = var1;
+    this->textureOffsetY = var2;
 }
 
 void Cube::addBox(float x, float y, float z, int width, int height, int depth)
 {
-    this->vertices.resize(8);
-    this->polygons.resize(6);
-
+    vertices.resize(8);
     float x1 = x + width;
     float y1 = y + height;
     float z1 = z + depth;
@@ -31,76 +26,36 @@ void Cube::addBox(float x, float y, float z, int width, int height, int depth)
     vertices[6] = Vertex(x1, y1, z1, 8.0f, 8.0f);
     vertices[7] = Vertex(x, y1, z1, 8.0f, 0.0f);
 
-    this->polygons[0] = Polygon(
-        {
-            vertices[5], 
-            vertices[1], 
-            vertices[2], 
-            vertices[6]
-        }, 
-        this->xTexOffs + depth + width, 
-        this->yTexOffs + depth, 
-        this->xTexOffs + depth + width + depth, 
-        this->yTexOffs + depth + height
-        );
-    this->polygons[1] = Polygon(
-        {
-            vertices[0], 
-            vertices[4], 
-            vertices[7], 
-            vertices[3]
-        }, 
-        this->xTexOffs + 0, 
-        this->yTexOffs + depth, 
-        this->xTexOffs + depth, 
-        this->yTexOffs + depth + height);
-    this->polygons[2] = Polygon(
-        {
-            vertices[5], 
-            vertices[4], 
-            vertices[0], 
-            vertices[1]
-        }, 
-        this->xTexOffs + depth, 
-        this->yTexOffs, 
-        this->xTexOffs + depth + width, 
-        this->yTexOffs + depth
-        );
-    this->polygons[3] = Polygon(
-        {
-            vertices[2], 
-            vertices[3], 
-            vertices[7], 
-            vertices[6]
-        }, 
-        this->xTexOffs + depth + width, 
-        this->yTexOffs, 
-        this->xTexOffs + depth + width + width, 
-        this->yTexOffs + depth
-        );
-    this->polygons[4] = Polygon(
-        {
-            vertices[1],
-            vertices[0], 
-            vertices[3], 
-            vertices[2]
-        }, 
-        this->xTexOffs + depth, 
-        this->yTexOffs + depth, 
-        this->xTexOffs + depth + width, 
-        this->yTexOffs + depth + height);
-    this->polygons[5] = Polygon(
-        {
-            vertices[4], 
-            vertices[5], 
-            vertices[6], 
-            vertices[7]
-        }, 
-        this->xTexOffs + depth + width + depth, 
-        this->yTexOffs + depth, 
-        this->xTexOffs + depth + width + depth + width, 
-        this->yTexOffs + depth + height
-        );
+    polygons.emplace_back(std::vector<Vertex>{vertices[5], vertices[1], vertices[2], vertices[6]},
+                          this->textureOffsetX + depth + width,
+                          this->textureOffsetY + depth,
+                          this->textureOffsetX + depth + width + depth,
+                          this->textureOffsetY + depth + height);
+    polygons.emplace_back(std::vector<Vertex>{vertices[0], vertices[4], vertices[7], vertices[3]},
+                          this->textureOffsetX + 0,
+                          this->textureOffsetY + depth,
+                          this->textureOffsetX + depth,
+                          this->textureOffsetY + depth + height);
+    polygons.emplace_back(std::vector<Vertex>{vertices[5], vertices[4], vertices[0], vertices[1]},
+                          this->textureOffsetX + depth,
+                          this->textureOffsetY,
+                          this->textureOffsetX + depth + width,
+                          this->textureOffsetY + depth);
+    polygons.emplace_back(std::vector<Vertex>{vertices[2], vertices[3], vertices[7], vertices[6]},
+                          this->textureOffsetX + depth + width,
+                          this->textureOffsetY,
+                          this->textureOffsetX + depth + width + width,
+                          this->textureOffsetY + depth);
+    polygons.emplace_back(std::vector<Vertex>{vertices[1], vertices[0], vertices[3], vertices[2]},
+                          this->textureOffsetX + depth,
+                          this->textureOffsetY + depth,
+                          this->textureOffsetX + depth + width,
+                          this->textureOffsetY + depth + height);
+    polygons.emplace_back(std::vector<Vertex>{vertices[4], vertices[5], vertices[6], vertices[7]},
+                          this->textureOffsetX + depth + width + depth,
+                          this->textureOffsetY + depth,
+                          this->textureOffsetX + depth + width + depth + width,
+                          this->textureOffsetY + depth + height);
 }
 
 void Cube::setPos(float x, float y, float z)
@@ -110,11 +65,31 @@ void Cube::setPos(float x, float y, float z)
     this->z = z;
 }
 
-// Render the cube
-void Cube::render(){
+void Cube::render()
+{
     if (!this->compiled)
     {
-        compile();
+        Cube *var1 = this;
+        this->list = glGenLists(1);
+        glNewList(this->list, GL_COMPILE);
+        glBegin(GL_QUADS);
+
+        for (int var2 = 0; var2 < var1->polygons.size(); ++var2)
+        {
+            Polygon var3 = var1->polygons[var2];
+            glColor3f(1.0F, 1.0F, 1.0F);
+
+            for (int var4 = 3; var4 >= 0; --var4)
+            {
+                Vertex var5 = var3.vertices[var4];
+                glTexCoord2f(var5.u / 63.999F, var5.v / 31.999F);
+                glVertex3f(var5.pos.x, var5.pos.y, var5.pos.z);
+            }
+        }
+
+        glEnd();
+        glEndList();
+        var1->compiled = true;
     }
 
     const float DEG_TO_RAD = 57.29578f;
@@ -125,19 +100,4 @@ void Cube::render(){
     glRotatef(this->xRot * DEG_TO_RAD, 1.0f, 0.0f, 0.0f);
     glCallList(this->list);
     glPopMatrix();
-}
-void Cube::compile()
-{
-    this->list = glGenLists(1);
-    glNewList(this->list, GL_COMPILE);
-    glBegin(GL_QUADS);
-
-    for(int i = 0; i < this->polygons.size(); i++)
-    {
-        this->polygons[i].render();
-    }
-
-    glEnd();
-    glEndList();
-    this->compiled = true;
 }

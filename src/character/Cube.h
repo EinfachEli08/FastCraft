@@ -8,8 +8,8 @@ class Cube
 private:
     std::vector<Vertex> vertices;
     std::vector<Polygon> polygons;
-    int xTexOffs;
-    int yTexOffs;
+    int textureOffsetX;
+    int textureOffsetY;
     int list = 0;
     bool compiled = false;
     void compile();
@@ -18,9 +18,9 @@ public:
     float x, y, z;
     float xRot, yRot, zRot;
 
-    Cube(int xTexOffs, int yTexOffs);
+    Cube(int textureOffsetX, int textureOffsetY);
 
-    void setTexOffs(int xTexOffs, int yTexOffs);
+    void setTexOffs(int textureOffsetX, int textureOffsetY);
 
     void addBox(float x, float y, float z, int width, int height, int depth);
 

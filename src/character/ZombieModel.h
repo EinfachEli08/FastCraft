@@ -18,5 +18,4 @@ public:
 
     ZombieModel();
 
-    void render(double var2);
 };

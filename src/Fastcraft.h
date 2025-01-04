@@ -77,7 +77,7 @@ private:
     long long millis;
     Timer timer = Timer(20.0F);
     Level *level;
-    Player *player;
+    Player *thePlayer;
     int paintTexture = 1;
     int editMode;
     bool running;

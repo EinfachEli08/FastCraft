@@ -5,10 +5,9 @@
 class Polygon
 {
 public:
-    std::vector<Vertex> vertices; 
-    int vertexCount;
+    std::vector<Vertex> vertices;
 
-    Polygon() = default; 
+    Polygon() = default;
     Polygon(const std::vector<Vertex> &vertices);
     Polygon(const std::vector<Vertex> &vertices, int x1, int y1, int x2, int y2);
 
