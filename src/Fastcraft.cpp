@@ -20,7 +20,6 @@ float *Fastcraft::getBuffer(float var1, float var2, float var3, float var4)
     return lb;
 }
 
-
 void Fastcraft::reportGLError(char *var1)
 {
     int var2 = glGetError();
@@ -666,6 +665,7 @@ void Fastcraft::tick(GLFWwindow *window)
     }
 
     thePlayer->tick(controller, 0.125);
+    particleEngine->tick();
 }
 
 void Fastcraft::destroy()

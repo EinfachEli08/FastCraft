@@ -19,11 +19,12 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
     this->lightDepths.resize(width * height * depth);
     bool loaded = this->load();
 
-    if(!loaded){
+    if (!loaded)
+    {
         LevelGen *levelGen = new LevelGen(width, height, depth);
         this->blocks = levelGen->generateMap();
     }
-   
+
     this->calcLightDepths(0, 0, width, height);
 }
 
@@ -179,10 +180,12 @@ std::vector<AABB> Level::getCubes(const AABB &aabb)
         {
             for (int z = minZ; z < maxZ; ++z)
             {
-                Tile *tile = Tile::tiles[this->getTile(x,y,z)];
-                if(tile != nullptr){
-                    AABB *aabb = tile->getAABB(x,y,z);
-                    if(aabb != nullptr){
+                Tile *tile = Tile::tiles[this->getTile(x, y, z)];
+                if (tile != nullptr)
+                {
+                    AABB *aabb = tile->getBoundingBox(x, y, z);
+                    if (aabb != nullptr)
+                    {
                         cubes.emplace_back(*aabb);
                     }
                 }

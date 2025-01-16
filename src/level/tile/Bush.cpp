@@ -1,15 +1,16 @@
 #include "Bush.h"
 
-Bush::Bush(int id) : Tile(id)
+Bush::Bush(int id) : Tile(6)
 {
-    tex = 15;
+    textureIndex = 15;
 }
 
 void Bush::tick(Level *level, int x, int y, int z, std::default_random_engine &random)
 {
-    int tile = level->getTile(x,y,z);
-    if(!level->isLit(x,y,z) || tile != Tile::dirt->id && tile != Tile::grass->id){
-        level->setTile(x,y,z,0);
+    int tile = level->getTile(x, y, z);
+    if (!level->isLit(x, y, z) || tile != Tile::dirt->id && tile != Tile::grass->id)
+    {
+        level->setTile(x, y, z, 0);
     }
 }
 
@@ -17,45 +18,45 @@ void Bush::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
 {
     if (!(level->isLit(x, y, z) ^ size != 1))
     {
-        int var7 = this->getTexture(15);
-        float var8 = (float)(var7 % 16) / 16.0F;
-        float var9 = var8 + 0.999F / 16.0F;
-        float var10 = (float)(var7 / 16) / 16.0F;
-        float var11 = var10 + 0.999F / 16.0F;
-        double var12 = 2;
-        tess.color(1.0F, 1.0F, 1.0F);
+        int var15 = this->getTexture(15);
+        float var17 = (float)(var15 % 16) / 16.0F;
+        float var18 = var17 + 0.999F / 16.0F;
+        float var16 = (float)(var15 / 16) / 16.0F;
+        float var7 = var16 + 0.999F / 16.0F;
+        tess.color((int)255, (int)255, (int)255);
 
-        for (int var13 = 0; var13 < var12; ++var13)
+        for (int var8 = 0; var8 < 2; ++var8)
         {
-            float var14 = (float)(std::sin((double)var13 * Math::PI / (double)var12 + Math::PI * 0.25D) * 0.5D);
-            float var15 = (float)(std::cos((double)var13 * Math::PI / (double)var12 + Math::PI * 0.25D) * 0.5D);
-            float var16 = (float)x + 0.5F - var14;
-            float var17 = (float)x + 0.5F + var14;
-            float var18 = (float)y + 0.0F;
-            float var19 = (float)y + 1.0F;
-            float var20 = (float)z + 0.5F - var15;
-            float var21 = (float)z + 0.5F + var15;
-            tess.vertexUV(var16, var19, var20, var9, var10);
-            tess.vertexUV(var17, var19, var21, var8, var10);
-            tess.vertexUV(var17, var18, var21, var8, var11);
-            tess.vertexUV(var16, var18, var20, var9, var11);
-            tess.vertexUV(var17, var19, var21, var8, var10);
-            tess.vertexUV(var16, var19, var20, var9, var10);
-            tess.vertexUV(var16, var18, var20, var9, var11);
-            tess.vertexUV(var17, var18, var21, var8, var11);
+            float var9 = (float)(std::sin((double)var8 * Math::PI / (double)2 + Math::PI * 0.25D) * 0.5D);
+            float var10 = (float)(std::cos((double)var8 * Math::PI / (double)2 + Math::PI * 0.25D) * 0.5D);
+            float var11 = (float)x + 0.5F - var9;
+            var9 += (float)x + 0.5F;
+            float var12 = (float)y;
+            float var13 = (float)y + 1.0F;
+            float var14 = (float)z + 0.5F - var10;
+            var10 += (float)z + 0.5F;
+            tess.vertexUV(var11, var13, var14, var18, var16);
+            tess.vertexUV(var9, var13, var10, var17, var16);
+            tess.vertexUV(var9, var12, var10, var17, var7);
+            tess.vertexUV(var11, var12, var14, var18, var7);
+            tess.vertexUV(var9, var13, var10, var17, var16);
+            tess.vertexUV(var11, var13, var14, var18, var16);
+            tess.vertexUV(var11, var12, var14, var18, var7);
+            tess.vertexUV(var9, var12, var10, var17, var7);
         }
     }
 }
 
-std::optional<AABB> Bush::getAABB(int x, int y, int z)
+std::optional<AABB> Bush::getBoundingBox(int x, int y, int z)
 {
     return std::nullopt; // Indicates no valid AABB
 }
 
-bool Bush::blocksLight(){
+bool Bush::blocksLight()
+{
     return false;
 }
-bool Bush::isSolid(){
+bool Bush::isSolid()
+{
     return false;
 }
-

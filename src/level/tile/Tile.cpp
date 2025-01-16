@@ -16,14 +16,14 @@ Tile *Tile::stoneBrick = new Tile(4, 16);
 Tile *Tile::wood = new Tile(5, 4);
 Tile *Tile::bush = new Bush(6);
 
-Tile::Tile(int id) : id(id), tex(0)
+Tile::Tile(int id) : id(id), textureIndex(0)
 {
     tiles[id] = this;
 }
 
 Tile::Tile(int id, int tex) : Tile(id)
 {
-    this->tex = tex;
+    this->textureIndex = tex;
 }
 
 void Tile::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
@@ -71,17 +71,39 @@ void Tile::render(Tesselator &tess, Level *level, int x, int y, int z, int size)
 
 bool Tile::shouldRenderFace(Level *level, int x, int y, int z, int size)
 {
-    return !level->isSolidTile(x, y, z) && level->isLit(x, y, z) ^ (size == 1);
+    //return !level->isSolidTile(x, y, z) && level->isLit(x, y, z) ^ (size == 1);
+
+    if (x >= 0 && y >= 0 && z >= 0 && x < level->width && y < level->depth && z < level->height)
+    {
+        bool var6 = true;
+        if (size == 2)
+        {
+            return false;
+        }
+        else
+        {
+            if (size >= 0)
+            {
+                var6 = level->isLit(x, y, z) ^ size == 1;
+            }
+
+            Tile* var7 = tiles[level->getTile(x, y, z)];
+            return !(var7 == nullptr ? false : var7->isSolid()) && var6;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 int Tile::getTexture(int face)
 {
-    return tex;
+    return textureIndex;
 }
 
 void Tile::renderFace(Tesselator &tesselator, int x, int y, int z, int face)
 {
-
     int texture = this->getTexture(face);
 
     float var7 = (float)(texture % 16) / 16.0F;
@@ -203,8 +225,9 @@ void Tile::renderFaceNoTexture(Tesselator &tesselator, int x, int y, int z, int 
     }
 }
 
-AABB *Tile::getAABB(int x, int y, int z){
-    return new AABB(x,y,z,x+1,y+1,z+1);
+AABB *Tile::getBoundingBox(int x, int y, int z)
+{
+    return new AABB(x, y, z, x + 1, y + 1, z + 1);
 }
 AABB *Tile::getTileAABB(int x, int y, int z)
 {
@@ -235,9 +258,8 @@ void Tile::destroy(Level *level, int x, int y, int z, ParticleEngine &particleEn
                 float px = x + (i + 0.5f) / particleSize;
                 float py = y + (j + 0.5f) / particleSize;
                 float pz = z + (k + 0.5f) / particleSize;
-                particleEngine.add(new Particle(level, px, py, pz, px - x - 0.5f, py - y - 0.5f, pz - z - 0.5f, tex));
+                particleEngine.add(new Particle(level, px, py, pz, px - x - 0.5f, py - y - 0.5f, pz - z - 0.5f, textureIndex));
             }
         }
     }
 }
-

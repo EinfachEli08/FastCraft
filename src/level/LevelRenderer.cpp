@@ -122,12 +122,12 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
     Tesselator& tess = Tesselator::getInstance();
     float selectionRadius = 3.0f;
     AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
-    int x0 = static_cast<int>(pickBox.x0);
-    int x1 = static_cast<int>(pickBox.x1 + 1.0f);
-    int y0 = static_cast<int>(pickBox.y0);
-    int y1 = static_cast<int>(pickBox.y1 + 1.0f);
-    int z0 = static_cast<int>(pickBox.z0);
-    int z1 = static_cast<int>(pickBox.z1 + 1.0f);
+    int x0 = (int)(pickBox.x0);
+    int x1 = (int)(pickBox.x1 + 1.0f);
+    int y0 = (int)(pickBox.y0);
+    int y1 = (int)(pickBox.y1 + 1.0f);
+    int z0 = (int)(pickBox.z0);
+    int z1 = (int)(pickBox.z1 + 1.0f);
     glInitNames();
     glPushName(0);
     glPushName(0);
@@ -143,7 +143,7 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
             for (int z = z0; z < z1; ++z)
             {
                 Tile *tile = Tile::tiles[this->level->getTile(x, y, z)];
-                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(z,y,z)))
+                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(x,y,z)))
                 {
                     glLoadName(z);
                     glPushName(0);
@@ -153,11 +153,9 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
                         tess.init();
                         tile->renderFace(tess, x, y, z, face);
                         tess.flush();
-                        glPopName();
                     }
                     glPopName();
                 }
-                glPopName();
             }
             glPopName();
         }
@@ -180,7 +178,7 @@ void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
         {
             Tile::rock->renderFaceNoTexture(tess, hit.x, hit.y, hit.z, i);
         }
-        
+
         tess.flush();
     }else{
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -189,46 +187,46 @@ void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
         glEnable(GL_TEXTURE_2D);
         int var6 = this->textures->loadTexture("/terrain.png", 9728);
         glBindTexture(GL_TEXTURE_2D, var6);
-        int var7 = hit.x;
-        int var8 = hit.y;
-        int var9 = hit.z;
+        int x = hit.x;
+        int y = hit.y;
+        int z = hit.z;
         if (hit.f == 0)
         {
-            --var8;
+            --y;
         }
 
         if (hit.f == 1)
         {
-            ++var8;
+            ++y;
         }
 
         if (hit.f == 2)
         {
-            --var9;
+            --z;
         }
 
         if (hit.f == 3)
         {
-            ++var9;
+            ++z;
         }
 
         if (hit.f == 4)
         {
-            --var7;
+            --x;
         }
 
         if (hit.f == 5)
         {
-            ++var7;
+            ++x;
         }
         tess.init();
         tess.noColor();
-        Tile::tiles[paintTexture]->render(tess, this->level, 0, var7, var8, var9);
-        Tile::tiles[paintTexture]->render(tess, this->level, 1, var7, var8, var9);
+        Tile::tiles[paintTexture]->render(tess, this->level, 0, x, y, z);
+        Tile::tiles[paintTexture]->render(tess, this->level, 1, x, y, z);
         tess.flush();
         glDisable(GL_TEXTURE_2D);
     }
-    
+
     glDisable(GL_BLEND);
 }
 

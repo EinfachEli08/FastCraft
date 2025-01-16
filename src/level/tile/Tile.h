@@ -5,7 +5,6 @@
 #include "particle/ParticleEngine.h"
 #include <vector>
 
-
 class Tile
 {
 public:
@@ -20,7 +19,7 @@ public:
     static Tile *bush;
 
     int id;
-    int tex;
+    int textureIndex;
 
     Tile(int id);
     Tile(int id, int tex);
@@ -28,15 +27,23 @@ public:
 
     virtual void render(Tesselator &tesselator, Level *level, int x, int y, int z, int size);
     virtual void renderFace(Tesselator &tesselator, int x, int y, int z, int face);
-    virtual void renderFaceNoTexture(Tesselator &tesselator, int x, int y, int z, int face); 
+    virtual void renderFaceNoTexture(Tesselator &tesselator, int x, int y, int z, int face);
     virtual bool blocksLight();
     virtual bool isSolid();
     virtual void tick(Level *level, int x, int y, int z, std::default_random_engine &random);
     virtual void destroy(Level *level, int x, int y, int z, ParticleEngine &particleEngine);
-    AABB *getAABB(int x, int y, int z);
+    AABB *getBoundingBox(int x, int y, int z);
     AABB *getTileAABB(int x, int y, int z);
 
-protected: 
-virtual int getTexture(int face);
+protected:
+    virtual int getTexture(int face);
     bool shouldRenderFace(Level *level, int x, int y, int z, int size);
+
+private:
+    float x0;
+    float y0;
+    float z0;
+    float x1;
+    float y1;
+    float z1;
 };

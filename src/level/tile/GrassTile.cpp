@@ -2,7 +2,7 @@
 
 GrassTile::GrassTile(int id) : Tile(id)
 {
-    tex = 3;
+    textureIndex = 3;
 }
 
 int GrassTile::getTexture(int face)

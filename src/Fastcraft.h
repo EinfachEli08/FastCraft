@@ -36,7 +36,6 @@ public:
     bool pause;
 
     Fastcraft(int width, int height, bool fullscreen);
-    ~Fastcraft();
     void destroy();
     void run();
 
