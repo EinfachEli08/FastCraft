@@ -10,11 +10,7 @@ Frustum &Frustum::getInstance()
 
 void Frustum::normalizePlane(std::array<std::array<float, 4>, 6> &frustum, int side)
 {
-    float magnitude = std::sqrt(frustum[side][0] * frustum[side][0] +
-                                frustum[side][1] * frustum[side][1] +
-                                frustum[side][2] * frustum[side][2]);
-
-    
+    float magnitude = (float)std::sqrt((double)(frustum[side][0] * frustum[side][0] + frustum[side][1] * frustum[side][1] + frustum[side][2] * frustum[side][2]));
     frustum[side][0] /= magnitude;
     frustum[side][1] /= magnitude;
     frustum[side][2] /= magnitude;
@@ -57,49 +53,6 @@ void Frustum::calculateFrustum()
     }
 }
 
-bool Frustum::pointInFrustum(float x, float y, float z) const
-{
-    for (int i = 0; i < 6; ++i)
-    {
-        if (this->m_Frustum[i][0] * x + this->m_Frustum[i][1] * y + this->m_Frustum[i][2] * z + this->m_Frustum[i][3] <= 0)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Frustum::sphereInFrustum(float x, float y, float z, float radius) const
-{
-    for (int i = 0; i < 6; ++i)
-    {
-        if (this->m_Frustum[i][0] * x + this->m_Frustum[i][1] * y + this->m_Frustum[i][2] * z + this->m_Frustum[i][3] <= -radius)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Frustum::cubeFullyInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const
-{
-    for (int i = 0; i < 6; ++i)
-    {
-        if (this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z0 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y0 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x0 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] <= 0 &&
-            this->m_Frustum[i][0] * x1 + this->m_Frustum[i][1] * y1 + this->m_Frustum[i][2] * z1 + this->m_Frustum[i][3] <= 0)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool Frustum::cubeInFrustum(AABB* aabb) const
 {
     for (int i = 0; i < 6; ++i)
@@ -119,7 +72,21 @@ bool Frustum::cubeInFrustum(AABB* aabb) const
     return false;
 }
 
-bool Frustum::isVisible(AABB* aabb) const
+bool Frustum::isVisible(AABB* aabb)
 {
-    return this->cubeInFrustum(aabb);
+    float z1 = aabb->z1;
+    float y1 = aabb->y1;
+    float x1 = aabb->x1;
+    float z0 = aabb->z0;
+    float y0 = aabb->y0;
+    float x0 = aabb->x0;
+    Frustum* frustum = this;
+
+    for(int var7 = 0; var7 < 6; ++var7) {
+        if(frustum->m_Frustum[var7][0] * x0 + frustum->m_Frustum[var7][1] * y0 + frustum->m_Frustum[var7][2] * z0 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x1 + frustum->m_Frustum[var7][1] * y0 + frustum->m_Frustum[var7][2] * z0 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x0 + frustum->m_Frustum[var7][1] * y1 + frustum->m_Frustum[var7][2] * z0 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x1 + frustum->m_Frustum[var7][1] * y1 + frustum->m_Frustum[var7][2] * z0 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x0 + frustum->m_Frustum[var7][1] * y0 + frustum->m_Frustum[var7][2] * z1 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x1 + frustum->m_Frustum[var7][1] * y0 + frustum->m_Frustum[var7][2] * z1 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x0 + frustum->m_Frustum[var7][1] * y1 + frustum->m_Frustum[var7][2] * z1 + frustum->m_Frustum[var7][3] <= 0.0F && frustum->m_Frustum[var7][0] * x1 + frustum->m_Frustum[var7][1] * y1 + frustum->m_Frustum[var7][2] * z1 + frustum->m_Frustum[var7][3] <= 0.0F) {
+            return false;
+        }
+    }
+
+    return true;
 }

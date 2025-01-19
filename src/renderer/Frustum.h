@@ -22,11 +22,8 @@ public:
     static Frustum &getInstance();
 
     void calculateFrustum();
-    bool pointInFrustum(float x, float y, float z) const;
-    bool sphereInFrustum(float x, float y, float z, float radius) const;
-    bool cubeFullyInFrustum(float x0, float y0, float z0, float x1, float y1, float z1) const;
     bool cubeInFrustum(AABB* aabb) const;
-    bool isVisible(AABB* aabb) const;
+    bool isVisible(AABB* aabb);
 
 private:
     Frustum() = default;

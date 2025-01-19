@@ -1,7 +1,9 @@
 #include "Polygon.h"
 #include <glad/glad.h>
 
-Polygon::Polygon(const std::vector<Vertex> &vertices) : vertices(vertices) {}
+Polygon::Polygon(const std::vector<Vertex> &vertices) {
+    this->vertices = vertices;
+}
 
 Polygon::Polygon(const std::vector<Vertex> &vertices, int x1, int y1, int x2, int y2) : vertices(vertices)
 {

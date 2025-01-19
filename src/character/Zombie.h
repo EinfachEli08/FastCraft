@@ -15,7 +15,7 @@ private:
     Textures *textures;
 
 public:
-    Cube head;
+    Cube head ;
     Cube body;
     Cube arm0;
     Cube arm1;

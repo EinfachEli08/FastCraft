@@ -117,55 +117,7 @@ void LevelRenderer::updateDirtyChunks(Player *player)
     }
 }
 
-void LevelRenderer::pick(Player *player, Frustum frustum)
-{
-    Tesselator &tess = Tesselator::getInstance();
-    float selectionRadius = 3.0f;
-    AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
-    int x0 = (int)(pickBox.x0);
-    int x1 = (int)(pickBox.x1 + 1.0f);
-    int y0 = (int)(pickBox.y0);
-    int y1 = (int)(pickBox.y1 + 1.0f);
-    int z0 = (int)(pickBox.z0);
-    int z1 = (int)(pickBox.z1 + 1.0f);
-    glInitNames();
-    glPushName(0);
-    glPushName(0);
-
-    for (int x = x0; x < x1; ++x)
-    {
-        glLoadName(x);
-        glPushName(0);
-        for (int y = y0; y < y1; ++y)
-        {
-            glLoadName(y);
-            glPushName(0);
-            for (int z = z0; z < z1; ++z)
-            {
-                Tile *tile = Tile::tiles[this->level->getTile(x, y, z)];
-                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(x, y, z)))
-                {
-                    glLoadName(z);
-                    glPushName(0);
-                    for (int face = 0; face < 6; face++)
-                    {
-                        glLoadName(face);
-                        tess.init();
-                        tile->renderFace(tess, x, y, z, face);
-                        tess.flush();
-                    }
-                    glPopName();
-                }
-            }
-            glPopName();
-        }
-        glPopName();
-    }
-    glPopName();
-    glPopName();
-}
-
-void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
+void LevelRenderer::renderHit(Player* player,HitResult hit, int editMode, int paintTexture)
 {
     Tesselator &tess = Tesselator::getInstance();
     glEnable(GL_BLEND);
@@ -177,7 +129,7 @@ void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
 
         for (int i = 0; i < 6; i++)
         {
-            Tile::rock->renderFaceNoTexture(tess, hit.x, hit.y, hit.z, i);
+            Tile::rock->renderFaceNoTexture(*player, tess, hit.x, hit.y, hit.z, i);
         }
 
         tess.flush();

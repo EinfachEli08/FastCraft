@@ -32,9 +32,7 @@ public:
 
     void render(Player *player, int contextID);
 
-    void renderHit(HitResult hit, int editMode, int paintTexture);
-
-    void pick(Player *player, Frustum frustum);
+    void renderHit(Player* player,HitResult hit, int editMode, int paintTexture);
 
     void setDirty(int x0, int y0, int z0, int x1, int y1, int z1);
 

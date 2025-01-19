@@ -2,7 +2,7 @@
 
 #include "phys/AABB.h"
 #include "LevelListener.h"
-#include "level/PerlinNoiseFilter.h"
+#include "level/NoiseMap.h"
 
 #include <random>
 #include <vector>
@@ -11,14 +11,12 @@
 
 class LevelGen
 {
-private:
+public:
+    LevelGen(int width, int height, int depth);
+
     int width;
     int height;
     int depth;
     std::mt19937 random;
-
-public:
-    LevelGen(int width, int height, int depth);
-    std::vector<unsigned int> generateMap();
 };
 

@@ -302,7 +302,7 @@ void Fastcraft::handleMouseClick()
             z++;
         }
 
-        AABB *aabb = Tile::tiles[this->paintTexture]->getTileAABB(x, y, z);
+        AABB *aabb = Tile::tiles[this->paintTexture]->getBlockBoundingBox(x, y, z);
         if (aabb == nullptr || this->isFree(aabb)){
             this->level->setTile(x, y, z, this->paintTexture);
         }
@@ -446,7 +446,53 @@ void Fastcraft::pick(float deltaTime)
     glRenderMode(GL_SELECT);
 
     this->setupPickCamera(deltaTime, width / 2, height / 2);
-    this->levelRenderer->pick(this->player, Frustum::getInstance());
+
+    //START pick from level renderer
+    Tesselator &tess = Tesselator::getInstance();
+    float selectionRadius = 3.0f;
+    AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
+    int x0 = (int)(pickBox.x0);
+    int x1 = (int)(pickBox.x1 + 1.0f);
+    int y0 = (int)(pickBox.y0);
+    int y1 = (int)(pickBox.y1 + 1.0f);
+    int z0 = (int)(pickBox.z0);
+    int z1 = (int)(pickBox.z1 + 1.0f);
+    glInitNames();
+    glPushName(0);
+    glPushName(0);
+
+    for (int x = x0; x < x1; ++x)
+    {
+        glLoadName(x);
+        glPushName(0);
+        for (int y = y0; y < y1; ++y)
+        {
+            glLoadName(y);
+            glPushName(0);
+            for (int z = z0; z < z1; ++z)
+            {
+                Tile *tile = Tile::tiles[this->level->getTile(x, y, z)];
+                if (tile != nullptr && Frustum::getInstance().isVisible(tile->getBlockBoundingBox(x, y, z)))
+                {
+                    glLoadName(z);
+                    glPushName(0);
+                    for (int face = 0; face < 6; face++)
+                    {
+                        glLoadName(face);
+                        tess.init();
+                        tile->renderFace(tess, x, y, z, face);
+                        tess.flush();
+                    }
+                    glPopName();
+                }
+            }
+            glPopName();
+        }
+        glPopName();
+    }
+    glPopName();
+    glPopName();
+    //END pick from level renderer
 
     GLint hits = glRenderMode(GL_RENDER);
     GLuint closestDepth = 0;
@@ -556,7 +602,7 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
     if (this->hitResult != nullptr)
     {
         glDisable(GL_ALPHA_TEST);
-        this->levelRenderer->renderHit(*this->hitResult, this->editMode, this->paintTexture);
+        this->levelRenderer->renderHit(this->player,*this->hitResult, this->editMode, this->paintTexture);
         glEnable(GL_ALPHA_TEST);
     }
     this->checkGlError("Rendered hit");
