@@ -9,7 +9,7 @@ void Timer::advanceTime()
 {
     long var1 = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     long var3 = var1 - lastTime;
-    lastTime = var1;
+    this->lastTime = var1;
 
     if (var3 < 0L)
     {
@@ -21,40 +21,16 @@ void Timer::advanceTime()
         var3 = 1000000000L;
     }
 
-    fps = static_cast<float>(1000000000L) / static_cast<float>(var3);
-    passedTime += static_cast<float>(var3) * timeScale * ticksPerSecond / 1.0E9f;
-    ticks = static_cast<int>(passedTime);
+    this->fps = (float)1000000000L / var3;
+    this->passedTime += (float)var3 *  this->timeScale *  this->ticksPerSecond / 1.0E9f;
+    this->ticks = (int)this->passedTime;
 
-    if (ticks > 100)
+    if (this->ticks > 100)
     {
-        ticks = 100;
+        this->ticks = 100;
     }
 
-    passedTime -= static_cast<float>(ticks);
-    a = passedTime;
+    this->passedTime -= (float)this->ticks;
+    this->a = this->passedTime;
 }
 
-int Timer::getTicks() const
-{
-    return ticks;
-}
-
-float Timer::getFPS() const
-{
-    return fps;
-}
-
-float Timer::getPassedTime() const
-{
-    return passedTime;
-}
-
-float Timer::getTimeScale() const
-{
-    return timeScale;
-}
-
-void Timer::setTimeScale(float scale)
-{
-    timeScale = scale;
-}

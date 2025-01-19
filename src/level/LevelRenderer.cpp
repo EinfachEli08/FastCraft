@@ -4,7 +4,7 @@
 #include <chrono>
 #include <algorithm>
 
-LevelRenderer::LevelRenderer(Level *level, Textures* textures) : level(level)
+LevelRenderer::LevelRenderer(Level *level, Textures *textures) : level(level)
 {
     this->textures = textures;
     level->addListener(this);
@@ -87,7 +87,7 @@ void LevelRenderer::render(Player *player, int contextID)
     {
         std::cerr << e.what() << std::endl;
     }
-    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     Frustum frustum = Frustum::getInstance();
 
@@ -106,7 +106,7 @@ void LevelRenderer::updateDirtyChunks(Player *player)
     std::vector<Chunk *> dirtyChunks = this->getAllDirtyChunks();
     if (!dirtyChunks.empty())
     {
-      
+
         DirtyChunkSorter sorter(player, &Frustum::getInstance());
         std::sort(dirtyChunks.begin(), dirtyChunks.end(), sorter);
 
@@ -119,7 +119,7 @@ void LevelRenderer::updateDirtyChunks(Player *player)
 
 void LevelRenderer::pick(Player *player, Frustum frustum)
 {
-    Tesselator& tess = Tesselator::getInstance();
+    Tesselator &tess = Tesselator::getInstance();
     float selectionRadius = 3.0f;
     AABB pickBox = player->bb.grow(selectionRadius, selectionRadius, selectionRadius);
     int x0 = (int)(pickBox.x0);
@@ -143,7 +143,7 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
             for (int z = z0; z < z1; ++z)
             {
                 Tile *tile = Tile::tiles[this->level->getTile(x, y, z)];
-                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(x,y,z)))
+                if (tile != nullptr && frustum.isVisible(tile->getTileAABB(x, y, z)))
                 {
                     glLoadName(z);
                     glPushName(0);
@@ -167,11 +167,12 @@ void LevelRenderer::pick(Player *player, Frustum frustum)
 
 void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
 {
-    Tesselator& tess = Tesselator::getInstance();
+    Tesselator &tess = Tesselator::getInstance();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
-    if(editMode == 0){
+    if (editMode == 0)
+    {
         tess.init();
 
         for (int i = 0; i < 6; i++)
@@ -180,12 +181,14 @@ void LevelRenderer::renderHit(HitResult hit, int editMode, int paintTexture)
         }
 
         tess.flush();
-    }else{
+    }
+    else
+    {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         float var10 = (float)std::sin((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0D) * 0.2F + 0.8F;
         glColor4f(var10, var10, var10, (float)std::sin((double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 200.0D) * 0.2F + 0.5F);
         glEnable(GL_TEXTURE_2D);
-        int var6 = this->textures->loadTexture("/terrain.png", 9728);
+        int var6 = this->textures->loadTexture("assets/terrain.png", 9728);
         glBindTexture(GL_TEXTURE_2D, var6);
         int x = hit.x;
         int y = hit.y;

@@ -19,6 +19,7 @@ public:
     bool isKeyHeld(int key) const;
     bool isKeyPressed(int key) const;
     bool isKeyReleased(int key) const;
+    bool next();
 
     // Static instance access
     static Keyboard *getInstance();
@@ -26,11 +27,12 @@ public:
 private:
     // Key states and event tracking
     std::array<int, GLFW_KEY_LAST + 1> keyStates;
-    
     std::array<bool, GLFW_KEY_LAST + 1> keyPress;
     std::array<bool, GLFW_KEY_LAST + 1> keyRelease;
 
     int eventKey;      // Last event key
     int eventKeyState; // Last event key state
-};
 
+    // Helper method to reset key events
+    void resetKeyEvents();
+};

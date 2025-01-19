@@ -22,11 +22,10 @@ public:
     void calcLightDepths(int var1, int var2, int var3, int var4);
     void addListener(LevelListener *listener);
     void removeListener(LevelListener *listener);
-    bool isTile(int x, int y, int z);
     bool isSolidTile(int x, int y, int z);
     bool isLightBlocker(int x, int y, int z);
     std::vector<AABB> getCubes(const AABB &aabb);
-    float getBrightness(int x, int y, int z);
+   
     bool setTile(int x, int y, int z, int tileId);
     bool isLit(int x, int y, int z);
     int getTile(int x, int y, int z);

@@ -9,6 +9,6 @@ public:
     // void render(Tesselator *tess, Level *level, int var3, int x, int y, int z) override;
     void render(Tesselator &tess, Level *level, int x, int y, int z, int size) override;
     std::optional<AABB> getBoundingBox(int x, int y, int z);
-    bool blocksLight();
-    bool isSolid();
+    bool blocksLight() override;
+    bool isSolid() override;
 };

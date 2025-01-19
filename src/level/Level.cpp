@@ -21,8 +21,7 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
 
     if (!loaded)
     {
-        LevelGen *levelGen = new LevelGen(width, height, depth);
-        this->blocks = levelGen->generateMap();
+        this->blocks = (new LevelGen(width, height, depth))->generateMap();
     }
 
     this->calcLightDepths(0, 0, width, height);
@@ -111,10 +110,8 @@ void Level::calcLightDepths(int x, int y, int width, int height)
     {
         for (int var6 = y; var6 < y + height; ++var6)
         {
+            int var7 = this->lightDepths[var5 + var6 * this->width];
 
-            int calc = var5 + var6 * this->width;
-
-            int var7 = this->lightDepths[calc];
             int var8;
             for (var8 = this->depth - 1; var8 > 0 && !this->isLightBlocker(var5, var8, var6); --var8)
             {
@@ -146,16 +143,12 @@ void Level::removeListener(LevelListener *listener)
     levelListeners.erase(std::remove(levelListeners.begin(), levelListeners.end(), listener), levelListeners.end());
 }
 
-bool Level::isTile(int x, int y, int z)
-{
-    return (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) && this->blocks[(y * this->height + z) * this->width + x] == 1;
-}
-
 bool Level::isLightBlocker(int x, int y, int z)
 {
     Tile *tile = Tile::tiles[getTile(x, y, z)];
     return tile == nullptr ? false : tile->blocksLight();
 }
+
 
 std::vector<AABB> Level::getCubes(const AABB &aabb)
 {
@@ -194,19 +187,6 @@ std::vector<AABB> Level::getCubes(const AABB &aabb)
     }
 
     return cubes;
-}
-
-float Level::getBrightness(int x, int y, int z)
-{
-    const float darkBrightness = 0.8f;
-    const float brightBrightness = 1.0f;
-    /*
-        if ( && x < this->width && y < this->depth && z < this->height)
-        {
-            return (y < this->lightDepths[x + z * this->width]) ? darkBrightness : brightBrightness;
-        }
-        */
-    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? (y < this->lightDepths[x + z * this->width] ? darkBrightness : brightBrightness) : brightBrightness;
 }
 
 bool Level::setTile(int x, int y, int z, int tileId)

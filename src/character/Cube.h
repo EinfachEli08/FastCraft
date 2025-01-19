@@ -12,11 +12,10 @@ private:
     int textureOffsetY;
     int list = 0;
     bool compiled = false;
-    void compile();
 
 public:
-    float x, y, z;
-    float xRot, yRot, zRot;
+    float x{}, y{}, z{};
+    float xRot{}, yRot{}, zRot{};
 
     Cube(int textureOffsetX, int textureOffsetY);
 

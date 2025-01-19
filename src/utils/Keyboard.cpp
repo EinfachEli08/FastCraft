@@ -1,8 +1,6 @@
 #include "Keyboard.h"
 
-
 static Keyboard *instance = nullptr;
-
 
 Keyboard::Keyboard() : eventKey(-1), eventKeyState(GLFW_RELEASE)
 {
@@ -97,4 +95,31 @@ Keyboard *Keyboard::getInstance()
         instance = new Keyboard();
     }
     return instance;
+}
+
+// Move to the next key event
+bool Keyboard::next()
+{
+    // Iterate through all keys to find the next event
+    for (int key = 0; key <= GLFW_KEY_LAST; ++key)
+    {
+        if (keyPress[key] || keyRelease[key])
+        {
+            eventKey = key;
+            eventKeyState = keyStates[key];
+            resetKeyEvents();
+            return true;
+        }
+    }
+    return false;
+}
+
+// Helper method to reset key events
+void Keyboard::resetKeyEvents()
+{
+    for (int i = 0; i <= GLFW_KEY_LAST; ++i)
+    {
+        keyPress[i] = false;
+        keyRelease[i] = false;
+    }
 }

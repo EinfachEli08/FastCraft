@@ -17,48 +17,49 @@ void Player::tick(Controller *controller, float deadzone)
     this->zo = this->z;
     float var1 = 0.0f;
     float var2 = 0.0f;
+    /*
+        if (controller->isConnected())
+        {
+            // Controller input
+            if (controller->isButtonPressed(12))
+                this->resetPos();
+            if (controller->getAxisPosition(1) < -deadzone)
+                --var2;
+            if (controller->getAxisPosition(1) > deadzone)
+                ++var2;
+            if (controller->getAxisPosition(0) < -deadzone)
+                --var1;
+            if (controller->getAxisPosition(0) > deadzone)
+                ++var1;
+            if (controller->isButtonPressed(0) && onGround)
+                yd = 0.5f;
+        }
+        else
+        {
+        */
+    // Keyboard input
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
+        this->resetPos();
 
-    if (controller->isConnected())
-    {
-        // Controller input
-        if (controller->isButtonPressed(12))
-            this->resetPos();
-        if (controller->getAxisPosition(1) < -deadzone)
-            --var2;
-        if (controller->getAxisPosition(1) > deadzone)
-            ++var2;
-        if (controller->getAxisPosition(0) < -deadzone)
-            --var1;
-        if (controller->getAxisPosition(0) > deadzone)
-            ++var1;
-        if (controller->isButtonPressed(0) && onGround)
-            yd = 0.5f;
-    }
-    else
-    {
-        // Keyboard input
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
-            this->resetPos();
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS ||
+        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS)
+        --var2;
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_W) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_UP) == GLFW_PRESS)
-            --var2;
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS ||
+        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS)
+        ++var2;
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_S) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_DOWN) == GLFW_PRESS)
-            ++var2;
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS ||
+        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS)
+        --var1;
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_A) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_LEFT) == GLFW_PRESS)
-            --var1;
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS ||
+        glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS)
+        ++var1;
 
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_D) == GLFW_PRESS ||
-            glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_RIGHT) == GLFW_PRESS)
-            ++var1;
-
-        if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && onGround)
-            this->yd = 0.5f;
-    }
+    if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && onGround)
+        this->yd = 0.5f;
+    //}
 
     // Movement and physics updates
     this->moveRelative(var1, var2, this->onGround ? 0.1f : 0.02f);

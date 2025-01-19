@@ -1,4 +1,5 @@
 #include "Mouse.h"
+#include <iostream>
 #include <GLFW/glfw3.h> // Include GLFW for mouse state functions
 
 // Static instance to allow access to the class
@@ -67,6 +68,19 @@ void Mouse::update(double xpos, double ypos)
     }
 }
 
+// Poll method for mouse events
+void Mouse::poll()
+{
+    // Poll mouse position
+    GLFWwindow *currentContext = glfwGetCurrentContext();
+    if (currentContext)
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(currentContext, &xpos, &ypos);
+        update(xpos, ypos);
+    }
+}
+
 // Get current X position
 double Mouse::getX() const
 {
@@ -94,6 +108,8 @@ double Mouse::getDY() const
 // Check if a specific button is currently held down
 bool Mouse::isButtonHeld(int button) const
 {
+    std::cout << "Button held: " << button << std::endl;
+
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
         return false;
     return buttonStates[button] == GLFW_PRESS;
@@ -102,6 +118,8 @@ bool Mouse::isButtonHeld(int button) const
 // Check if a specific button was clicked
 bool Mouse::isButtonClicked(int button) const
 {
+    std::cout << "Button clicked: " << button << std::endl;
+
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
         return false;
     return buttonClick[button];
@@ -110,8 +128,10 @@ bool Mouse::isButtonClicked(int button) const
 // Check if a specific button was released
 bool Mouse::isButtonReleased(int button) const
 {
+    std::cout << "Button released: " << button << std::endl;
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
         return false;
+    
     return buttonRelease[button];
 }
 
@@ -125,4 +145,40 @@ int Mouse::getEventButton() const
 int Mouse::getEventButtonState() const
 {
     return eventButtonState;
+}
+
+// Set cursor position
+void Mouse::setCursorPosition(double xpos, double ypos)
+{
+    GLFWwindow *currentContext = glfwGetCurrentContext();
+    if (currentContext)
+    {
+        glfwSetCursorPos(currentContext, xpos, ypos);
+        update(xpos, ypos);
+    }
+}
+
+bool Mouse::next()
+{
+    for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; ++button)
+    {
+        if (buttonClick[button] || buttonRelease[button])
+        {
+            eventButton = button;
+            eventButtonState = buttonStates[button];
+            resetButtonEvents();
+            return true;
+        }
+    }
+    return false;
+}
+
+// Helper method to reset button events
+void Mouse::resetButtonEvents()
+{
+    for (int i = 0; i <= GLFW_MOUSE_BUTTON_LAST; ++i)
+    {
+        buttonClick[i] = false;
+        buttonRelease[i] = false;
+    }
 }

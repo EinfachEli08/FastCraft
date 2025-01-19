@@ -2,14 +2,12 @@
 #include "utils/OpenGLHeaders.h"
 #include "renderer/Textures.h"
 
-
 #include <vector>
 #include <iostream>
 #include <thread>
 #include <chrono>
 #include <cmath>
 #include <cstring>
-
 
 #include "Timer.h"
 #include "level/LevelRenderer.h"
@@ -21,10 +19,6 @@
 #include "utils/Controller.h"
 #include "character/Cube.h"
 #include "character/Zombie.h"
-
-
-
-
 
 class Fastcraft
 {
@@ -40,7 +34,7 @@ public:
     void run();
 
 private:
-    static void reportGLError(char *var1);
+    static void checkGlError(char *var1);
     char *errorString(GLenum glError);
 
     void grabMouse(GLFWwindow *window);
@@ -48,7 +42,7 @@ private:
 
     void tick(GLFWwindow *window);
 
-    void focusPlayerCamera(float var1);
+    void moveCameraToPlayer(float var1);
 
     void render(float deltaTime, GLFWwindow *window);
 
@@ -59,8 +53,10 @@ private:
 
     void init(GLFWwindow **window);
 
+    void handleMouseClick();
+    bool isFree(AABB *aabb);
     void stop();
-    void drawGui();
+    void drawGui(float deltaTime);
     void setupCamera(float timer);
 
     void toggleFullscreen(GLFWwindow *window);
@@ -76,8 +72,9 @@ private:
     long long millis;
     Timer timer = Timer(20.0F);
     Level *level;
-    Player *thePlayer;
+    Player *player;
     int paintTexture = 1;
+    int yMouseAxis = 1;
     int editMode;
     bool running;
 
