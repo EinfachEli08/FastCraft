@@ -7,7 +7,7 @@ Bush::Bush(int id) : Tile(6)
 
 void Bush::tick(Level *level, int x, int y, int z, std::default_random_engine &random)
 {
-    int tile = level->getTile(x, y, z);
+    int tile = level->getTile(x, y - 1, z);
     if (!level->isLit(x, y, z) || tile != Tile::dirt->id && tile != Tile::grass->id)
     {
         level->setTile(x, y, z, 0);

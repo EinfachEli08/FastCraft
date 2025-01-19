@@ -11,6 +11,6 @@ public:
     Player(Level *level);
 
     // Methods
-    void tick(Controller *controller, float deadzone);
+    void tick();
 };
 

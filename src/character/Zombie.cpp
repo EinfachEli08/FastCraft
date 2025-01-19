@@ -10,10 +10,10 @@ Zombie::Zombie(Level *level, Textures *textures, float x, float y, float z)
       head(0, 0), body(16, 16), arm0(40, 16), arm1(40, 16), leg0(0, 16), leg1(0, 16)
 {
     this->textures = textures;
-    this->rotA = static_cast<float>(Math::random() + 1.0D) * 0.01F;
+    this->rotA = (float)(Math::random() + 1.0D) * 0.01F;
     this->setPos(x, y, z);
-    this->timeOffs = static_cast<float>(Math::random()) * 1239813.0f;
-    this->rot = static_cast<float>(Math::random()) * static_cast<float>(Math::PI * 2.0);
+    this->timeOffs = (float)(Math::random()) * 1239813.0f;
+    this->rot = (float)(Math::random()) * (float)(Math::PI * 2.0);
     this->speed = 1.0f;
 }
 
@@ -32,14 +32,13 @@ void Zombie::tick()
     }
 
     this->rot += this->rotA;
-    this->rotA = this->rotA * 0.99D;
-    this->rotA = (this->rotA + (Math::random() - Math::random()) * Math::random() * Math::random() * 0.08F);
+    this->rotA = (float)((double)this->rotA * 0.99D);
+    this->rotA = (float)((double)this->rotA + (Math::random() - Math::random()) * Math::random() * Math::random() * 0.08F);
 
-    var1 = std::sin(this->rot);
-    var2 = std::cos(this->rot);
+    var1 = (float)std::sin(this->rot);
+    var2 = (float)std::cos(this->rot);
 
-    if (this->onGround && Math::random() < 0.08D)
-    {
+    if (this->onGround && Math::random() < 0.08D){
         this->yd = 0.5F;
     }
 
@@ -51,8 +50,7 @@ void Zombie::tick()
     this->yd *= 0.98f;
     this->zd *= 0.91f;
 
-    if (this->onGround)
-    {
+    if (this->onGround){
         this->xd *= 0.7f;
         this->zd *= 0.7f;
     }

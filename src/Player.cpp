@@ -10,33 +10,14 @@ Player::Player(Level *level) : Entity(level)
 
 
 // Handle input and physics
-void Player::tick(Controller *controller, float deadzone)
+void Player::tick()
 {
     this->xo = this->x;
     this->yo = this->y;
     this->zo = this->z;
     float var1 = 0.0f;
     float var2 = 0.0f;
-    /*
-        if (controller->isConnected())
-        {
-            // Controller input
-            if (controller->isButtonPressed(12))
-                this->resetPos();
-            if (controller->getAxisPosition(1) < -deadzone)
-                --var2;
-            if (controller->getAxisPosition(1) > deadzone)
-                ++var2;
-            if (controller->getAxisPosition(0) < -deadzone)
-                --var1;
-            if (controller->getAxisPosition(0) > deadzone)
-                ++var1;
-            if (controller->isButtonPressed(0) && onGround)
-                yd = 0.5f;
-        }
-        else
-        {
-        */
+
     // Keyboard input
     if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_R) == GLFW_PRESS)
         this->resetPos();
