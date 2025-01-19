@@ -1,14 +1,11 @@
 #include "utils/OpenGLHeaders.h"
 #include "Cube.h"
 
-Cube::Cube(int textureOffsetX, int textureOffsetY)
-    : textureOffsetX(textureOffsetX), textureOffsetY(textureOffsetY) {}
-
-void Cube::setTexOffs(int var1, int var2)
-{
-    this->textureOffsetX = var1;
-    this->textureOffsetY = var2;
+Cube::Cube(int textureOffsetX, int textureOffsetY){
+    this->textureOffsetX = textureOffsetX;
+    this->textureOffsetY = textureOffsetY;
 }
+
 
 void Cube::addBox(float x, float y, float z, int width, int height, int depth)
 {
@@ -16,53 +13,60 @@ void Cube::addBox(float x, float y, float z, int width, int height, int depth)
     float x1 = x + width;
     float y1 = y + height;
     float z1 = z + depth;
-
-    vertices[0] = Vertex(x, y, z, 0.0f, 0.0f);
-    vertices[1] = Vertex(x1, y, z, 0.0f, 8.0f);
-    vertices[2] = Vertex(x1, y1, z, 8.0f, 8.0f);
-    vertices[3] = Vertex(x, y1, z, 8.0f, 0.0f);
-    vertices[4] = Vertex(x, y, z1, 0.0f, 0.0f);
-    vertices[5] = Vertex(x1, y, z1, 0.0f, 8.0f);
-    vertices[6] = Vertex(x1, y1, z1, 8.0f, 8.0f);
-    vertices[7] = Vertex(x, y1, z1, 8.0f, 0.0f);
-
-    polygons.emplace_back(std::vector<Vertex>{vertices[5], vertices[1], vertices[2], vertices[6]},
-                          this->textureOffsetX + depth + width,
-                          this->textureOffsetY + depth,
-                          this->textureOffsetX + depth + width + depth,
-                          this->textureOffsetY + depth + height);
-    polygons.emplace_back(std::vector<Vertex>{vertices[0], vertices[4], vertices[7], vertices[3]},
-                          this->textureOffsetX + 0,
-                          this->textureOffsetY + depth,
-                          this->textureOffsetX + depth,
-                          this->textureOffsetY + depth + height);
-    polygons.emplace_back(std::vector<Vertex>{vertices[5], vertices[4], vertices[0], vertices[1]},
-                          this->textureOffsetX + depth,
-                          this->textureOffsetY,
-                          this->textureOffsetX + depth + width,
-                          this->textureOffsetY + depth);
-    polygons.emplace_back(std::vector<Vertex>{vertices[2], vertices[3], vertices[7], vertices[6]},
-                          this->textureOffsetX + depth + width,
-                          this->textureOffsetY,
-                          this->textureOffsetX + depth + width + width,
-                          this->textureOffsetY + depth);
-    polygons.emplace_back(std::vector<Vertex>{vertices[1], vertices[0], vertices[3], vertices[2]},
-                          this->textureOffsetX + depth,
-                          this->textureOffsetY + depth,
-                          this->textureOffsetX + depth + width,
-                          this->textureOffsetY + depth + height);
-    polygons.emplace_back(std::vector<Vertex>{vertices[4], vertices[5], vertices[6], vertices[7]},
-                          this->textureOffsetX + depth + width + depth,
-                          this->textureOffsetY + depth,
-                          this->textureOffsetX + depth + width + depth + width,
-                          this->textureOffsetY + depth + height);
+    Vertex var10 = Vertex(x, y, z, 0.0F, 0.0F);
+    Vertex var11 = Vertex(x1, y, z, 0.0F, 8.0F);
+    Vertex var12 = Vertex(x1, y1, z, 8.0F, 8.0F);
+    Vertex var16 = Vertex(x, y1, z, 8.0F, 0.0F);
+    Vertex var13 = Vertex(x, y, z1, 0.0F, 0.0F);
+    Vertex var15 = Vertex(x1, y, z1, 0.0F, 8.0F);
+    Vertex var17 = Vertex(x1, y1, z1, 8.0F, 8.0F);
+    Vertex var14 = Vertex(x, y1, z1, 8.0F, 0.0F);
+    this->vertices[0] = var10;
+    this->vertices[1] = var11;
+    this->vertices[2] = var12;
+    this->vertices[3] = var16;
+    this->vertices[4] = var13;
+    this->vertices[5] = var15;
+    this->vertices[6] = var17;
+    this->vertices[7] = var14;
+    this->polygons.resize(6);
+    this->polygons[0] = Polygon{std::vector<Vertex>{vertices[5], vertices[1], vertices[2], vertices[6]},
+                                this->textureOffsetX + depth + width,
+                                this->textureOffsetY + depth,
+                                this->textureOffsetX + depth + width + depth,
+                                this->textureOffsetY + depth + height};
+    this->polygons[1] = Polygon{std::vector<Vertex>{vertices[0], vertices[4], vertices[7], vertices[3]},
+                                this->textureOffsetX + 0,
+                                this->textureOffsetY + depth,
+                                this->textureOffsetX + depth,
+                                this->textureOffsetY + depth + height};
+    this->polygons[2] = Polygon{std::vector<Vertex>{vertices[5], vertices[4], vertices[0], vertices[1]},
+                                this->textureOffsetX + depth,
+                                this->textureOffsetY,
+                                this->textureOffsetX + depth + width,
+                                this->textureOffsetY + depth};
+    this->polygons[3] = Polygon{std::vector<Vertex>{vertices[2], vertices[3], vertices[7], vertices[6]},
+                                this->textureOffsetX + depth + width,
+                                this->textureOffsetY,
+                                this->textureOffsetX + depth + width + width,
+                                this->textureOffsetY + depth};
+    this->polygons[4] = Polygon{std::vector<Vertex>{vertices[1], vertices[0], vertices[3], vertices[2]},
+                                this->textureOffsetX + depth,
+                                this->textureOffsetY + depth,
+                                this->textureOffsetX + depth + width,
+                                this->textureOffsetY + depth + height};
+    this->polygons[5] = Polygon{std::vector<Vertex>{vertices[4], vertices[5], vertices[6], vertices[7]},
+                                this->textureOffsetX + depth + width + depth,
+                                this->textureOffsetY + depth,
+                                this->textureOffsetX + depth + width + depth + width,
+                                this->textureOffsetY + depth + height};
 }
 
 void Cube::setPos(float x, float y, float z)
 {
     this->x = x;
     this->y = y;
-    this->z = z;
+    this->z = 0.0F;
 }
 
 void Cube::render()

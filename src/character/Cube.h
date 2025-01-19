@@ -19,8 +19,6 @@ public:
 
     Cube(int textureOffsetX, int textureOffsetY);
 
-    void setTexOffs(int textureOffsetX, int textureOffsetY);
-
     void addBox(float x, float y, float z, int width, int height, int depth);
 
     void setPos(float x, float y, float z);
