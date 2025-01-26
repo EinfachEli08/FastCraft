@@ -37,38 +37,26 @@ public:
 
 private:
     GLFWwindow *window = nullptr;
-    static void checkGlError(char *var1);
-    char *errorString(GLenum glError);
+
+    static void reportGLError(std::string var1);
 
     void grabMouse(GLFWwindow *window);
     void releaseMouse(GLFWwindow *window);
 
     void tick();
 
-    void moveCameraToPlayer(float var1);
+    void focusPlayerCamera(float var1);
 
     void render(float deltaTime);
 
     void setupFog(int mode);
 
-    float *getFogColor(int mode);
     float *getBuffer(float var1, float var2, float var3, float var4);
-
-    void init();
-
-    void handleMouseClick();
-    bool isFree(AABB *aabb);
-    void stop();
-    void drawGui(float deltaTime);
-    void setupCamera(float timer);
 
     void toggleFullscreen(GLFWwindow *window);
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     void pickMatrix(float x, float y, float deltaX, float deltaY, const GLint *viewport);
     void perspective(float fovY, float aspect, float zNear, float zFar);
-
-    void setupPickCamera(float timer, int widthIn, int heightIn);
-    void pick(float deltaTime);
 
     double mouseX;
     double mouseY;
@@ -90,8 +78,6 @@ private:
     LevelRenderer *levelRenderer;
     Mouse *mouse;
     Keyboard *keyboard;
-    Controller *controller;
-    int stickSpeed;
     std::vector<Entity *> entities;
     HitResult *hitResult;
     bool isFullscreen;

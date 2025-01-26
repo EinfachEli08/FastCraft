@@ -4,109 +4,14 @@
 #include "nano/nanovg_gl.h"
 
 Fastcraft::Fastcraft(int width, int height, bool fullscreen)
-        : width(width), height(height), isFullscreen(fullscreen)
 {
+    this->width = width;
+    this->height = height;
+    this->isFullscreen = fullscreen;
     this->textures = new Textures();
 }
-void Fastcraft::init()
-{
-    if (!glfwInit())
-    {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-    }
 
-    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-    if (!monitor)
-    {
-        std::cerr << "Failed to get primary monitor!" << std::endl;
-    }
-
-    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-    if (!mode)
-    {
-        std::cerr << "Failed to get video mode!" << std::endl;
-    }
-
-    int windowPosX = (mode->width - this->width) / 2;
-    int windowPosY = (mode->height - this->height) / 2;
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
-    this->window = glfwCreateWindow(this->width, this->height, "FastCraft Game", nullptr, nullptr);
-    if (this->window == nullptr)
-    {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-    }
-
-    glfwSetWindowPos(this->window, windowPosX, windowPosY);
-
-    glfwMakeContextCurrent(this->window);
-
-    glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
-
-    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    glfwSwapInterval(0);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-    }
-
-    this->vg = nvgCreateGL3(NVG_STENCIL_STROKES);
-    if (this->vg == nullptr)
-    {
-        std::cerr << "Could not initialize NanoVG" << std::endl;
-        return;
-    }
-
-    this->mouse = new Mouse();
-    this->keyboard = new Keyboard();
-
-    this->checkGlError("Pre startup");
-
-    glEnable(GL_TEXTURE_2D);
-    glShadeModel(GL_SMOOTH);
-    glClearColor(0.5F, 0.8F, 1.0F, 0.0F);
-    glClearDepth(1.0D);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.5F);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
-
-    this->checkGlError("Startup");
-
-    this->font = new Font(this->vg, "assets/MinecraftRegular.ttf");
-    glViewport(0, 0, this->width, this->height);
-    this->level = new Level(this, 256, 256, 64);
-    this->levelRenderer = new LevelRenderer(this->level, this->textures);
-    this->player = new Player(this->level);
-    this->particleEngine = new ParticleEngine(this->level);
-
-
-    for (int i = 0; i < 10; ++i)
-    {
-        auto *zombie = new Zombie(this->level, this->textures, 128.0F, 0.0F, 128.0F);
-        zombie->resetPos();
-        entities.push_back(zombie);
-    }
-
-    if (!appletMode)
-    {
-        this->grabMouse(this->window);
-    }
-
-    this->checkGlError("Post startup");
-}
-
-void Fastcraft::checkGlError(char *var1)
+void Fastcraft::reportGLError(std::string var1)
 {
     int var2 = glGetError();
     if (var2 != 0)
@@ -114,33 +19,33 @@ void Fastcraft::checkGlError(char *var1)
         const char *errorMessage;
         switch (var2)
         {
-        case GL_NO_ERROR:
-            errorMessage = "No error";
-            break;
-        case GL_INVALID_ENUM:
-            errorMessage = "Invalid enum";
-            break;
-        case GL_INVALID_VALUE:
-            errorMessage = "Invalid value";
-            break;
-        case GL_INVALID_OPERATION:
-            errorMessage = "Invalid operation";
-            break;
-        case GL_STACK_OVERFLOW:
-            errorMessage = "Stack overflow";
-            break;
-        case GL_STACK_UNDERFLOW:
-            errorMessage = "Stack underflow";
-            break;
-        case GL_OUT_OF_MEMORY:
-            errorMessage = "Out of memory";
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            errorMessage = "Invalid framebuffer operation";
-            break;
-        default:
-            errorMessage = "Unknown error";
-            break;
+            case GL_NO_ERROR:
+                errorMessage = "No error";
+                break;
+            case GL_INVALID_ENUM:
+                errorMessage = "Invalid enum";
+                break;
+            case GL_INVALID_VALUE:
+                errorMessage = "Invalid value";
+                break;
+            case GL_INVALID_OPERATION:
+                errorMessage = "Invalid operation";
+                break;
+            case GL_STACK_OVERFLOW:
+                errorMessage = "Stack overflow";
+                break;
+            case GL_STACK_UNDERFLOW:
+                errorMessage = "Stack underflow";
+                break;
+            case GL_OUT_OF_MEMORY:
+                errorMessage = "Out of memory";
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                errorMessage = "Invalid framebuffer operation";
+                break;
+            default:
+                errorMessage = "Unknown error";
+                break;
         }
 
         std::cout << "########## GL ERROR ##########" << std::endl;
@@ -172,7 +77,100 @@ void Fastcraft::run()
     this->window = nullptr;
     try
     {
-        this->init();
+        if (!glfwInit())
+        {
+            std::cerr << "Failed to initialize GLFW" << std::endl;
+        }
+
+        GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+        if (!monitor)
+        {
+            std::cerr << "Failed to get primary monitor!" << std::endl;
+        }
+
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        if (!mode)
+        {
+            std::cerr << "Failed to get video mode!" << std::endl;
+        }
+
+        int windowPosX = (mode->width - this->width) / 2;
+        int windowPosY = (mode->height - this->height) / 2;
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
+        this->window = glfwCreateWindow(this->width, this->height, "FastCraft Game", nullptr, nullptr);
+        if (this->window == nullptr)
+        {
+            std::cerr << "Failed to create GLFW window" << std::endl;
+            glfwTerminate();
+        }
+
+        glfwSetWindowPos(this->window, windowPosX, windowPosY);
+
+        glfwMakeContextCurrent(this->window);
+
+        glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
+
+        glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        glfwSwapInterval(0);
+
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            std::cerr << "Failed to initialize GLAD" << std::endl;
+            glfwTerminate();
+        }
+
+        this->vg = nvgCreateGL3(NVG_STENCIL_STROKES);
+        if (this->vg == nullptr)
+        {
+            std::cerr << "Could not initialize NanoVG" << std::endl;
+            return;
+        }
+
+        this->mouse = new Mouse();
+        this->keyboard = new Keyboard();
+
+        this->reportGLError("Pre startup");
+
+        glEnable(GL_TEXTURE_2D);
+        glShadeModel(GL_SMOOTH);
+        glClearColor(0.5F, 0.8F, 1.0F, 0.0F);
+        glClearDepth(1.0);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.5F);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+
+        this->reportGLError("Startup");
+
+        this->font = new Font(this->vg, "assets/MinecraftRegular.ttf");
+        glViewport(0, 0, this->width, this->height);
+        this->level = new Level(this, 256, 256, 64);
+        this->levelRenderer = new LevelRenderer(this->level, this->textures);
+        this->player = new Player(this->level);
+        this->particleEngine = new ParticleEngine(this->level);
+
+
+        for (int i = 0; i < 10; ++i)
+        {
+            auto *zombie = new Zombie(this->level, this->textures, 128.0F, 0.0F, 128.0F);
+            zombie->resetPos();
+            entities.push_back(zombie);
+        }
+
+        if (!appletMode)
+        {
+            this->grabMouse(this->window);
+        }
+
+        this->reportGLError("Post startup");
     }
     catch (const std::exception &e)
     {
@@ -190,7 +188,7 @@ void Fastcraft::run()
             } else {
 
                 if (glfwWindowShouldClose(this->window)) {
-                    this->stop();
+                    this->running = false;
                 }
 
                 this->mouse->update(xpos, -ypos);
@@ -207,9 +205,9 @@ void Fastcraft::run()
                     this->tick();
                 }
 
-                this->checkGlError("Pre render");
+                this->reportGLError("Pre render");
                 this->render(timer.a);
-                this->checkGlError("Post render");
+                this->reportGLError("Post render");
                 ++fps;
 
                 while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() >= millis + 1000L)
@@ -232,11 +230,6 @@ void Fastcraft::run()
     }
 
     this->destroy();
-}
-
-void Fastcraft::stop()
-{
-    this->running = false;
 }
 
 void Fastcraft::grabMouse(GLFWwindow *window)
@@ -268,46 +261,6 @@ void Fastcraft::releaseMouse(GLFWwindow *window)
     }
 }
 
-void Fastcraft::handleMouseClick()
-{
-    if(this->editMode == 0) {
-        if (this->hitResult != nullptr) {
-            Tile *tile = Tile::tiles[this->level->getTile(this->hitResult->x, this->hitResult->y, this->hitResult->z)];
-            bool var4 = this->level->setTile(this->hitResult->x, this->hitResult->y, this->hitResult->z, 0);
-            if (tile != nullptr && var4) {
-                tile->destroy(this->level, this->hitResult->x, this->hitResult->y, this->hitResult->z, *this->particleEngine);
-            }
-        }
-    } else if(this->hitResult != nullptr) {
-        int x = this->hitResult->x;
-        int y = this->hitResult->y;
-        int z = this->hitResult->z;
-        if (this->hitResult->f == 0) {
-            x--;
-        }
-        if (this->hitResult->f == 1) {
-            x++;
-        }
-        if (this->hitResult->f == 2) {
-            y--;
-        }
-        if (this->hitResult->f == 3) {
-            y++;
-        }
-        if (this->hitResult->f == 4) {
-            z--;
-        }
-        if (this->hitResult->f == 5) {
-            z++;
-        }
-
-        AABB *aabb = Tile::tiles[this->paintTexture]->getBlockBoundingBox(x, y, z);
-        if (aabb == nullptr || this->isFree(aabb)){
-            this->level->setTile(x, y, z, this->paintTexture);
-        }
-    }
-}
-
 void Fastcraft::tick()
 {
     while (mouse->next()) {
@@ -315,7 +268,70 @@ void Fastcraft::tick()
             this->grabMouse(this->window);
         } else {
             if (mouse->getEventButton() == GLFW_MOUSE_BUTTON_LEFT && mouse->getEventButtonState() == GLFW_PRESS) {
-                this->handleMouseClick();
+                if(this->editMode == 0) {
+                    if (this->hitResult != nullptr) {
+                        Tile *tile = Tile::tiles[this->level->getTile(this->hitResult->x, this->hitResult->y, this->hitResult->z)];
+                        bool var4 = this->level->setTile(this->hitResult->x, this->hitResult->y, this->hitResult->z, 0);
+                        if (tile != nullptr && var4) {
+                            tile->destroy(this->level, this->hitResult->x, this->hitResult->y, this->hitResult->z, *this->particleEngine);
+                        }
+                    }
+                } else if(this->hitResult != nullptr) {
+                    label197:
+                    {
+                        int x = this->hitResult->x;
+                        int y = this->hitResult->y;
+                        int z = this->hitResult->z;
+                        if (this->hitResult->f == 0) {
+                            x--;
+                        }
+                        if (this->hitResult->f == 1) {
+                            x++;
+                        }
+                        if (this->hitResult->f == 2) {
+                            y--;
+                        }
+                        if (this->hitResult->f == 3) {
+                            y++;
+                        }
+                        if (this->hitResult->f == 4) {
+                            z--;
+                        }
+                        if (this->hitResult->f == 5) {
+                            z++;
+                        }
+
+                        AABB *aabb = Tile::tiles[this->paintTexture]->getBlockBoundingBox(x, y, z);
+
+                        if (aabb != nullptr) {
+                            AABB *copyBB = aabb;
+                            Fastcraft *fc = this;
+                            bool hasIntersected;
+
+                            if (this->player->bb.intersects(*aabb)) {
+                                hasIntersected = false;
+                            } else {
+                                int i = 0;
+
+                                while (true) {
+                                    if (i >= this->entities.size()) {
+                                        hasIntersected = true;
+                                        break;
+                                    }
+
+                                    if ((this->entities[i])->bb.intersects(*aabb)) {
+                                        hasIntersected = false;
+                                    }
+                                    ++i;
+                                }
+                            }
+                            if (!hasIntersected) {
+                                break;
+                            }
+                        }
+                        this->level->setTile(x, y, z, this->paintTexture);
+                    }
+                }
             }
 
             if (mouse->getEventButton() == GLFW_MOUSE_BUTTON_RIGHT && mouse->getEventButtonState() == GLFW_PRESS) {
@@ -391,22 +407,7 @@ void Fastcraft::tick()
     }
 }
 
-bool Fastcraft::isFree(AABB *aabb)
-{
-    if (this->player->bb.intersects(*aabb)){
-        return false;
-    } else {
-        for (int var2 = 0; var2 < this->entities.size(); ++var2){
-            if ((this->entities[var2])->bb.intersects(*aabb)){
-                return false;
-            }
-        }
-
-        return true;
-    }
-}
-
-void Fastcraft::moveCameraToPlayer(float var1)
+void Fastcraft::focusPlayerCamera(float var1)
 {
     glTranslatef(0.0F, 0.0F, -0.3F);
     glRotatef(this->player->xRot, 1.0F, 0.0F, 0.0F);
@@ -417,37 +418,43 @@ void Fastcraft::moveCameraToPlayer(float var1)
     glTranslatef(-var2, -var3, -var4);
 }
 
-void Fastcraft::setupCamera(float timer)
+void Fastcraft::render(float deltaTime)
 {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    this->perspective(70.0f, (float)this->width / (float)this->height, 0.05f, 1000.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    this->moveCameraToPlayer(timer);
-}
+    // this->releaseMouse(window);
+    // player->turn(mouse->getDX(), mouse->getDY());
+    if (this->mouseGrabbed)
+    {
+        float var2 = 0.0F;
+        float var3 = 0.0F;
+        var2 = (float)this->mouse->getDX();
+        var3 = (float)this->mouse->getDY();
+        if (this->appletMode)
+        {
+            this->mouse->poll();
+            var2 = (float)(this->mouse->getX() - this->width / 2);
+            var3 = (float)(this->mouse->getY() - this->height / 2);
+            this->mouse->setCursorPosition(this->width / 2, this->height / 2);
+        }
 
-void Fastcraft::setupPickCamera(float timer, int widthIn, int heightIn)
-{
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    this->pickMatrix((float)widthIn, (float)heightIn, 5.0f, 5.0f, viewport);
-    this->perspective(70.0f, (float)this->width / (float)this->height, 0.05f, 1000.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    this->moveCameraToPlayer(timer);
-}
+        this->player->turn(var2, var3 * (float)this->yMouseAxis);
+    }
+    // TODO: Implement controller support again
+    this->reportGLError("Set Viewport");
 
-void Fastcraft::pick(float deltaTime)
-{
     std::vector<GLuint> selectBuffer(512);
 
     glSelectBuffer(selectBuffer.size(), selectBuffer.data());
     glRenderMode(GL_SELECT);
 
-    this->setupPickCamera(deltaTime, width / 2, height / 2);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    this->pickMatrix((float)this->width / 2, (float)this->height / 2, 5.0f, 5.0f, viewport);
+    this->perspective(70.0f, (float)this->width / (float)this->height, 0.05f, 1000.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    this->focusPlayerCamera(deltaTime);
 
     //START pick from level renderer
     Tesselator &tess = Tesselator::getInstance();
@@ -534,43 +541,24 @@ void Fastcraft::pick(float deltaTime)
     {
         this->hitResult = nullptr;
     }
-}
 
-void Fastcraft::render(float deltaTime)
-{
-    // this->releaseMouse(window);
-    // player->turn(mouse->getDX(), mouse->getDY());
-    if (this->mouseGrabbed)
-    {
-        float var2 = 0.0F;
-        float var3 = 0.0F;
-        var2 = (float)this->mouse->getDX();
-        var3 = (float)this->mouse->getDY();
-        if (this->appletMode)
-        {
-            this->mouse->poll();
-            var2 = (float)(this->mouse->getX() - this->width / 2);
-            var3 = (float)(this->mouse->getY() - this->height / 2);
-            this->mouse->setCursorPosition(this->width / 2, this->height / 2);
-        }
-
-        this->player->turn(var2, var3 * (float)this->yMouseAxis);
-    }
-    // TODO: Implement controller support again
-    this->checkGlError("Set Viewport");
-    this->pick(deltaTime);
-    this->checkGlError("Picked");
+    this->reportGLError("Picked");
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    this->setupCamera(deltaTime);
-    this->checkGlError("Set up camera");
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    this->perspective(70.0f, (float)this->width / (float)this->height, 0.05f, 1000.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    this->focusPlayerCamera(deltaTime);
+    this->reportGLError("Set up camera");
     glEnable(GL_CULL_FACE);
     Frustum frustum = Frustum::getInstance();
     this->levelRenderer->updateDirtyChunks(this->player);
-    this->checkGlError("Update Chunks");
+    this->reportGLError("Update Chunks");
     this->setupFog(0);
     glEnable(GL_FOG);
     this->levelRenderer->render(this->player, 0);
-    this->checkGlError("Rendered level");
+    this->reportGLError("Rendered level");
 
     for (int index = 0; index < this->entities.size(); ++index)
     {
@@ -581,9 +569,9 @@ void Fastcraft::render(float deltaTime)
         }
     }
 
-    this->checkGlError("Rendered entities");
+    this->reportGLError("Rendered entities");
     this->particleEngine->render(this->player, deltaTime, 0);
-    this->checkGlError("Rendered particles");
+    this->reportGLError("Rendered particles");
     setupFog(1);
     this->levelRenderer->render(this->player, 1);
 
@@ -600,39 +588,30 @@ void Fastcraft::render(float deltaTime)
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_FOG);
-    this->checkGlError("Rendered rest");
+    this->reportGLError("Rendered rest");
     if (this->hitResult != nullptr)
     {
         glDisable(GL_ALPHA_TEST);
         this->levelRenderer->renderHit(this->player,*this->hitResult, this->editMode, this->paintTexture);
         glEnable(GL_ALPHA_TEST);
     }
-    this->checkGlError("Rendered hit");
-    this->drawGui(deltaTime);
-    this->checkGlError("Rendered gui");
-    glfwSwapBuffers(this->window);
-}
-
-void Fastcraft::drawGui(float deltaTime)
-{
+    this->reportGLError("Rendered hit");
     int sw = this->width * 240 / this->height;
     int sh = this->height * 240 / this->height;
     glClear(GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(0.0D, (double)sw, (double)sh, 0.0D, 100.0D, 300.0D);
+    glOrtho(0.0, (double)sw, (double)sh, 0.0, 100.0, 300.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
 
-    this->checkGlError("GUI: Init");
+    this->reportGLError("GUI: Init");
 
     glPushMatrix();
     glTranslatef((float)(sw - 16), 16.0F, 0.0F);
-
-    Tesselator &tess = Tesselator::getInstance();
 
     glScalef(16.0F, 16.0F, 16.0F);
     glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
@@ -660,7 +639,7 @@ void Fastcraft::drawGui(float deltaTime)
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
-    this->checkGlError("GUI: Draw selected");
+    this->reportGLError("GUI: Draw selected");
 
     int wCenter = sw / 2;
     int hCenter = sh / 2;
@@ -680,7 +659,7 @@ void Fastcraft::drawGui(float deltaTime)
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
     tess.end();
 
-    this->checkGlError("GUI: Draw crosshair");
+    this->reportGLError("GUI: Draw crosshair");
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
@@ -692,11 +671,11 @@ void Fastcraft::drawGui(float deltaTime)
     // NanoVG rendering
     nvgBeginFrame(this->vg, this->width, this->height, 1.0f);
 
-    this->font->drawShadow("FastCraft Engine Classic", 4.0f, 4.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
-    this->font->drawShadow(this->fpsString, 4.0f, 24.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
-    this->font->drawShadow("paintTexture: " + std::to_string(this->paintTexture), 4.0f, 44.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
+    this->font->drawShadow("FastCraft Engine Classic",                                  4.0f,   4.0f,   16.0f, nvgRGBA(255, 255, 255, 255));
+    this->font->drawShadow(this->fpsString,                                             4.0f,   24.0f,  16.0f, nvgRGBA(255, 255, 255, 255));
+    this->font->drawShadow("paintTexture: " + std::to_string(this->paintTexture),   4.0f,   44.0f,  16.0f, nvgRGBA(255, 255, 255, 255));
 
-    this->checkGlError("GUI: Draw text");
+    this->reportGLError("GUI: Draw text");
 
     nvgEndFrame(this->vg);
 
@@ -707,7 +686,9 @@ void Fastcraft::drawGui(float deltaTime)
     glPopClientAttrib();
     glPopAttrib();
 
-    this->checkGlError("GUI: NVG font");
+    this->reportGLError("GUI: NVG font");
+    this->reportGLError("Rendered gui");
+    glfwSwapBuffers(this->window);
 }
 
 void Fastcraft::setupFog(int mode)
@@ -740,6 +721,62 @@ float *Fastcraft::getBuffer(float var1, float var2, float var3, float var4)
     this->lb[3] = var4;
     return this->lb;
 }
+
+void Fastcraft::showLoadingScreen(std::string var1, std::string var2) {
+    int sw = this->width * 240 / this->height;
+    int sh = this->height * 240 / this->height;
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    Tesselator tess = Tesselator::getInstance();
+    glEnable(GL_TEXTURE_2D);
+    GLuint text;
+    try
+    {
+        text = this->textures->loadTexture("assets/dirt.png", 9728);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, text);
+    tess.begin();
+    tess.color(8421504);
+    tess.vertexUV(0.0F, (float)sh, 0.0F, 0.0F, (float)sh / 32.0F);
+    tess.vertexUV((float)sw, (float)sh, 0.0F, (float)sw / 32.0F, (float)sh / 32.0F);
+    tess.vertexUV((float)sw, 0.0F, 0.0F, (float)sw / 32.0F, 0.0F);
+    tess.vertexUV(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+    tess.end();
+    glEnable(GL_TEXTURE_2D);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+
+    // NanoVG rendering
+    nvgBeginFrame(this->vg, this->width, this->height, 1.0f);
+    this->font->drawShadow(var1, (this->width - this->font->getWidth(var1, 16.0f)) / 2.0f, this->height / 2.0f - 24.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
+    this->font->drawShadow(var2, (this->width - this->font->getWidth(var2, 16.0f)) / 2.0f, this->height / 2.0f + 8.0f, 16.0f, nvgRGBA(255, 255, 255, 255));
+    nvgEndFrame(this->vg);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopClientAttrib();
+    glPopAttrib();
+
+    glfwSwapBuffers(this->window);
+
+    try {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200L));
+    } catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
 
 /* Extra classes */
 void Fastcraft::toggleFullscreen(GLFWwindow *window)
@@ -810,61 +847,3 @@ void Fastcraft::perspective(float fovY, float aspect, float zNear, float zFar)
     }
 }
 
-void Fastcraft::showLoadingScreen(std::string var1, std::string var2) {
-    int var3 = this->width * 240 / this->height;
-    int var4 = this->height * 240 / this->height;
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    Tesselator tess = Tesselator::getInstance();
-    glEnable(GL_TEXTURE_2D);
-    GLuint text;
-    try
-    {
-        text = this->textures->loadTexture("assets/terrain.png", 9728);
-        if (text == 0) {
-            std::cerr << "Failed to load texture" << std::endl;
-            return;
-        }
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
-    glBindTexture(GL_TEXTURE_2D, text);
-    tess.begin();
-    tess.color(8421504);
-    tess.vertexUV(0.0F, (float)var4, 0.0F, 0.0F, (float)var4 / 32.0F);
-    tess.vertexUV((float)var3, (float)var4, 0.0F, (float)var3 / 32.0F, (float)var4 / 32.0F);
-    tess.vertexUV((float)var3, 0.0F, 0.0F, (float)var3 / 32.0F, 0.0F);
-    tess.vertexUV(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-    tess.end();
-   // glEnable(GL_TEXTURE_2D);
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-
-    // NanoVG rendering
-    nvgBeginFrame(this->vg, this->width, this->height, 1.0f);
-    this->font->drawShadow(var1, (var3 - this->font->getWidth(var1, 16.0f)) / 2, var4 / 2 - 4 - 8, 16.0f, nvgRGBA(255, 255, 255, 255));
-    this->font->drawShadow(var2, (var3 - this->font->getWidth(var2, 16.0f)) / 2, var4 / 2 - 4 + 4, 16.0f, nvgRGBA(255, 255, 255, 255));
-    nvgEndFrame(this->vg);
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glPopClientAttrib();
-    glPopAttrib();
-
-    glfwSwapBuffers(this->window);
-
-    try {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200L));
-    } catch (const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
-}
