@@ -1,4 +1,6 @@
 #include "Level.h"
+#include "Fastcraft.h"
+
 
 #include <algorithm>
 #include <cmath>
@@ -9,9 +11,21 @@
 #include "Level/tile/Tile.h"
 #include "Level/LevelGen.h"
 
-Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), random(rd())
+Level::Level(Fastcraft* fc, int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), random(rd())
 {
-
+    int scWidth;
+    int scHeight;
+    this->fastCraft = fc;
+    scWidth = fc->width * 240 / fc->height;
+    scHeight = fc->height * 240 / fc->height;
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0D, (double)scWidth, (double)scHeight, 0.0D, 100.0D, 300.0D);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(0.0F, 0.0F, -200.0F);
+    this->fastCraft->showLoadingScreen("Loading level", "Reading..");
     this->width = width;
     this->height = height;
     this->depth = depth;
@@ -30,6 +44,7 @@ Level::Level(int width, int height, int depth) : width(0), height(0), depth(0), 
 
 void Level::generateMap()
 {
+    this->fastCraft->showLoadingScreen("Generating level", "Raising..");
     LevelGen* gen = new LevelGen(this->width, this->height, this->depth);
     LevelGen* genSav = gen;
     int gWidth = gen->width;
@@ -107,6 +122,8 @@ void Level::generateMap()
     }
 
     this->blocks = map;
+    this->fastCraft->showLoadingScreen("Generating level", "Carving..");
+
     std::vector<unsigned int> var27 = this->blocks;
     genSav = gen;
     gHeight = gen->width;
@@ -158,7 +175,7 @@ void Level::generateMap()
     }
 
     this->blocks = var27;
-
+    this->fastCraft->showLoadingScreen("Generating level", "Watering..");
     //TODO: IMPL once there are liquids
 
     /*
@@ -178,8 +195,9 @@ void Level::generateMap()
 		}
 
 		long var32 = System.nanoTime();
-		this.minecraft.showLoadingScreen("Generating level", "Melting..");
-		var25 = 0;
+     */
+    this->fastCraft->showLoadingScreen("Generating level", "Melting..");
+        /*var25 = 0;
 
 		for(var29 = 0; var29 < 400; ++var29) {
 			int var34 = this.random.nextInt(this.width);

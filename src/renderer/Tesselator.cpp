@@ -20,7 +20,7 @@ Tesselator &Tesselator::getInstance()
     return instance;
 }
 
-void Tesselator::flush()
+void Tesselator::end()
 {
     if (this->vertices == 0)
         return; // Keine Daten, keine Operation.
@@ -75,7 +75,7 @@ void Tesselator::clear()
     this->p = 0;
 }
 
-void Tesselator::init()
+void Tesselator::begin()
 {
     this->clear();
     this->hasColor = false;
@@ -136,9 +136,9 @@ void Tesselator::vertex(float x, float y, float z)
     this->p += (ptr - (this->array.data() + this->p)); // Update Index
     ++this->vertices;
 
-    if (this->vertices % 4 == 0 && this->p >= MAX_FLOATS - this->len*4)
+    if (this->vertices % 4 == 0 && this->p >= MAX_FLOATS - (this->len << 2))
     {
-        this->flush();
+        this->end();
     }
 }
 

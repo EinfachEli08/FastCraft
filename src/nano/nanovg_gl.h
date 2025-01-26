@@ -677,7 +677,7 @@ static int glnvg__renderCreate(void* uptr)
 		"#endif\n"
 		"}\n";
 
-	glnvg__checkError(gl, "init");
+	glnvg__checkError(gl, "begin");
 
 	if (gl->flags & NVG_ANTIALIAS) {
 		if (glnvg__createShader(&gl->shader, "shader", shaderHeader, "#define EDGE_AA 1\n", fillVertShader, fillFragShader) == 0)

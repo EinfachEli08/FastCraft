@@ -39,7 +39,7 @@ void ParticleEngine::render(Player *player, float deltaTime, int renderMode)
 
         Tesselator &tesselator = Tesselator::getInstance();
         glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
-        tesselator.init();
+        tesselator.begin();
 
         for (int i = 0; i < this->particles.size(); ++i)
         {
@@ -50,7 +50,7 @@ void ParticleEngine::render(Player *player, float deltaTime, int renderMode)
             }
         }
 
-        tesselator.flush();
+        tesselator.end();
         glDisable(GL_TEXTURE_2D);
     }
     

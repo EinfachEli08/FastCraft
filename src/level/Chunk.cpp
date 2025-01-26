@@ -58,7 +58,7 @@ void Chunk::rebuild(int index)
         auto var2 = std::chrono::duration_cast<std::chrono::nanoseconds>(start.time_since_epoch()).count();
 
         glNewList(this->lists + index, GL_COMPILE);
-        t.init();
+    t.begin();
         int var4 = 0;
         for (int x = this->x0; x < this->x1; ++x)
         {
@@ -75,7 +75,7 @@ void Chunk::rebuild(int index)
             }
         }
 
-        t.flush();
+    t.end();
         glEndList();
         auto start1 = std::chrono::high_resolution_clock::now();
         auto var9 = std::chrono::duration_cast<std::chrono::nanoseconds>(start1.time_since_epoch()).count();

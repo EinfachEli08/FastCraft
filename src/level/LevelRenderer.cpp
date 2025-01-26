@@ -125,14 +125,14 @@ void LevelRenderer::renderHit(Player* player,HitResult hit, int editMode, int pa
     glColor4f(1.0f, 1.0f, 1.0f, static_cast<float>(std::sin(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 100.0) * 0.2 + 0.4));
     if (editMode == 0)
     {
-        tess.init();
+        tess.begin();
 
         for (int i = 0; i < 6; i++)
         {
             Tile::rock->renderFaceNoTexture(*player, tess, hit.x, hit.y, hit.z, i);
         }
 
-        tess.flush();
+        tess.end();
     }
     else
     {
@@ -174,11 +174,11 @@ void LevelRenderer::renderHit(Player* player,HitResult hit, int editMode, int pa
         {
             ++x;
         }
-        tess.init();
+        tess.begin();
         tess.noColor();
         Tile::tiles[paintTexture]->render(tess, this->level, 0, x, y, z);
         Tile::tiles[paintTexture]->render(tess, this->level, 1, x, y, z);
-        tess.flush();
+        tess.end();
         glDisable(GL_TEXTURE_2D);
     }
 

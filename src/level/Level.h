@@ -1,5 +1,4 @@
 #pragma once
-
 #include "phys/AABB.h"
 #include "LevelListener.h"
 #include "level/NoiseMap.h"
@@ -9,6 +8,9 @@
 #include <fstream>
 #include <iostream>
 
+// Forward declaration of Fastcraft
+class Fastcraft;
+
 class Level
 {
 public:
@@ -16,7 +18,7 @@ public:
     int height;
     int depth;
 
-    Level(int width, int height, int depth);
+    Level(Fastcraft* fc, int width, int height, int depth);
     void generateMap();
     bool load();
     void save();
@@ -26,13 +28,14 @@ public:
     bool isSolidTile(int x, int y, int z);
     bool isLightBlocker(int x, int y, int z);
     std::vector<AABB> getCubes(const AABB &aabb);
-   
+
     bool setTile(int x, int y, int z, int tileId);
     bool isLit(int x, int y, int z);
     int getTile(int x, int y, int z);
     void tick();
 
 private:
+    Fastcraft* fastCraft;
     std::vector<unsigned int> blocks;
     std::vector<int> lightDepths;
     std::vector<LevelListener *> levelListeners;

@@ -58,7 +58,7 @@ extern "C" {
  *  This is the reference documentation for Vulkan related functions and types.
  *  For more task-oriented information, see the @ref vulkan_guide.
  */
-/*! @defgroup init Initialization, version and error reference
+/*! @defgroup begin Initialization, version and error reference
  *  @brief Functions and types related to initialization and error handling.
  *
  *  This is the reference documentation for initialization and termination of
@@ -282,21 +282,21 @@ extern "C" {
  *
  *  The major version number of the GLFW header.  This is incremented when the
  *  API is changed in non-compatible ways.
- *  @ingroup init
+ *  @ingroup begin
  */
 #define GLFW_VERSION_MAJOR          3
 /*! @brief The minor version number of the GLFW header.
  *
  *  The minor version number of the GLFW header.  This is incremented when
  *  features are added to the API but it remains backward-compatible.
- *  @ingroup init
+ *  @ingroup begin
  */
 #define GLFW_VERSION_MINOR          4
 /*! @brief The revision number of the GLFW header.
  *
  *  The revision number of the GLFW header.  This is incremented when a bug fix
  *  release is made that does not contain any API changes.
- *  @ingroup init
+ *  @ingroup begin
  */
 #define GLFW_VERSION_REVISION       0
 /*! @} */
@@ -307,7 +307,7 @@ extern "C" {
  *  `true` or `_True` or `GL_TRUE` or `VK_TRUE` or anything else that is equal
  *  to one.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 #define GLFW_TRUE                   1
 /*! @brief Zero.
@@ -316,7 +316,7 @@ extern "C" {
  *  `false` or `_False` or `GL_FALSE` or `VK_FALSE` or anything else that is
  *  equal to zero.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 #define GLFW_FALSE                  0
 
@@ -661,7 +661,7 @@ extern "C" {
  *
  *  See [error handling](@ref error_handling) for how these are used.
  *
- *  @ingroup init
+ *  @ingroup begin
  *  @{ */
 /*! @brief No error has occurred.
  *
@@ -828,9 +828,9 @@ extern "C" {
 /*! @brief Platform unavailable or no matching platform was found.
  *
  *  If emitted during initialization, no matching platform was found.  If the @ref
- *  GLFW_PLATFORM init hint was set to `GLFW_ANY_PLATFORM`, GLFW could not detect any of
+ *  GLFW_PLATFORM begin hint was set to `GLFW_ANY_PLATFORM`, GLFW could not detect any of
  *  the platforms supported by this library binary, except for the Null platform.  If the
- *  init hint was set to a specific platform, it is either not supported by this library
+ *  begin hint was set to a specific platform, it is either not supported by this library
  *  binary or GLFW was not able to detect it.
  *
  *  If emitted by a native access function, GLFW was initialized for a different platform
@@ -1076,9 +1076,9 @@ extern "C" {
  *  [attribute](@ref GLFW_OPENGL_PROFILE_attrib).
  */
 #define GLFW_OPENGL_PROFILE         0x00022008
-/*! @brief Context flush-on-release hint and attribute.
+/*! @brief Context end-on-release hint and attribute.
  *
- *  Context flush-on-release [hint](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_hint) and
+ *  Context end-on-release [hint](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_hint) and
  *  [attribute](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_attrib).
  */
 #define GLFW_CONTEXT_RELEASE_BEHAVIOR 0x00022009
@@ -1290,46 +1290,46 @@ extern "C" {
 #define GLFW_CONNECTED              0x00040001
 #define GLFW_DISCONNECTED           0x00040002
 
-/*! @addtogroup init
+/*! @addtogroup begin
  *  @{ */
-/*! @brief Joystick hat buttons init hint.
+/*! @brief Joystick hat buttons begin hint.
  *
- *  Joystick hat buttons [init hint](@ref GLFW_JOYSTICK_HAT_BUTTONS).
+ *  Joystick hat buttons [begin hint](@ref GLFW_JOYSTICK_HAT_BUTTONS).
  */
 #define GLFW_JOYSTICK_HAT_BUTTONS   0x00050001
-/*! @brief ANGLE rendering backend init hint.
+/*! @brief ANGLE rendering backend begin hint.
  *
- *  ANGLE rendering backend [init hint](@ref GLFW_ANGLE_PLATFORM_TYPE_hint).
+ *  ANGLE rendering backend [begin hint](@ref GLFW_ANGLE_PLATFORM_TYPE_hint).
  */
 #define GLFW_ANGLE_PLATFORM_TYPE    0x00050002
-/*! @brief Platform selection init hint.
+/*! @brief Platform selection begin hint.
  *
- *  Platform selection [init hint](@ref GLFW_PLATFORM).
+ *  Platform selection [begin hint](@ref GLFW_PLATFORM).
  */
 #define GLFW_PLATFORM               0x00050003
-/*! @brief macOS specific init hint.
+/*! @brief macOS specific begin hint.
  *
- *  macOS specific [init hint](@ref GLFW_COCOA_CHDIR_RESOURCES_hint).
+ *  macOS specific [begin hint](@ref GLFW_COCOA_CHDIR_RESOURCES_hint).
  */
 #define GLFW_COCOA_CHDIR_RESOURCES  0x00051001
-/*! @brief macOS specific init hint.
+/*! @brief macOS specific begin hint.
  *
- *  macOS specific [init hint](@ref GLFW_COCOA_MENUBAR_hint).
+ *  macOS specific [begin hint](@ref GLFW_COCOA_MENUBAR_hint).
  */
 #define GLFW_COCOA_MENUBAR          0x00051002
-/*! @brief X11 specific init hint.
+/*! @brief X11 specific begin hint.
  *
- *  X11 specific [init hint](@ref GLFW_X11_XCB_VULKAN_SURFACE_hint).
+ *  X11 specific [begin hint](@ref GLFW_X11_XCB_VULKAN_SURFACE_hint).
  */
 #define GLFW_X11_XCB_VULKAN_SURFACE 0x00052001
-/*! @brief Wayland specific init hint.
+/*! @brief Wayland specific begin hint.
  *
- *  Wayland specific [init hint](@ref GLFW_WAYLAND_LIBDECOR_hint).
+ *  Wayland specific [begin hint](@ref GLFW_WAYLAND_LIBDECOR_hint).
  */
 #define GLFW_WAYLAND_LIBDECOR       0x00053001
 /*! @} */
 
-/*! @addtogroup init
+/*! @addtogroup begin
  *  @{ */
 /*! @brief Hint value that enables automatic platform selection.
  *
@@ -1463,7 +1463,7 @@ typedef struct GLFWcursor GLFWcursor;
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 typedef void* (* GLFWallocatefun)(size_t size, void* user);
 
@@ -1519,7 +1519,7 @@ typedef void* (* GLFWallocatefun)(size_t size, void* user);
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 typedef void* (* GLFWreallocatefun)(void* block, size_t size, void* user);
 
@@ -1561,7 +1561,7 @@ typedef void* (* GLFWreallocatefun)(void* block, size_t size, void* user);
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 typedef void (* GLFWdeallocatefun)(void* block, void* user);
 
@@ -1585,7 +1585,7 @@ typedef void (* GLFWdeallocatefun)(void* block, void* user);
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 typedef void (* GLFWerrorfun)(int error_code, const char* description);
 
@@ -2132,7 +2132,7 @@ typedef struct GLFWgamepadstate
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 typedef struct GLFWallocator
 {
@@ -2172,7 +2172,7 @@ typedef struct GLFWallocator
  *  Additional calls to this function after successful initialization but before
  *  termination will return `GLFW_TRUE` immediately.
  *
- *  The @ref GLFW_PLATFORM init hint controls which platforms are considered during
+ *  The @ref GLFW_PLATFORM begin hint controls which platforms are considered during
  *  initialization.  This also depends on which platforms the library was compiled to
  *  support.
  *
@@ -2185,18 +2185,18 @@ typedef struct GLFWallocator
  *  @remark @macos This function will change the current directory of the
  *  application to the `Contents/Resources` subdirectory of the application's
  *  bundle, if present.  This can be disabled with the @ref
- *  GLFW_COCOA_CHDIR_RESOURCES init hint.
+ *  GLFW_COCOA_CHDIR_RESOURCES begin hint.
  *
  *  @remark @macos This function will create the main menu and dock icon for the
  *  application.  If GLFW finds a `MainMenu.nib` it is loaded and assumed to
  *  contain a menu bar.  Otherwise a minimal menu bar is created manually with
  *  common commands like Hide, Quit and About.  The About entry opens a minimal
  *  about dialog with information from the application's bundle.  The menu bar
- *  and dock icon can be disabled entirely with the @ref GLFW_COCOA_MENUBAR init
+ *  and dock icon can be disabled entirely with the @ref GLFW_COCOA_MENUBAR begin
  *  hint.
  *
  *  @remark __Wayland, X11:__ If the library was compiled with support for both
- *  Wayland and X11, and the @ref GLFW_PLATFORM init hint is set to
+ *  Wayland and X11, and the @ref GLFW_PLATFORM begin hint is set to
  *  `GLFW_ANY_PLATFORM`, the `XDG_SESSION_TYPE` environment variable affects
  *  which platform is picked.  If the environment variable is not set, or is set
  *  to something other than `wayland` or `x11`, the regular detection mechanism
@@ -2215,7 +2215,7 @@ typedef struct GLFWallocator
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI int glfwInit(void);
 
@@ -2249,11 +2249,11 @@ GLFWAPI int glfwInit(void);
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI void glfwTerminate(void);
 
-/*! @brief Sets the specified init hint to the desired value.
+/*! @brief Sets the specified begin hint to the desired value.
  *
  *  This function sets hints for the next initialization of GLFW.
  *
@@ -2266,8 +2266,8 @@ GLFWAPI void glfwTerminate(void);
  *  will only affect their specific platform.  Other platforms will ignore them.
  *  Setting these hints requires no platform specific headers or functions.
  *
- *  @param[in] hint The [init hint](@ref init_hints) to set.
- *  @param[in] value The new value of the init hint.
+ *  @param[in] hint The [begin hint](@ref init_hints) to set.
+ *  @param[in] value The new value of the begin hint.
  *
  *  @errors Possible errors include @ref GLFW_INVALID_ENUM and @ref
  *  GLFW_INVALID_VALUE.
@@ -2281,17 +2281,17 @@ GLFWAPI void glfwTerminate(void);
  *
  *  @since Added in version 3.3.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI void glfwInitHint(int hint, int value);
 
-/*! @brief Sets the init allocator to the desired value.
+/*! @brief Sets the begin allocator to the desired value.
  *
  *  To use the default allocator, call this function with a `NULL` argument.
  *
  *  If you specify an allocator struct, every member must be a valid function
  *  pointer.  If any member is `NULL`, this function will emit @ref
- *  GLFW_INVALID_VALUE and the init allocator will be unchanged.
+ *  GLFW_INVALID_VALUE and the begin allocator will be unchanged.
  *
  *  The functions in the allocator must fulfil a number of requirements.  See the
  *  documentation for @ref GLFWallocatefun, @ref GLFWreallocatefun and @ref
@@ -2312,7 +2312,7 @@ GLFWAPI void glfwInitHint(int hint, int value);
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator);
 
@@ -2387,7 +2387,7 @@ GLFWAPI void glfwInitVulkanLoader(PFN_vkGetInstanceProcAddr loader);
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev);
 
@@ -2421,7 +2421,7 @@ GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev);
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI const char* glfwGetVersionString(void);
 
@@ -2452,7 +2452,7 @@ GLFWAPI const char* glfwGetVersionString(void);
  *
  *  @since Added in version 3.3.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI int glfwGetError(const char** description);
 
@@ -2498,7 +2498,7 @@ GLFWAPI int glfwGetError(const char** description);
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun callback);
 
@@ -2519,7 +2519,7 @@ GLFWAPI GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun callback);
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI int glfwGetPlatform(void);
 
@@ -2543,7 +2543,7 @@ GLFWAPI int glfwGetPlatform(void);
  *
  *  @since Added in version 3.4.
  *
- *  @ingroup init
+ *  @ingroup begin
  */
 GLFWAPI int glfwPlatformSupported(int platform);
 
@@ -5518,7 +5518,7 @@ GLFWAPI const float* glfwGetJoystickAxes(int jid, int* count);
  *  represented as four buttons.  The hats are in the same order as returned by
  *  __glfwGetJoystickHats__ and are in the order _up_, _right_, _down_ and
  *  _left_.  To disable these extra buttons, set the @ref
- *  GLFW_JOYSTICK_HAT_BUTTONS init hint before initialization.
+ *  GLFW_JOYSTICK_HAT_BUTTONS begin hint before initialization.
  *
  *  If the specified joystick is not present this function will return `NULL`
  *  but will not generate an error.  This can be used instead of first calling
@@ -6077,9 +6077,9 @@ GLFWAPI uint64_t glfwGetTimerFrequency(void);
  *  When moving a context between threads, you must detach it (make it
  *  non-current) on the old thread before making it current on the new one.
  *
- *  By default, making a context non-current implicitly forces a pipeline flush.
+ *  By default, making a context non-current implicitly forces a pipeline end.
  *  On machines that support `GL_KHR_context_flush_control`, you can control
- *  whether a context performs this flush by setting the
+ *  whether a context performs this end by setting the
  *  [GLFW_CONTEXT_RELEASE_BEHAVIOR](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_hint)
  *  hint.
  *

@@ -7,14 +7,14 @@ public:
     Tesselator();
     ~Tesselator();
 
-    void init();
+    void begin();
     void tex(float u, float v);
     void color(float r, float g, float b);
     void color(int hex);
     void noColor();
     void vertex(float x, float y, float z);
     void vertexUV(float x, float y, float z, float u, float v);
-    void flush();
+    void end();
 
     static Tesselator &getInstance();
 

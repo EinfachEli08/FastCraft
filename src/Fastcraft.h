@@ -33,25 +33,28 @@ public:
     void destroy();
     void run();
 
+    void showLoadingScreen(std::string var1, std::string var2);
+
 private:
+    GLFWwindow *window = nullptr;
     static void checkGlError(char *var1);
     char *errorString(GLenum glError);
 
     void grabMouse(GLFWwindow *window);
     void releaseMouse(GLFWwindow *window);
 
-    void tick(GLFWwindow *window);
+    void tick();
 
     void moveCameraToPlayer(float var1);
 
-    void render(float deltaTime, GLFWwindow *window);
+    void render(float deltaTime);
 
     void setupFog(int mode);
 
     float *getFogColor(int mode);
     float *getBuffer(float var1, float var2, float var3, float var4);
 
-    void init(GLFWwindow **window);
+    void init();
 
     void handleMouseClick();
     bool isFree(AABB *aabb);

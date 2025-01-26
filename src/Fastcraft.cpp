@@ -4,14 +4,11 @@
 #include "nano/nanovg_gl.h"
 
 Fastcraft::Fastcraft(int width, int height, bool fullscreen)
+        : width(width), height(height), isFullscreen(fullscreen)
 {
-    this->width = width;
-    this->height = height;
-    this->isFullscreen = fullscreen;
     this->textures = new Textures();
 }
-
-void Fastcraft::init(GLFWwindow **window)
+void Fastcraft::init()
 {
     if (!glfwInit())
     {
@@ -37,20 +34,20 @@ void Fastcraft::init(GLFWwindow **window)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
-    *window = glfwCreateWindow(this->width, this->height, "FastCraft Game", nullptr, nullptr);
-    if (*window == nullptr)
+    this->window = glfwCreateWindow(this->width, this->height, "FastCraft Game", nullptr, nullptr);
+    if (this->window == nullptr)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
     }
 
-    glfwSetWindowPos(*window, windowPosX, windowPosY);
+    glfwSetWindowPos(this->window, windowPosX, windowPosY);
 
-    glfwMakeContextCurrent(*window);
+    glfwMakeContextCurrent(this->window);
 
-    glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
 
-    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSwapInterval(0);
 
@@ -86,11 +83,13 @@ void Fastcraft::init(GLFWwindow **window)
 
     this->checkGlError("Startup");
 
-    this->level = new Level(256, 256, 64);
+    this->font = new Font(this->vg, "assets/MinecraftRegular.ttf");
+    glViewport(0, 0, this->width, this->height);
+    this->level = new Level(this, 256, 256, 64);
     this->levelRenderer = new LevelRenderer(this->level, this->textures);
     this->player = new Player(this->level);
     this->particleEngine = new ParticleEngine(this->level);
-    this->font = new Font(this->vg, "assets/MinecraftRegular.ttf");
+
 
     for (int i = 0; i < 10; ++i)
     {
@@ -101,7 +100,7 @@ void Fastcraft::init(GLFWwindow **window)
 
     if (!appletMode)
     {
-        this->grabMouse(*window);
+        this->grabMouse(this->window);
     }
 
     this->checkGlError("Post startup");
@@ -170,10 +169,10 @@ void Fastcraft::run()
     this->running = true;
 
     double xpos, ypos;
-    GLFWwindow *window = nullptr;
+    this->window = nullptr;
     try
     {
-        this->init(&window);
+        this->init();
     }
     catch (const std::exception &e)
     {
@@ -190,7 +189,7 @@ void Fastcraft::run()
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             } else {
 
-                if (glfwWindowShouldClose(window)) {
+                if (glfwWindowShouldClose(this->window)) {
                     this->stop();
                 }
 
@@ -198,18 +197,18 @@ void Fastcraft::run()
                 this->keyboard->update();
 
                 if (keyboard->isKeyPressed(GLFW_KEY_F11)) {
-                    this->toggleFullscreen(window);
+                    this->toggleFullscreen(this->window);
                 }
 
                 this->timer.advanceTime();
 
                 for (int i = 0; i < timer.ticks; ++i)
                 {
-                    this->tick(window);
+                    this->tick();
                 }
 
                 this->checkGlError("Pre render");
-                this->render(timer.a, window);
+                this->render(timer.a);
                 this->checkGlError("Post render");
                 ++fps;
 
@@ -221,7 +220,7 @@ void Fastcraft::run()
                     fps = 0;
                 }
 
-                glfwGetCursorPos(window, &xpos, &ypos);
+                glfwGetCursorPos(this->window, &xpos, &ypos);
 
                 glfwPollEvents();
             }
@@ -309,11 +308,11 @@ void Fastcraft::handleMouseClick()
     }
 }
 
-void Fastcraft::tick(GLFWwindow *window)
+void Fastcraft::tick()
 {
     while (mouse->next()) {
         if (!this->mouseGrabbed && mouse->getEventButtonState()) {
-            this->grabMouse(window);
+            this->grabMouse(this->window);
         } else {
             if (mouse->getEventButton() == GLFW_MOUSE_BUTTON_LEFT && mouse->getEventButtonState() == GLFW_PRESS) {
                 this->handleMouseClick();
@@ -329,6 +328,9 @@ void Fastcraft::tick(GLFWwindow *window)
 
         do{
             if (!this->keyboard->next()) {
+
+                this->level->tick();
+
                 for (int i = 0; i < this->entities.size(); ++i)
                 {
                     this->entities[i]->tick();
@@ -348,7 +350,7 @@ void Fastcraft::tick(GLFWwindow *window)
         {
             if (this->keyboard->getEventKey() == GLFW_KEY_ESCAPE && (this->appletMode || !this->isFullscreen))
             {
-                releaseMouse(window);
+                releaseMouse(this->window);
             }
             if (this->keyboard->isKeyPressed(GLFW_KEY_ENTER))
             {
@@ -479,9 +481,9 @@ void Fastcraft::pick(float deltaTime)
                     for (int face = 0; face < 6; face++)
                     {
                         glLoadName(face);
-                        tess.init();
+                        tess.begin();
                         tile->renderFace(tess, x, y, z, face);
-                        tess.flush();
+                        tess.end();
                     }
                     glPopName();
                 }
@@ -534,7 +536,7 @@ void Fastcraft::pick(float deltaTime)
     }
 }
 
-void Fastcraft::render(float deltaTime, GLFWwindow *window)
+void Fastcraft::render(float deltaTime)
 {
     // this->releaseMouse(window);
     // player->turn(mouse->getDX(), mouse->getDY());
@@ -608,7 +610,7 @@ void Fastcraft::render(float deltaTime, GLFWwindow *window)
     this->checkGlError("Rendered hit");
     this->drawGui(deltaTime);
     this->checkGlError("Rendered gui");
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(this->window);
 }
 
 void Fastcraft::drawGui(float deltaTime)
@@ -651,9 +653,9 @@ void Fastcraft::drawGui(float deltaTime)
     glBindTexture(GL_TEXTURE_2D, text);
     glEnable(GL_TEXTURE_2D);
 
-    tess.init();
+    tess.begin();
     Tile::tiles[this->paintTexture]->render(tess, this->level, 0, -2, 0, 0);
-    tess.flush();
+    tess.end();
 
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
@@ -664,7 +666,7 @@ void Fastcraft::drawGui(float deltaTime)
     int hCenter = sh / 2;
     glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-    tess.init();
+    tess.begin();
     tess.vertex((wCenter + 1), (hCenter - 4), 0.0F);
     tess.vertex((wCenter - 0), (hCenter - 4), 0.0F);
 
@@ -676,7 +678,7 @@ void Fastcraft::drawGui(float deltaTime)
 
     tess.vertex((wCenter - 4), (hCenter + 1), 0.0F);
     tess.vertex((wCenter + 5), (hCenter + 1), 0.0F);
-    tess.flush();
+    tess.end();
 
     this->checkGlError("GUI: Draw crosshair");
 
@@ -747,14 +749,14 @@ void Fastcraft::toggleFullscreen(GLFWwindow *window)
 
     if (this->isFullscreen)
     {
-        glfwSetWindowMonitor(window, nullptr, this->windowedPosX, this->windowedPosY, this->windowedWidth, this->windowedHeight, 0);
+        glfwSetWindowMonitor(this->window, nullptr, this->windowedPosX, this->windowedPosY, this->windowedWidth, this->windowedHeight, 0);
     }
     else
     {
-        glfwGetWindowPos(window, &this->windowedPosX, &this->windowedPosY);
-        glfwGetWindowSize(window, &this->windowedWidth, &this->windowedHeight);
+        glfwGetWindowPos(this->window, &this->windowedPosX, &this->windowedPosY);
+        glfwGetWindowSize(this->window, &this->windowedWidth, &this->windowedHeight);
 
-        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        glfwSetWindowMonitor(this->window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
 
     this->isFullscreen = !this->isFullscreen;
@@ -805,5 +807,64 @@ void Fastcraft::perspective(float fovY, float aspect, float zNear, float zFar)
         matrix[15] = 0.0f;
 
         glMultMatrixf(matrix);
+    }
+}
+
+void Fastcraft::showLoadingScreen(std::string var1, std::string var2) {
+    int var3 = this->width * 240 / this->height;
+    int var4 = this->height * 240 / this->height;
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    Tesselator tess = Tesselator::getInstance();
+    glEnable(GL_TEXTURE_2D);
+    GLuint text;
+    try
+    {
+        text = this->textures->loadTexture("assets/terrain.png", 9728);
+        if (text == 0) {
+            std::cerr << "Failed to load texture" << std::endl;
+            return;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, text);
+    tess.begin();
+    tess.color(8421504);
+    tess.vertexUV(0.0F, (float)var4, 0.0F, 0.0F, (float)var4 / 32.0F);
+    tess.vertexUV((float)var3, (float)var4, 0.0F, (float)var3 / 32.0F, (float)var4 / 32.0F);
+    tess.vertexUV((float)var3, 0.0F, 0.0F, (float)var3 / 32.0F, 0.0F);
+    tess.vertexUV(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+    tess.end();
+   // glEnable(GL_TEXTURE_2D);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+
+    // NanoVG rendering
+    nvgBeginFrame(this->vg, this->width, this->height, 1.0f);
+    this->font->drawShadow(var1, (var3 - this->font->getWidth(var1, 16.0f)) / 2, var4 / 2 - 4 - 8, 16.0f, nvgRGBA(255, 255, 255, 255));
+    this->font->drawShadow(var2, (var3 - this->font->getWidth(var2, 16.0f)) / 2, var4 / 2 - 4 + 4, 16.0f, nvgRGBA(255, 255, 255, 255));
+    nvgEndFrame(this->vg);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopClientAttrib();
+    glPopAttrib();
+
+    glfwSwapBuffers(this->window);
+
+    try {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200L));
+    } catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
     }
 }
