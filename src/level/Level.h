@@ -1,6 +1,5 @@
 #pragma once
 #include "phys/AABB.h"
-#include "LevelListener.h"
 #include "level/NoiseMap.h"
 
 #include <random>
@@ -10,6 +9,7 @@
 
 // Forward declaration of Fastcraft
 class Fastcraft;
+class LevelRenderer;
 
 class Level
 {
@@ -23,9 +23,8 @@ public:
     bool load();
     void save();
     void calcLightDepths(int var1, int var2, int var3, int var4);
-    void addListener(LevelListener *listener);
-    void removeListener(LevelListener *listener);
     bool isSolidTile(int x, int y, int z);
+    bool setTileNoUpdate(int x, int y, int z, int tileId);
     bool isLightBlocker(int x, int y, int z);
     std::vector<AABB> getCubes(const AABB &aabb);
 
@@ -33,14 +32,23 @@ public:
     bool isLit(int x, int y, int z);
     int getTile(int x, int y, int z);
     void tick();
+    bool containsLiquid(AABB* aabb, int type);
+
+    std::vector<LevelRenderer *> levelListeners;
 
 private:
     Fastcraft* fastCraft;
     std::vector<unsigned int> blocks;
     std::vector<int> lightDepths;
-    std::vector<LevelListener *> levelListeners;
+
+
+    std::vector<int> coords;
 
     int unprocessed;
     std::random_device rd; // Declare random_device
     std::mt19937 random;   // Declare mt19937
+
+    void updateNeighbourAt(int x, int y, int z, int tileId);
+    long floodFill(int var1, int var2, int var3, int var4, int var5);
+    void calculateLightDepths(int x, int y, int width, int height);
 };

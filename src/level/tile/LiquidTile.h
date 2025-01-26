@@ -1,33 +1,36 @@
 /*
+
 #pragma once
-#include "level/tile/Tile.h"
 
-class LiquidTile: public Tile {
+#include "Tile.h"
+#include "level/Level.h"
+#include "phys/AABB.h"
+#include "renderer/Tesselator.h"
+#include <random>
 
-public:
-
-    void tick(Level *level, int x, int y, int z, std::default_random_engine &random) override;
-
-    void renderFace(Tesselator &tess, Level *level, int x, int y, int z, int face);
-    bool mayPick();
-    std::optional<AABB> getBoundingBox(int x, int y, int z);
-    bool blocksLight();
-    bool isSolid();
-    int getLiquidType();
-    void neighborChanged(Level *level, int x, int y, int z, int var5);
-
-
-private:
-    bool updateWater(Level *level, int x, int y, int z, int var5);
-    bool checkWater(Level *level, int x, int y, int z, int var5);
-    int spreadSpeed = 1;
+class LiquidTile : public Tile {
 protected:
     int liquidType;
     int calmTileId;
     int tileId;
+    int spreadSpeed = 1;
 
+public:
     LiquidTile(int id, int liquidType);
-    bool shouldRenderFace(Level *level, int x, int y, int z, int face);
+
+    void tick(Level *level, int x, int y, int z, std::default_random_engine &random) override;
+    bool shouldRenderFace(Level *level, int x, int y, int z, int face) override;
+    void renderFace(Tesselator &tesselator, int x, int y, int z, int face) override;
+    bool mayPick() override;
+    AABB *getBoundingBox(int x, int y, int z) override;
+    bool blocksLight() override;
+    bool isSolid() override;
+    int getLiquidType() override;
+    void neighborChanged(Level *level, int x, int y, int z, int tileId) override;
+
+private:
+    bool updateWater(Level *level, int x, int y, int z, int depth);
+    bool checkWater(Level *level, int x, int y, int z, int depth);
 };
 
-*/
+ */

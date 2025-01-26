@@ -7,7 +7,8 @@
 LevelRenderer::LevelRenderer(Level *level, Textures *textures) : level(level)
 {
     this->textures = textures;
-    level->addListener(this);
+
+    level->levelListeners.push_back(this);
 
     // Calculate how many chunks we have in each dimension
     this->xChunks = level->width / CHUNK_SIZE;
@@ -214,17 +215,8 @@ void LevelRenderer::setDirty(int x0, int y0, int z0, int x1, int y1, int z1)
     }
 }
 
-void LevelRenderer::tileChanged(int x, int y, int z)
-{
-    setDirty(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
-}
-
-void LevelRenderer::lightColumnChanged(int var1, int var2, int var3, int var4)
-{
-    setDirty(var1 - 1, var3 - 1, var2 - 1, var1 + 1, var4 + 1, var2 + 1);
-}
-
-void LevelRenderer::allChanged()
-{
-    setDirty(0, 0, 0, level->width, level->depth, level->height);
+void LevelRenderer::resetChunks(){
+    for(int var1 = 0; var1 < this->chunks.size(); ++var1) {
+        this->chunks[var1]->setDirty();
+    }
 }

@@ -11,7 +11,7 @@
 #include "Level/tile/Tile.h"
 #include "Level/LevelGen.h"
 
-Level::Level(Fastcraft* fc, int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), random(rd())
+Level::Level(Fastcraft* fc, int width, int height, int depth) : width(0), height(0), depth(0), blocks(0), lightDepths(), coords(1048576), random(rd())
 {
     int scWidth;
     int scHeight;
@@ -35,7 +35,6 @@ Level::Level(Fastcraft* fc, int width, int height, int depth) : width(0), height
 
     if (!loaded)
     {
-        //this->blocks = (new LevelGen(width, height, depth))->
         this->generateMap();
     }
 
@@ -217,9 +216,11 @@ void Level::generateMap()
 			((LevelRenderer)this.levelListeners.get(var29)).resetChunks();
 		}
      */
+    for(var29 = 0; var29 < this->levelListeners.size(); ++var29) {
+        (this->levelListeners.at(var29))->resetChunks();
+    }
 
 }
-
 
 bool Level::load()
 {
@@ -251,9 +252,8 @@ bool Level::load()
         // Recalculate lighting for the entire level
         calcLightDepths(0, 0, this->width, this->depth);
 
-        for (auto &listener : this->levelListeners)
-        {
-            listener->allChanged();
+        for(int var3 = 0; var3 < this->levelListeners.size(); ++var3) {
+            (this->levelListeners.at(var3))->resetChunks();
         }
 
         std::cout << "Level loaded successfully." << std::endl;
@@ -300,41 +300,167 @@ void Level::save()
 
 void Level::calcLightDepths(int x, int y, int width, int height)
 {
-    for (int var5 = x; var5 < x + width; ++var5)
-    {
-        for (int var6 = y; var6 < y + height; ++var6)
-        {
+    for(int var5 = x; var5 < x + width; ++var5) {
+        for(int var6 = y; var6 < y + height; ++var6) {
             int var7 = this->lightDepths[var5 + var6 * this->width];
 
             int var8;
-            for (var8 = this->depth - 1; var8 > 0 && !this->isLightBlocker(var5, var8, var6); --var8)
-            {
+            for(var8 = this->depth - 1; var8 > 0; --var8) {
+                Tile* var14 = Tile::tiles[this->getTile(var5, var8, var6)];
+                if(var14 == nullptr ? false : var14->blocksLight()) {
+                    break;
+                }
             }
 
-            this->lightDepths[var5 + var6 * this->width] = var8;
-
-            if (var7 != var8)
-            {
+            this->lightDepths[var5 + var6 * this->width] = var8 + 1;
+            if(var7 != var8) {
                 int var9 = var7 < var8 ? var7 : var8;
-                int var10 = var7 > var8 ? var7 : var8;
+                var7 = var7 > var8 ? var7 : var8;
 
-                for (int var11 = 0; var11 < this->levelListeners.size(); ++var11)
-                {
-                    this->levelListeners.at(var11)->lightColumnChanged(var5, var6, var9, var10);
+                for(var8 = 0; var8 < this->levelListeners.size(); ++var8) {
+                    LevelRenderer *var10 = this->levelListeners.at(var8);
+                    var10->setDirty(var5 - 1, var9 - 1, var6 - 1, var5 + 1, var7 + 1, var6 + 1);
                 }
             }
         }
     }
+
 }
 
-void Level::addListener(LevelListener *listener)
+bool Level::setTile(int x, int y, int z, int tileId)
 {
-    levelListeners.push_back(listener);
+    if(x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) {
+        if(tileId == this->blocks[(y * this->height + z) * this->width + x]) {
+            return false;
+        } else {
+            this->blocks[(y * this->height + z) * this->width + x] = tileId;
+            this->updateNeighbourAt(x - 1, y, z, tileId);
+            this->updateNeighbourAt(x + 1, y, z, tileId);
+            this->updateNeighbourAt(x, y - 1, z, tileId);
+            this->updateNeighbourAt(x, y + 1, z, tileId);
+            this->updateNeighbourAt(x, y, z - 1, tileId);
+            this->updateNeighbourAt(x, y, z + 1, tileId);
+            this->calculateLightDepths(x, z, 1, 1);
+
+            for(tileId = 0; tileId < this->levelListeners.size(); ++tileId) {
+                LevelRenderer* var5 = this->levelListeners.at(tileId);
+                var5->setDirty(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+            }
+
+            return true;
+        }
+    } else {
+        return false;
+    }
 }
 
-void Level::removeListener(LevelListener *listener)
+void Level::calculateLightDepths(int x, int y, int width, int height) {
+    for(int var5 = x; var5 < x + width; ++var5) {
+        for(int var6 = y; var6 < y + height; ++var6) {
+            int var7 = this->lightDepths[var5 + var6 * this->width];
+
+            int var8;
+            for(var8 = this->depth - 1; var8 > 0; --var8) {
+                Tile* var14 = Tile::tiles[this->getTile(var5, var8, var6)];
+                if(var14 == nullptr ? false : var14->blocksLight()) {
+                    break;
+                }
+            }
+
+            this->lightDepths[var5 + var6 * this->width] = var8 + 1;
+            if(var7 != var8) {
+                int var9 = var7 < var8 ? var7 : var8;
+                var7 = var7 > var8 ? var7 : var8;
+
+                for(var8 = 0; var8 < this->levelListeners.size(); ++var8) {
+                    LevelRenderer* var10 = this->levelListeners.at(var8);
+                    var10->setDirty(var5 - 1, var9 - 1, var6 - 1, var5 + 1, var7 + 1, var6 + 1);
+                }
+            }
+        }
+    }
+
+}
+
+bool Level::setTileNoUpdate(int x, int y, int z, int tileId){
+    if(x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) {
+        if (tileId == this->blocks[(y * this->height + z) * this->width + x]) {
+            return false;
+        }else{
+            this->blocks[(y * this->height + z) * this->width + x] = tileId;
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void Level::updateNeighbourAt(int x, int y, int z, int tileId){
+    if(x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height) {
+        Tile* tile = Tile::tiles[this->blocks[(y*this->height + z)*this->width + x]];
+        if(tile != nullptr){
+            tile->neighborChanged(this, x, y, z, tileId);
+        }
+
+    }
+}
+
+bool Level::isLit(int x, int y, int z)
 {
-    levelListeners.erase(std::remove(levelListeners.begin(), levelListeners.end(), listener), levelListeners.end());
+    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? y >= this->lightDepths[x + z * this->width] : true;
+}
+
+int Level::getTile(int x, int y, int z)
+{
+    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? this->blocks[(y * this->height + z) * this->width + x] : 0;
+}
+
+bool Level::containsLiquid(AABB* aabb, int type){
+    int x0 = (int)std::floor((double)aabb->x0);
+    int x1 = (int)std::floor((double)aabb->x1 + 1.0F);
+    int y0 = (int)std::floor((double)aabb->y0);
+    int y1 = (int)std::floor((double)aabb->y1 + 1.0F);
+    int z0 = (int)std::floor((double)aabb->z0);
+    int z1 = (int)std::floor((double)aabb->z1 + 1.0F);
+
+    if(x0 < 0) {
+        x0 = 0;
+    }
+
+    if(y0 < 0) {
+        y0 = 0;
+    }
+
+    if(z0 < 0) {
+        z0 = 0;
+    }
+
+    if(x1 > this->width) {
+        x1 = this->width;
+    }
+
+    if(y1 > this->depth) {
+        y1 = this->depth;
+    }
+
+    if(z1 > this->height) {
+        z1 = this->height;
+    }
+
+    for(x0 = x0; x0 < x1; ++x0) {
+        for(int var8 = y0; var8 < y1; ++var8) {
+            for(int var9 = z0; var9 < z1; ++var9) {
+                Tile* tile = Tile::tiles[this->getTile(x0, var8, var9)];
+                if(tile != nullptr && tile->getLiquidType() == type) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 bool Level::isLightBlocker(int x, int y, int z)
@@ -342,7 +468,6 @@ bool Level::isLightBlocker(int x, int y, int z)
     Tile *tile = Tile::tiles[getTile(x, y, z)];
     return tile == nullptr ? false : tile->blocksLight();
 }
-
 
 std::vector<AABB> Level::getCubes(const AABB &aabb)
 {
@@ -383,43 +508,6 @@ std::vector<AABB> Level::getCubes(const AABB &aabb)
     return cubes;
 }
 
-bool Level::setTile(int x, int y, int z, int tileId)
-{
-    if (x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height)
-    {
-        if (tileId == this->blocks[(y * this->height + z) * this->width + x])
-        {
-            return false;
-        }
-        else
-        {
-            this->blocks[(y * this->height + z) * this->width + x] = tileId;
-            this->calcLightDepths(x, z, 1, 1);
-
-            for (int var5 = 0; var5 < this->levelListeners.size(); ++var5)
-            {
-                this->levelListeners.at(var5)->tileChanged(x, y, z);
-            }
-
-            return true;
-        }
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Level::isLit(int x, int y, int z)
-{
-    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? y >= this->lightDepths[x + z * this->width] : true;
-}
-
-int Level::getTile(int x, int y, int z)
-{
-    return x >= 0 && y >= 0 && z >= 0 && x < this->width && y < this->depth && z < this->height ? this->blocks[(y * this->height + z) * this->width + x] : 0;
-}
-
 bool Level::isSolidTile(int x, int y, int z)
 {
     Tile *tile = Tile::tiles[this->getTile(x, y, z)];
@@ -452,103 +540,101 @@ void Level::tick()
     }
 }
 
-/*
- private long floodFill(int var1, int var2, int var3, int var4, int var5) {
-		byte var18 = (byte)var5;
-		ArrayList var19 = new ArrayList();
-		byte var6 = 0;
-		int var7 = this.height - 1;
-		int var8 = this.width - 1;
-		int var20 = var6 + 1;
-		this.coords[0] = ((var2 << 8) + var3 << 8) + var1;
-		long var11 = 0L;
-		var1 = this.width * this.height;
+long Level::floodFill(int var1, int var2, int var3, int var4, int var5) {
+    int var18 = var5;
+    std::vector<std::vector<int>> var19;
+    int var6 = 0;
+    int var7 = this->height - 1;
+    int var8 = this->width - 1;
+    int var20 = var6 + 1;
+    this->coords[0] = ((var2 << 8) + var3 << 8) + var1;
+    long var11 = 0L;
+    var1 = this->width * this->height;
 
-		while(var20 > 0) {
-			--var20;
-			var2 = this.coords[var20];
-			if(var20 == 0 && var19.size() > 0) {
-				System.out.println("IT HAPPENED!");
-				this.coords = (int[])var19.remove(var19.size() - 1);
-				var20 = this.coords.length;
-			}
+    while (var20 > 0) {
+        --var20;
+        var2 = this->coords[var20];
+        if (var20 == 0 && !var19.empty()) {
+            std::cout << "IT HAPPENED!" << std::endl;
+            this->coords = var19.back();
+            var19.pop_back();
+            var20 = this->coords.size();
+        }
 
-			var3 = var2 >> 8 & var7;
-			int var9 = var2 >> 16;
-			int var10 = var2 & var8;
+        var3 = var2 >> 8 & var7;
+        int var9 = var2 >> 16;
+        int var10 = var2 & var8;
 
-			int var13;
-			for(var13 = var10; var10 > 0 && this.blocks[var2 - 1] == 0; --var2) {
-				--var10;
-			}
+        int var13;
+        for (var13 = var10; var10 > 0 && this->blocks[var2 - 1] == 0; --var2) {
+            --var10;
+        }
 
-			while(var13 < this.width && this.blocks[var2 + var13 - var10] == 0) {
-				++var13;
-			}
+        while (var13 < this->width && this->blocks[var2 + var13 - var10] == 0) {
+            ++var13;
+        }
 
-			int var14 = var2 >> 8 & var7;
-			int var15 = var2 >> 16;
-			if(var14 != var3 || var15 != var9) {
-				System.out.println("hoooly fuck");
-			}
+        int var14 = var2 >> 8 & var7;
+        int var15 = var2 >> 16;
+        if (var14 != var3 || var15 != var9) {
+            std::cout << "hoooly fuck" << std::endl;
+        }
 
-			boolean var21 = false;
-			boolean var22 = false;
-			boolean var16 = false;
-			var11 += (long)(var13 - var10);
+        bool var21 = false;
+        bool var22 = false;
+        bool var16 = false;
+        var11 += (var13 - var10);
 
-			for(var10 = var10; var10 < var13; ++var10) {
-				this.blocks[var2] = var18;
-				boolean var17;
-				if(var3 > 0) {
-					var17 = this.blocks[var2 - this.width] == 0;
-					if(var17 && !var21) {
-						if(var20 == this.coords.length) {
-							var19.add(this.coords);
-							this.coords = new int[1048576];
-							var20 = 0;
-						}
+        for (var10 = var10; var10 < var13; ++var10) {
+            this->blocks[var2] = var18;
+            bool var17;
+            if (var3 > 0) {
+                var17 = this->blocks[var2 - this->width] == 0;
+                if (var17 && !var21) {
+                    if (var20 == this->coords.size()) {
+                        var19.push_back(this->coords);
+                        this->coords = std::vector<int>(1048576);
+                        var20 = 0;
+                    }
 
-						this.coords[var20++] = var2 - this.width;
-					}
+                    this->coords[var20++] = var2 - this->width;
+                }
 
-					var21 = var17;
-				}
+                var21 = var17;
+            }
 
-				if(var3 < this.height - 1) {
-					var17 = this.blocks[var2 + this.width] == 0;
-					if(var17 && !var22) {
-						if(var20 == this.coords.length) {
-							var19.add(this.coords);
-							this.coords = new int[1048576];
-							var20 = 0;
-						}
+            if (var3 < this->height - 1) {
+                var17 = this->blocks[var2 + this->width] == 0;
+                if (var17 && !var22) {
+                    if (var20 == this->coords.size()) {
+                        var19.push_back(this->coords);
+                        this->coords = std::vector<int>(1048576);
+                        var20 = 0;
+                    }
 
-						this.coords[var20++] = var2 + this.width;
-					}
+                    this->coords[var20++] = var2 + this->width;
+                }
 
-					var22 = var17;
-				}
+                var22 = var17;
+            }
 
-				if(var9 > 0) {
-					var17 = this.blocks[var2 - var1] == 0;
-					if(var17 && !var16) {
-						if(var20 == this.coords.length) {
-							var19.add(this.coords);
-							this.coords = new int[1048576];
-							var20 = 0;
-						}
+            if (var9 > 0) {
+                var17 = this->blocks[var2 - var1] == 0;
+                if (var17 && !var16) {
+                    if (var20 == this->coords.size()) {
+                        var19.push_back(this->coords);
+                        this->coords = std::vector<int>(1048576);
+                        var20 = 0;
+                    }
 
-						this.coords[var20++] = var2 - var1;
-					}
+                    this->coords[var20++] = var2 - var1;
+                }
 
-					var16 = var17;
-				}
+                var16 = var17;
+            }
 
-				++var2;
-			}
-		}
-
-		return var11;
-	}
- */
+            ++var2;
+        }
+    }
+    return var11;
+}
