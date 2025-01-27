@@ -3,10 +3,11 @@
 
 FastCraft is a personal project where I, EinfachEli08, am recreating **Minecraft: Java Edition** in C++ line by line, version for version as closely as possible. In addition, I aim to build an **open-source Minecraft like game engine**, enabling others to experiment, learn, and create their own Minecraft-inspired projects.
 
-
 > [!IMPORTANT]
 > This project **does not include** Minecraft's original assets (textures, sounds, etc.). You must **provide your own assets** to comply with Mojang's guidelines and copyright laws.
 
+> [!WARNING]
+> FastCraft is a fan project and is not affiliated with Mojang, Microsoft, or Minecraft. It is created as a personal coding challenge.
 
 ## Features
 - Aiming for a 1:1 recreation of Minecraft: Java Edition in C++.
@@ -54,11 +55,6 @@ FastCraft uses the following libraries to implement core functionality:
 
 ## Contributions
 Contributions are welcome! Whether it's optimizing code, fixing bugs, or adding features, feel free to submit pull requests. Ensure your code adheres to Minecrafts source style works as expected.
-
-
-## Disclaimer
-FastCraft is a fan project and is not affiliated with Mojang, Microsoft, or Minecraft. It is created as a personal coding challenge.
-
 
 ## Contact
 For questions or discussions, feel free to reach out via GitHub issues or pull requests. Thank you for your interest in FastCraft!
